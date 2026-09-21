@@ -1,0 +1,14 @@
+{
+  "date": "2026-09-21",
+  "tool": "built-in image_gen",
+  "assets": [
+    {
+      "id": "01-ark-form-v2",
+      "title": "方舟扩建接口的差异探索",
+      "references": [
+        "/Users/roy/Documents/Codex/2026-09-19/goal-blander-u3d-cli/outputs/stellar-echoes-unity/Worldbuilding/Sketchbook/01-ark-form.png"
+      ],
+      "prompt": "Edit this existing original concept sketch sheet. Preserve the large main ark drawing, the title, paper/graphite/marker style, upper-right panel detail and the rear engine/docking inset. The edit target is ONLY the THREE SMALL lower-row A/B/C studies. Currently these are almost duplicates. Make their maintenance and FUTURE GROWTH INTERFACES genuinely distinct and visually readable, while preserving the same basic long pointed central spine, swept rear shoulders, two large rear engines and one smaller auxiliary engine. All three are unfinished BASIC HULL design alternatives with no installed upgrade modules.\nA — FLUSH INTERFACES: a refined closed external shell, with 3 clearly inset sealed service/expansion covers on the near-facing shoulder. Show their large readable seams and captive latches, not micro-greeble.\nB — OPEN SERVICE CHANNEL: a long shallow open maintenance channel along the near-facing shoulder, containing two restrained service lines, clean bulkheads, and discrete EMPTY attachment sockets. Keep inner pressure hull intact. No exposed living rooms, cargo or added modules.\nC — LOAD-BEARING GROWTH RAIL: retain the same pressure hull and fundamental silhouette, but recess a clear structural mounting rail with three empty supported bracket stations along the near-facing flank; a proper longitudinal beam connects the brackets to the hull ribs. Show mechanical logic, not spike-like decoration. No box/canister/solar/antenna upgrades already attached.\nMake the differences in the lower drawings large enough to compare at thumbnail size. Use the SAME angle and roughly the same scale for all three. Existing labels A B C remain, add no text. Do not change main upper composition, colors, number of nozzles, docking pocket or ship identity. The goal is to explore how this civilization leaves a ship ready for later expansion without pretending the player has already built the modules."
+    }
+  ]
+}

@@ -1,0 +1,67 @@
+---
+import DefaultFooter from '@astrojs/starlight/components/Footer.astro';
+import promptArchive from '../data/prompt-records.json';
+---
+<DefaultFooter {...Astro.props} />
+<div class="archive-footer" data-pagefind-ignore>
+  <span>STELLAR ECHOES · 世界与制作档案</span>
+  <a href="/guide/contributing/">让每次修改留下理由 ↗</a>
+</div>
+<template id="art-prompt-links">{promptArchive.records.map((record) => <a data-image={record.image} href={`/prompts/#${record.id}`}>{record.title}</a>)}</template>
+<dialog data-pagefind-ignore id="art-viewer" aria-label="手稿大图查看">
+  <div class="viewer-toolbar">
+    <strong id="viewer-title">手稿</strong>
+    <div class="viewer-actions">
+      <button type="button" id="zoom-out" aria-label="缩小手稿">−</button>
+      <button type="button" id="zoom-reset">适应窗口</button>
+      <button type="button" id="zoom-in" aria-label="放大手稿">＋</button>
+      <a id="viewer-download" download>原图</a>
+      <a id="viewer-prompt">完整提示词 ↗</a>
+      <button type="button" id="viewer-close" aria-label="关闭大图">关闭 ×</button>
+    </div>
+  </div>
+  <div class="viewer-canvas"><img id="viewer-image" alt="" /></div>
+</dialog>
+<script>
+  const dialog = document.querySelector<HTMLDialogElement>('#art-viewer')!;
+  const image = document.querySelector<HTMLImageElement>('#viewer-image')!;
+  const title = document.querySelector<HTMLElement>('#viewer-title')!;
+  const download = document.querySelector<HTMLAnchorElement>('#viewer-download')!;
+  const promptLink = document.querySelector<HTMLAnchorElement>('#viewer-prompt')!;
+  const promptLinks = new Map(Array.from(document.querySelector<HTMLTemplateElement>('#art-prompt-links')!.content.querySelectorAll<HTMLAnchorElement>('a')).map(link => [link.dataset.image, link.href]));
+  let zoom = 1;
+  let opener: HTMLElement | null = null;
+  const applyZoom = () => {
+    image.style.width = zoom === 1 ? 'auto' : `${Math.round(1536 * zoom)}px`;
+    image.style.maxWidth = zoom === 1 ? '100%' : 'none';
+    image.style.maxHeight = zoom === 1 ? 'calc(92dvh - 90px)' : 'none';
+  };
+  document.querySelectorAll<HTMLImageElement>('.sl-markdown-content img[src^="/art/"], .gallery-image').forEach((img) => {
+    const existingLink = img.closest('a');
+    if (existingLink && new URL(existingLink.href).pathname !== new URL(img.src).pathname) return;
+    if (!img.closest('a')) {
+      const link = document.createElement('a');
+      link.href = img.src; link.className = 'art-link'; link.setAttribute('aria-label', `放大查看：${img.alt}`);
+      img.replaceWith(link); link.append(img);
+    }
+    const link = img.closest('a')!;
+    link.addEventListener('click', (event) => {
+      event.preventDefault(); opener = link;
+      image.src = img.src; image.alt = img.alt; title.textContent = img.alt || '概念手稿';
+      download.href = img.src; zoom = 1; applyZoom(); dialog.showModal();
+      promptLink.href = promptLinks.get(new URL(img.src).pathname) || '/prompts/';
+    });
+  });
+  document.querySelector('#viewer-close')?.addEventListener('click', () => dialog.close());
+  dialog.addEventListener('close', () => opener?.focus());
+  dialog.addEventListener('click', (event) => { if (event.target === dialog) dialog.close(); });
+  document.querySelector('#zoom-in')?.addEventListener('click', () => { zoom = Math.min(3, zoom + .5); applyZoom(); });
+  document.querySelector('#zoom-out')?.addEventListener('click', () => { zoom = Math.max(1, zoom - .5); applyZoom(); });
+  document.querySelector('#zoom-reset')?.addEventListener('click', () => { zoom = 1; applyZoom(); });
+  const filters = document.querySelectorAll<HTMLButtonElement>('[data-art-filter]');
+  filters.forEach((button) => button.addEventListener('click', () => {
+    const selected = button.dataset.artFilter;
+    filters.forEach((el) => { const active = el === button; el.classList.toggle('selected', active); el.setAttribute('aria-pressed', String(active)); });
+    document.querySelectorAll<HTMLElement>('[data-art-group]').forEach((card) => { card.hidden = selected !== '全部' && card.dataset.artGroup !== selected; });
+  }));
+</script>

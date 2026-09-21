@@ -1,0 +1,28 @@
+---
+const entries = [
+  { no: '01', title: '航路与时代', question: '共同抵达，为什么没有等来接班？', text: '从相互依赖的港口，到逐渐变稀的航次。理解今天的空站从何而来。', href: '/world/history/' },
+  { no: '02', title: '文明与值守公约', question: '陌生人凭什么信任一盏灯？', text: '灯塔网络、三类历史职责，以及允许后来者接手的承诺。', href: '/world/civilization/' },
+  { no: '03', title: '潮汐之庭', question: '我们抵达了怎样的地方？', text: '珠母星与冰环之下，三座设施分别守着物资、种源与航图。', href: '/world/tidal-garden/' },
+  { no: '04', title: '归航号', question: '一艘船怎样成为家园？', text: '没有可依赖母港的共同体，在船上持续生活，探索值得前往的远方。', href: '/world/ark/' },
+  { no: '05', title: '船员与共同生活', question: '我们究竟在为谁远航？', text: '从七人到九人。专业、愿望、餐桌与值班表，让远航有具体的牵挂。', href: '/world/people/' },
+  { no: '06', title: '科技与能力边界', question: '能够走多远，要付出什么？', text: '迁徙、休眠、人工重力与循环系统，以及仍待收敛的时代和规模。', href: '/world/technology/' },
+];
+---
+<section class="world-opening" aria-label="世界的三个尺度">
+  <div><span class="eyebrow">STELLAR ECHOES / 世界设定集</span><p>远行时，宇宙巨大。<br />靠近时，看见人的痕迹。<br />归来时，让生活好一点。</p></div>
+  <ol class="world-scales">
+    <li><span>身边</span><a href="/world/people/">一张餐桌，一班值守的人 <span aria-hidden="true">↗</span></a></li>
+    <li><span>近域</span><a href="/world/tidal-garden/">一片能够亲自验证的星域 <span aria-hidden="true">↗</span></a></li>
+    <li><span>远方</span><a href="/world/history/">一条尚待重新接续的航路 <span aria-hidden="true">↗</span></a></li>
+  </ol>
+</section>
+<section class="world-atlas" aria-labelledby="world-atlas">
+  <div class="atlas-heading"><div><span class="eyebrow">READ THE WORLD</span><h2 id="world-atlas">从时代，读到一盏生活灯。</h2></div><p>沿编号阅读，也可以从一个问题进入。<br />每篇正文都能独立理解，并通向相关设定。</p></div>
+  <div class="world-entry-grid">{entries.map(entry => <a href={entry.href}><span class="entry-number">{entry.no}</span><h3>{entry.title}</h3><strong>{entry.question}</strong><p>{entry.text}</p><span class="entry-open">阅读条目 <span aria-hidden="true">↗</span></span></a>)}</div>
+  <a class="rules-strip" href="/world/rules/"><span class="eyebrow">贯穿所有条目的依据</span><strong>宇宙规则</strong><span>物资不会凭空出现，旧录音不等于新的回应。八条规则，让探索中的选择有重量。</span><span aria-hidden="true">↗</span></a>
+</section>
+<section class="archive-door" aria-labelledby="archive-door-title">
+  <div><span class="eyebrow">FROM WORLD TO FORM</span><h2 id="archive-door-title">这个世界，怎样被画出来。</h2><p>设定回答它为何存在；手稿研究它的形体与空间；制作记录保存每次取舍。图像与完整生成提示词一起归档。</p><div class="archive-links"><a href="/gallery/">视觉设计档案 ↗</a><a href="/prompts/">逐图生成提示词 ↗</a><a href="/process/timeline/">制作过程 ↗</a></div></div>
+  <figure><a href="/ship/overview/"><img src="/art/current/01-master-study.png" width="1536" height="1024" alt="归航号工业母舰概念手稿，进入母舰视觉设计档案" loading="lazy" /></a><figcaption>归航号 · 当前外形研究 <a href="/prompts/#master-study">完整提示词 ↗</a></figcaption></figure>
+</section>
+<p class="world-edition">公开创作档案 · 世界设定仍在生长，科技纪年与总体尺度保留候选标记。<a href="/guide/about/">了解内容状态与阅读方法 ↗</a></p>

@@ -1,0 +1,189 @@
+{
+  "status": "concept discussion inputs only; mission updated to independent living home; legacy dimensions and zoning require reassessment; no Blender modeling",
+  "unit": "meter",
+  "axis": {
+    "x": "starboard",
+    "y": "aft",
+    "z": "up",
+    "bow": "negative Y"
+  },
+  "dimensions": {
+    "length": 2400,
+    "beam": 520,
+    "hull_height": 320,
+    "bridge_max_z": 245
+  },
+  "hull_z": {
+    "bottom": -160,
+    "top": 160
+  },
+  "main_sections": [
+    {
+      "y": -1200,
+      "half_width": 58,
+      "low": -60,
+      "high": 70
+    },
+    {
+      "y": -990,
+      "half_width": 162,
+      "low": -105,
+      "high": 120
+    },
+    {
+      "y": -620,
+      "half_width": 220,
+      "low": -150,
+      "high": 155
+    },
+    {
+      "y": 100,
+      "half_width": 244,
+      "low": -160,
+      "high": 160
+    },
+    {
+      "y": 620,
+      "half_width": 230,
+      "low": -145,
+      "high": 145
+    },
+    {
+      "y": 900,
+      "half_width": 205,
+      "low": -120,
+      "high": 125
+    },
+    {
+      "y": 1130,
+      "half_width": 190,
+      "low": -105,
+      "high": 95
+    }
+  ],
+  "ports": {
+    "side": "port/negative X",
+    "external_x": -260,
+    "launch": {
+      "center_y": -180,
+      "clear_width": 48,
+      "clear_height": 44,
+      "floor_z": -80
+    },
+    "recovery": {
+      "center_y": -70,
+      "clear_width": 64,
+      "clear_height": 48,
+      "floor_z": -80
+    },
+    "hangar_internal": {
+      "x_min": -246,
+      "x_max": -94,
+      "y_min": -230,
+      "y_max": 40,
+      "floor_z": -80,
+      "ceiling_z": -28
+    },
+    "shared_interface": "dorsal or ventral saddle with paired mechanical locks; geometry to be verified",
+    "dimensional_scope": "clear_width/clear_height apply to inner machine transit throat; outer service alcove dimensions remain open"
+  },
+  "zones": [
+    {
+      "name": "forward shield / observation",
+      "y_start": -1200,
+      "y_end": -920
+    },
+    {
+      "name": "preservation / sleep / seeds",
+      "y_start": -920,
+      "y_end": -350
+    },
+    {
+      "name": "residential rotating core and independent service deck",
+      "y_start": -350,
+      "y_end": 260
+    },
+    {
+      "name": "industrial / stores / workshop",
+      "y_start": 260,
+      "y_end": 680
+    },
+    {
+      "name": "isolated power / propellant / propulsion",
+      "y_start": 680,
+      "y_end": 1200
+    }
+  ],
+  "units": {
+    "exploration": {
+      "concept_name": "巡隼",
+      "height_stowed": 10,
+      "width_stowed": 12,
+      "depth_stowed": 9
+    },
+    "combat": {
+      "concept_name": "守望",
+      "height_stowed": 20,
+      "width_stowed": 12,
+      "depth_stowed": 8
+    },
+    "extraction": {
+      "concept_name": "砺石",
+      "height_stowed": 12,
+      "width_stowed": 18,
+      "depth_stowed": 12
+    }
+  },
+  "interior_style": {
+    "palette": "warm off-white outer panels, blue-gray structure, graphite recesses, sparse brick red identification, amber service marks",
+    "habitation": "protected continuous living community with quiet/private and shared spaces; sealed unused sectors remain possible, not a ship where daily life is only a brief maintenance interval",
+    "gravity": "rotating habitation core candidate; hangar and axis service spaces low gravity, personnel restraints and local interfaces; no assumed magic gravity floor"
+  },
+  "review_requirements": [
+    "recognizable ship not monument",
+    "manually check concept views; never claim generated views are exact projections from a canonical 3D model",
+    "actual openings not black decals",
+    "clearly separate launch and recovery lanes",
+    "do not claim full collision-path validation from static volumes",
+    "interior fixtures readable at human scale",
+    "original unit silhouettes share mother-ship maintenance interfaces",
+    "derive inhabited, medical, cultivation, workshop and public spaces from continuous life before retaining legacy volume allocations",
+    "preserve awake relationships, valid stability and curiosity as independent exploration value; do not encode an inevitable destination",
+    "keep historical prompts and generated image records unchanged; new mission acceptance is not visual or engineering approval"
+  ],
+  "reference_concept": "../Sketchbook/Ark-Industrial/05-guihang-carrier.png",
+  "mission_baseline": {
+    "source": "../11-归航号使命与生活设计基线.md",
+    "status": "user accepted mission direction; detailed spaces, technology and gameplay not approved or implemented",
+    "identity": "independent civilization home with no reliable home port to depend on; continuous life and exploration",
+    "history": "origin and whether a former home port ever existed remain undecided; migration is only a possible experience or later choice",
+    "theme": "why continue living and exploring without a predetermined destination; meaning emerges through care, curiosity and mutual commitments, not a single cosmic answer or score",
+    "continuity": "a continuing awake community and relationships take priority; century-scale travel is a major optional design decision, not the everyday loop",
+    "stability": "stable residence, remaining and possible settlement must stay valid; no recurring disaster solely to force departure",
+    "exploration": "curiosity and discovery can matter without material yield; lack of reliable contacts does not prove an empty universe"
+  },
+  "candidate_review": {
+    "numeric_geometry": "all existing hull, zone, door and machine dimensions below are retained as historical sketch inputs, not a validated arrangement for continuous life",
+    "technology": "era around 3400, 0.02c travel, century-scale sleep, thousand-person population and rotating gravity remain candidates requiring reassessment",
+    "population": "seven awake then nine is prototype progression, not total ship capacity; no population or sleep mechanics changed"
+  },
+  "space_program": {
+    "status": "requirements for next concept brief; not modeled or assigned validated volumes",
+    "continuous_use": [
+      "private habitation and rest",
+      "shared meals, discussion and memory",
+      "medical care, recovery and isolation",
+      "cultivation, water and air processing",
+      "workshops, spares and learning",
+      "launch, recovery, sample handling and repairs"
+    ],
+    "preservation": "sleep and protected records remain necessary functions but are not the sole primary payload",
+    "existing_zones": "retained below for traceability; re-evaluate volumes, connections and pressure/gravity transitions before assigning the new program"
+  },
+  "production_sequence": [
+    "life and exploration brief",
+    "common scale and general arrangement concept sheets",
+    "door stowage and rotating/fixed interfaces",
+    "Blender blockout after concept review; not started"
+  ]
+}

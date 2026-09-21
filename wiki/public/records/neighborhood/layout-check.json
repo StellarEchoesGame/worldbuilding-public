@@ -1,0 +1,20 @@
+{
+  "status": "PASS",
+  "scope": "allocation boxes, door anchors on both room boundaries, declared vertical reserves and counted fixture marks",
+  "rooms": 45,
+  "door_anchors_checked": 53,
+  "residents": 48,
+  "cabins": 24,
+  "bed_marks": 48,
+  "allocated_floor_area_m2": {
+    "0": 1200,
+    "1": 1008
+  },
+  "void_excluded_m2": 192,
+  "bedroom_allocation_m2": 576,
+  "graph_paths_to_care": 72,
+  "notes": [
+    "Door anchors and graph connectivity do not validate door swings, lift capacity or evacuation time.",
+    "Furniture marks reserve area; no independent plumbing/clearance validation."
+  ]
+}

@@ -1,0 +1,21 @@
+{
+  "name": "stellar-echoes-wiki",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "astro dev --host 127.0.0.1 --port 4191",
+    "build": "node scripts/prepare-records.mjs && astro build && node scripts/finalize-light.mjs",
+    "preview": "astro preview --host 127.0.0.1 --port 4191",
+    "check:public": "node scripts/check-public.mjs",
+    "deploy": "node scripts/deploy.mjs"
+  },
+  "dependencies": {
+    "@astrojs/starlight": "0.42.2",
+    "astro": "7.3.3",
+    "sharp": "^0.34.5"
+  },
+  "devDependencies": {
+    "wrangler": "4.135.0"
+  }
+}

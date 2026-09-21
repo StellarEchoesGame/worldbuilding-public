@@ -1,0 +1,14 @@
+---
+import sheets from '../data/art.json';
+import PromptDetails from './PromptDetails.astro';
+---
+<div class="gallery-controls" aria-label="按主题筛选手稿" data-pagefind-ignore>
+  {['全部', '母舰', '舰内', '机体'].map((group, i) => <button class:list={{ selected: i === 0 }} data-art-filter={group} aria-pressed={i === 0}>{group}<span>{group === '全部' ? sheets.length : sheets.filter(s => s.group === group).length}</span></button>)}
+</div>
+<div class="art-grid">
+  {sheets.map((sheet, i) => <article class="art-card" data-art-group={sheet.group}>
+    <a href={sheet.image} class="art-link" aria-label={`放大查看：${sheet.short}`}><img class="gallery-image" src={sheet.image} alt={sheet.short} width="1536" height="1024" loading="lazy" /></a>
+    <div class="art-card-body"><span class="eyebrow">{String(i + 1).padStart(2, '0')} / {sheet.group} · 概念 v0.1</span><h2>{sheet.short}</h2><p>{sheet.caption}</p><a class="article-link" href={sheet.article}>设计说明与评审 ↗</a></div>
+    <PromptDetails image={sheet.image} />
+  </article>)}
+</div>

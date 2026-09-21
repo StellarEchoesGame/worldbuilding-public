@@ -1,0 +1,13 @@
+{
+  "heading.anchorLabel": "跳转到“{{title}}”",
+  "pagefind.clear_search": "清空",
+  "pagefind.load_more": "加载更多结果",
+  "pagefind.search_label": "搜索世界设定与制作档案",
+  "pagefind.filters_label": "筛选",
+  "pagefind.zero_results": "未找到与“[SEARCH_TERM]”相关的记录",
+  "pagefind.many_results": "找到 [COUNT] 条与“[SEARCH_TERM]”相关的记录",
+  "pagefind.one_result": "找到 [COUNT] 条与“[SEARCH_TERM]”相关的记录",
+  "pagefind.alt_search": "未找到“[SEARCH_TERM]”，以下为“[DIFFERENT_TERM]”的结果",
+  "pagefind.search_suggestion": "未找到“[SEARCH_TERM]”，可以尝试以下词语：",
+  "pagefind.searching": "正在搜索“[SEARCH_TERM]”…"
+}

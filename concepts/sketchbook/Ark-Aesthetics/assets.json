@@ -1,0 +1,29 @@
+{
+  "tool": "built-in image_gen",
+  "assets": [
+    {
+      "file": "04a-crown-of-dawn.png",
+      "source": "/Users/roy/.codex/generated_images/01a0b936-3647-7db2-a737-53d7ee1431a3/exec-46b2a533-b402-4680-8017-e59f09e707c6.png",
+      "width": 1536,
+      "height": 1024,
+      "sha256": "23863dbe2445500d28e11ea0a63cc5b1ad5865a84165fa8fe06d13bf1ab082d4",
+      "status": "visual direction candidate; not approved or modeled"
+    },
+    {
+      "file": "04b-pilgrim-monolith.png",
+      "source": "/Users/roy/.codex/generated_images/01a0b936-3647-7db2-a737-53d7ee1431a3/exec-4d21f1db-352d-4779-9015-690a2a9aafbd.png",
+      "width": 1536,
+      "height": 1024,
+      "sha256": "8a638566b4fffe8616494d0b03cc086ec42f49b4ba5be63ad711ac474eb502e3",
+      "status": "visual direction candidate; not approved or modeled"
+    },
+    {
+      "file": "04c-stellar-seed.png",
+      "source": "/Users/roy/.codex/generated_images/01a0b936-3647-7db2-a737-53d7ee1431a3/exec-8bf65c53-aeb0-4c9f-8125-1bc06ab565ee.png",
+      "width": 1536,
+      "height": 1024,
+      "sha256": "1bd87f0d6358c95deff2302a72444b23cdec38da870e4d99d1bb2c1df51f6c92",
+      "status": "visual direction candidate; not approved or modeled"
+    }
+  ]
+}

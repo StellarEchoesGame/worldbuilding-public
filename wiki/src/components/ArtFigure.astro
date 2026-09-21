@@ -1,0 +1,8 @@
+---
+import PromptDetails from './PromptDetails.astro';
+const { image, alt } = Astro.props;
+---
+<figure class="art-figure">
+  <a href={image} class="art-link" aria-label={`放大查看：${alt}`}><img src={image} alt={alt} loading="lazy" width="1536" height="1024" /></a>
+  <PromptDetails image={image} />
+</figure>

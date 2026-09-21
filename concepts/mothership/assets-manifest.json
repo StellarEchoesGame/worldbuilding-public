@@ -1,0 +1,123 @@
+{
+  "version": "0.1",
+  "assets": [
+    {
+      "id": "master",
+      "title": "01 / 归航号 · 形体与双港口",
+      "file": "01-master-study.png",
+      "width": 1536,
+      "height": 1024,
+      "bytes": 2501523,
+      "sha256": "59598f7dafba74a0fa0157372a0b2102dfca01dba37554933c90545228de6b80",
+      "original_source": "/Users/roy/.codex/generated_images/01a0b936-3647-7db2-a737-53d7ee1431a3/exec-6cd95e9d-40ca-41e5-9f9c-fbdd9e1b398c.png",
+      "stage": "concept study, not production asset"
+    },
+    {
+      "id": "views",
+      "title": "02 / 同舰六视图研究",
+      "file": "02-exterior-views.png",
+      "width": 1536,
+      "height": 1024,
+      "bytes": 2465909,
+      "sha256": "8cf1cedbc66e06b91d059a29c83619fc3b80323e1bb0973a5f7a93906d3dcd4c",
+      "original_source": "/Users/roy/.codex/generated_images/01a0b936-3647-7db2-a737-53d7ee1431a3/exec-f8482ed9-dc78-4578-b14c-8f4abfac0674.png",
+      "stage": "concept study, not production asset"
+    },
+    {
+      "id": "structure",
+      "title": "03 / 保护、生活、工业与动力",
+      "file": "03-systems-exploded.png",
+      "width": 1536,
+      "height": 1024,
+      "bytes": 2644249,
+      "sha256": "92b407ab239ca1721590e8c8e35858cd70bad8220f24f12553e1966ca68613d3",
+      "original_source": "/Users/roy/.codex/generated_images/01a0b936-3647-7db2-a737-53d7ee1431a3/exec-91e07a20-dec8-41fc-b4a0-7321695d0102.png",
+      "stage": "concept study, not production asset"
+    },
+    {
+      "id": "hangar",
+      "title": "04 / 出击、回收与有人维护",
+      "file": "04-hangar-design.png",
+      "width": 1536,
+      "height": 1024,
+      "bytes": 3189563,
+      "sha256": "35d77ea6cf4aa5bbefce05d61880fb551190edf6ffe15150d813dc1c1f20fdeb",
+      "original_source": "/Users/roy/.codex/generated_images/01a0b936-3647-7db2-a737-53d7ee1431a3/exec-272df187-be73-4730-ba80-8d31b543c01e.png",
+      "stage": "concept study, not production asset"
+    },
+    {
+      "id": "portflow",
+      "title": "05 / 港门开启与机体转运",
+      "file": "04b-port-mechanisms.png",
+      "width": 1536,
+      "height": 1024,
+      "bytes": 2859436,
+      "sha256": "27d66e1c3c6bed7f9409a66ebf6cc34e5816c0b5e54e509d8ad2e64644f171a8",
+      "original_source": "/Users/roy/.codex/generated_images/01a0b936-3647-7db2-a737-53d7ee1431a3/exec-3699faf1-4a2c-4d38-892c-a8d28ed2b756.png",
+      "stage": "concept study, not production asset"
+    },
+    {
+      "id": "bridge",
+      "title": "06 / 紧凑的指挥与交班空间",
+      "file": "interiors/05-bridge-interior.png",
+      "width": 1536,
+      "height": 1024,
+      "bytes": 3223829,
+      "sha256": "ea7b2659fdad7c78d134367a1382bd15dfe7cd36e863c404b16633d067bca309",
+      "original_source": "/Users/roy/.codex/generated_images/01a0b936-3647-7db2-a737-53d7ee1431a3/exec-47717e52-1191-4453-9741-611e1ac3c39b.png",
+      "stage": "concept study, not production asset"
+    },
+    {
+      "id": "habitat",
+      "title": "07 / 七个人重新点亮的公共舱",
+      "file": "interiors/06-habitation-interior.png",
+      "width": 1536,
+      "height": 1024,
+      "bytes": 2729070,
+      "sha256": "32857785d718df0a2f0082eaeb8cc30d45e9bcebec0ffcba0f3c6e29bd67ceb7",
+      "original_source": "/Users/roy/.codex/generated_images/01a0b936-3647-7db2-a737-53d7ee1431a3/exec-ce41e67e-a425-4788-80c3-75ab50817d31.png",
+      "stage": "concept study, not production asset"
+    },
+    {
+      "id": "roles",
+      "title": "08 / 探索、战斗与采集",
+      "file": "units/07-role-lineup.png",
+      "width": 1536,
+      "height": 1024,
+      "bytes": 3021241,
+      "sha256": "f5997ac1cc25387f14c70c0f36d1e0516db45aae8b4876b7ba4bd48808e33335",
+      "original_source": "/Users/roy/.codex/generated_images/01a0b936-3647-7db2-a737-53d7ee1431a3/exec-97b8bd09-efd8-4d37-ae24-6dd6d1f8cd7f.png",
+      "stage": "concept study, not production asset"
+    },
+    {
+      "id": "sentinel",
+      "title": "09 / 守望 · 装甲、骨架与机动设备",
+      "file": "units/08-sentinel-breakdown.png",
+      "width": 1536,
+      "height": 1024,
+      "bytes": 2643880,
+      "sha256": "0b071b9474fd594cf2939a9323a3f73b6d27e26c0fd4bdf3f00eb970f4769aec",
+      "original_source": "/Users/roy/.codex/generated_images/01a0b936-3647-7db2-a737-53d7ee1431a3/exec-aecbde3a-9c38-48d3-986b-2c1890bf52a8.png",
+      "stage": "concept study, not production asset"
+    },
+    {
+      "id": "workframes",
+      "title": "10 / 工具、矿料舱与标准接口",
+      "file": "units/09-workframe-breakdown.png",
+      "width": 1536,
+      "height": 1024,
+      "bytes": 3059106,
+      "sha256": "4f9ec2592d9d2cfa80989986feee56ba11881b3a59cfe17cadddc1441a23bcd0",
+      "original_source": "/Users/roy/.codex/generated_images/01a0b936-3647-7db2-a737-53d7ee1431a3/exec-ccf2bf87-2833-45d1-969f-61ad1ba47157.png",
+      "stage": "concept study, not production asset"
+    }
+  ],
+  "preserved_previous_versions": [
+    "01-master-study-v1.png",
+    "02-exterior-views-v1.png",
+    "03-systems-exploded-v1.png",
+    "04b-port-mechanisms-v1.png",
+    "interiors/06-habitation-interior-v1.png",
+    "units/08-sentinel-breakdown-v1.png"
+  ]
+}

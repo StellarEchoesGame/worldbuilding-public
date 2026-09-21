@@ -1,0 +1,54 @@
+{
+  "version": "N48-01",
+  "status": "concept candidate; provenance retained",
+  "files": [
+    {
+      "file": "01-neighborhood-plan.svg",
+      "sha256": "ca8378c5612f68dcaf6f6ba07cf9f355c3361fd7b50d572d0cf2527cca1d69e6"
+    },
+    {
+      "file": "02-neighborhood-section.svg",
+      "sha256": "3bc68e57725ee2804f89ab2eab65adb5fadd32ef04a080b51cc3984865b66201"
+    },
+    {
+      "file": "03-neighborhood-cutaway-v1.png",
+      "sha256": "85160920d93f7b12028dd2b447bc71bf4aeff7e50caf377dca7727acd438d6ae"
+    },
+    {
+      "file": "03-neighborhood-cutaway.png",
+      "sha256": "56955066b37207b270fd07ba18a08759512b8efee638b9dadf51caed51270b92"
+    },
+    {
+      "file": "04-cultivation-threshold.png",
+      "sha256": "6de89103ec49a54f459123ca2a6d5ebfeaaad39680f49d00e6c58d478111e1e8"
+    },
+    {
+      "file": "README.md",
+      "sha256": "152f50eb16cf35c9db369ecc732b36ff830a65ca27cb6eb86eef565439e9d7b4"
+    },
+    {
+      "file": "build_layout.py",
+      "sha256": "bb9ae7e5859f9baa8ba72447200dbae0c59dd7473f80b2a39672a65d70177523"
+    },
+    {
+      "file": "cutaway-edit-prompt.txt",
+      "sha256": "ee166e9aa18c20ffcaf96d9bec1829bc1dd2093622561d875f068f8c26858c97"
+    },
+    {
+      "file": "layout-check.json",
+      "sha256": "3d8da7c5d2fbba456b8901e1a7a06ccdc7aab041b52e1162cc414e3799570e93"
+    },
+    {
+      "file": "layout.json",
+      "sha256": "ca9db5bf0c312da552b377e6efc45869667e8b8fdf6bc213a942006b470b6a6f"
+    },
+    {
+      "file": "prompts.json",
+      "sha256": "2c8bbfaa54a47705f8dec829f6598c576f7cf60a66156d0ac2b2472d4b97db44"
+    },
+    {
+      "file": "review.md",
+      "sha256": "522fdc801ee596ce097591c5d033fa32a186563329ce2a8431e7af0835ba727e"
+    }
+  ]
+}

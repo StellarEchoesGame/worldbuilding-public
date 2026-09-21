@@ -1,0 +1,40 @@
+---
+import archive from '../data/prompt-records.json';
+const { image, expanded = false } = Astro.props;
+const record = archive.records.find((entry) => entry.image === image);
+if (!record) throw new Error(`Missing generation record for ${image}`);
+---
+<details class="prompt-details" open={expanded} data-prompt-image={image} data-pagefind-ignore>
+  <summary>完整生成提示词 <span>{record.steps.length} 轮记录 · 原文</span></summary>
+  <div class="prompt-body">
+    <p class="prompt-intro">AI 图像创作记录 · 保留实际输入原文与修订顺序。</p>
+    {record.steps.map((step, index) => <section class="prompt-step">
+      <div class="prompt-step-heading"><strong>{String(index + 1).padStart(2, '0')} / {step.kind === 'edit' ? '编辑与修订' : '初始生成'}</strong><button type="button" class="prompt-copy" aria-label={`复制${record.title}第 ${index + 1} 轮完整提示词`}>复制全文</button></div>
+      {step.referenceImages?.length > 0 && <p class="prompt-references">参考图：{step.referenceImages.map((path, i) => {
+        const reference = archive.records.find((entry) => entry.image === path);
+        return <>{i > 0 && ' · '}<a href={reference ? `/prompts/#${reference.id}` : path}>{reference?.title || '查看参考图'}</a></>;
+      })}</p>}
+      {step.referenceNote && <p class="prompt-reference-note">{step.referenceNote}</p>}
+      <pre class="prompt-text" tabindex="0" aria-label={`第 ${index + 1} 轮提示词原文`}>{step.prompt}</pre>
+      <span class="prompt-copy-status" role="status" aria-live="polite"></span>
+    </section>)}
+    {record.sourceNote && <p class="prompt-source-note">{record.sourceNote}</p>}
+    <a class="prompt-permalink" href={`/prompts/#${record.id}`}>这张图的永久记录 ↗</a>
+  </div>
+</details>
+<script>
+  document.querySelectorAll<HTMLButtonElement>('.prompt-copy').forEach((button) => {
+    button.addEventListener('click', async () => {
+      const step = button.closest('.prompt-step')!;
+      const text = step.querySelector('.prompt-text')?.textContent || '';
+      const status = step.querySelector<HTMLElement>('.prompt-copy-status')!;
+      try {
+        await navigator.clipboard.writeText(text);
+        status.textContent = '已复制完整提示词';
+      } catch {
+        status.textContent = '浏览器未允许复制，请选中下方完整原文复制。';
+        step.querySelector<HTMLElement>('.prompt-text')?.focus();
+      }
+    });
+  });
+</script>

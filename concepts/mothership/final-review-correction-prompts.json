@@ -1,0 +1,26 @@
+[
+  {
+    "id": "06-habitation-interior",
+    "file": "interiors/06-habitation-interior.png",
+    "prompt": "Use case: precise-object-edit. Edit ONLY the small circular HABITAT SECTION diagram at bottom center of this concept sheet. Preserve the large common-room perspective, bottom-left floor plan, bottom-right table exploded detail, color, ink/marker style and all other content. The orange COMMON ROOM sector is currently on the right of the ring, while its people stand vertically: this contradicts radial outward gravity. Move the orange common room sector to the SIX O'CLOCK BOTTOM part of the circular habitat drum. Draw its people standing on the OUTER bottom arc floor, FEET DOWN toward the ring's exterior and HEADS UP toward its center. Place a single radial OUTWARD (ARTIFICIAL GRAVITY) arrow straight down from this bottom room toward the outside of the ring, avoiding people. Relocate COMMON ROOM (INSIDE DRUM) leader to this bottom orange sector. Keep non-rotating outer hull and service spine, rotating habitat drum identities clear, remove the old orange room on the right. All large interior design and page layout remain unchanged. This is a hand-drawn concept section, not an engineering approval.",
+    "referenced_image_paths": [
+      "/Users/roy/Documents/Codex/2026-09-19/goal-blander-u3d-cli/outputs/stellar-echoes-unity/Worldbuilding/MothershipDesign/interiors/06-habitation-interior.png"
+    ]
+  },
+  {
+    "id": "08-sentinel-breakdown",
+    "file": "units/08-sentinel-breakdown.png",
+    "prompt": "Use case: precise-object-edit. Edit this original SENTINEL mechanical concept sheet to fix two specific review findings. Preserve the whole FRONT figure, colors, silhouette, left-arm shield/right-hand carbine, backpack identity and paper/ink style. 1) In the center BACK view, preserve the upper back with two rectangular propulsion pods, middle docking saddle and service socket. REDRAW THE LOWER HALF AS A TRUE REAR VIEW: rear pelvis plates, back-of-knee actuators, calf rear panels with maintenance slots, ankle back/heel housings facing the viewer. The wide feet point AWAY from the viewer; show heel faces, not the front toe segments. No front groin armor or front shin plates in BACK. Shield stays on machine left (image left in back view) and carbine stays on machine right (image right in back view); do not mirror entire figure. 2) In bottom-right CAPTURE INTERFACE detail, numbers above the two central upright saddle lugs currently incorrectly reuse 1 and 2. Rename these lug callouts '3a' and '3b'. Keep 3 the central docking saddle and 4 the service connector; main back and exploded labels 1 and 2 continue to identify propulsion pods. These are localized corrections; preserve other content and readable compact labels.",
+    "referenced_image_paths": [
+      "/Users/roy/Documents/Codex/2026-09-19/goal-blander-u3d-cli/outputs/stellar-echoes-unity/Worldbuilding/MothershipDesign/units/08-sentinel-breakdown.png"
+    ]
+  },
+  {
+    "id": "04b-port-mechanisms",
+    "file": "04b-port-mechanisms.png",
+    "prompt": "Use case: precise-object-edit. Preserve this entire GUIHANG PORT MECHANISM & TRANSFER concept sheet: same three door states CLOSED/LIFTING/OPEN, lift guides, door geometry, same floor plan/colored arrows/HOLD A/B/transfer carriage/UNLOAD/ISOLATION labels, same original machines and details. Correct ONLY human scale. The machines are 10-12 meter workframes, the suited maintenance people are 1.75 meter tall at the SAME ground depth. In the lower-right TRANSFER CARRIAGE DETAIL, make the suited person much smaller: their height should be about ONE SIXTH the machine's uncradled body height, roughly ONE QUARTER their current drawn height. Keep boots contacting the same floor and tether visible. In the top LIFTING and OPEN door panels, similarly shrink the human figures beside the machine to ONE QUARTER their current height. They must read as tiny maintenance people beside a very large machine, never as ordinary people beside a 3 meter robot. Do not resize machines, doors, carriage or text. Preserve style/composition and all non-human parts. This is proportion correction, not new machine design.",
+    "referenced_image_paths": [
+      "/Users/roy/Documents/Codex/2026-09-19/goal-blander-u3d-cli/outputs/stellar-echoes-unity/Worldbuilding/MothershipDesign/04b-port-mechanisms.png"
+    ]
+  }
+]

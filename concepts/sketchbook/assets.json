@@ -1,0 +1,39 @@
+{
+  "tool": "built-in image_gen",
+  "status": "concept candidates; not model blueprints",
+  "primary": [
+    "01-ark-form-v2.png",
+    "02-station-families.png",
+    "03-handover-objects.png"
+  ],
+  "images": [
+    {
+      "name": "01-ark-form-v2.png",
+      "width": 1536,
+      "height": 1024,
+      "bytes": 2719449,
+      "sha256": "fd6dee8e9f2e7623ec52624f3aee1ae80ebd7930bc8f9464150a03d07bd9f213"
+    },
+    {
+      "name": "01-ark-form.png",
+      "width": 1536,
+      "height": 1024,
+      "bytes": 3052136,
+      "sha256": "94008500d606d5e298d1ba8a1ccfa82166bdf2325481c4e96ac0be220072a7b6"
+    },
+    {
+      "name": "02-station-families.png",
+      "width": 1536,
+      "height": 1024,
+      "bytes": 2828879,
+      "sha256": "ed5a50880ece88516f68221dc1907311a2748e18b20977337ee6116c7e8648e6"
+    },
+    {
+      "name": "03-handover-objects.png",
+      "width": 1536,
+      "height": 1024,
+      "bytes": 2786956,
+      "sha256": "7cb84a2a5635a6665e01ad84dfcd64e6c04560586800673499b54b296ea88c57"
+    }
+  ]
+}

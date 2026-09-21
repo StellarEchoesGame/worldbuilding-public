@@ -1,0 +1,38 @@
+{
+  "status": "concept candidate, not engineered or implemented",
+  "tool": "image_gen.imagegen",
+  "files": [
+    {
+      "path": "01-shift-mess.png",
+      "sha256": "e3c0bc8589258d5bcb5aa0364dd25efe5a82d684bdaefccb7c4cbf78831e5383"
+    },
+    {
+      "path": "02-habitation-lane.png",
+      "sha256": "a6933e38ed969999bc523e7b81c03a86e9bfea485d003188f1caac97cbf3125c"
+    },
+    {
+      "path": "03-cultivation-commons-v1.png",
+      "sha256": "96b9572bf6d7a0e6ec2f97dfae8f7c74534746911c97f6eb81a1d4cbff922bd4"
+    },
+    {
+      "path": "03-cultivation-commons.png",
+      "sha256": "570c367d352ddb5cd0c255f878afe317b875ab1721cccca786389b178d352efc"
+    },
+    {
+      "path": "README.md",
+      "sha256": "850255fca2517ddda7a3f626c1bd70141b18aed3f9a78b3c94180a6977154ccc"
+    },
+    {
+      "path": "brief.md",
+      "sha256": "ff2a7489125be5464962d8ef05e8eee4d40f6ec03fa4ee8269c2b78b291b2a27"
+    },
+    {
+      "path": "prompts.json",
+      "sha256": "fa978ee9c543ed73d6f5d8ba3fdec560587cddfcaa51077b8ee490e077d44135"
+    },
+    {
+      "path": "review.md",
+      "sha256": "40ad5e5bbb90bb0f139eb6efb3d11db57093333ba894bf00f7d30c3a024dd152"
+    }
+  ]
+}

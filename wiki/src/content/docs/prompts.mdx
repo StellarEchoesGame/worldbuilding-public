@@ -1,0 +1,17 @@
+---
+title: 逐图生成提示词
+description: 每张手稿的完整生成原文、参考图与编辑链，包含当前方案和历史版本。
+tableOfContents: false
+---
+
+import PromptArchive from '../../components/PromptArchive.astro';
+
+这些手稿是 AI 图像创作与人工评审共同留下的记录。我们把**实际输入的完整提示词**与图像一起保存：既记录第一次如何描述，也记录每次返修如何改变它。展开图下的记录即可阅读或复制原文。
+
+提示词保留原始语言。修订图按顺序列出初始输入与编辑指令，并注明参考图；同一提示词再次生成时，结果可能不同。
+
+[下载全部提示词记录（JSON）](/records/concept-prompts.json) · [图稿版本与校验记录](/records/art-manifest.json)
+
+邻里单元的两张 SVG 平剖由布局数据程序绘制，不属于 AI 提示词记录；[布局数据、绘图脚本与检查边界](/ship/neighborhood/#布局来源与检查范围)在其条目中公开。
+
+<PromptArchive />

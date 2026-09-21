@@ -1,0 +1,11 @@
+---
+import archive from '../data/prompt-records.json';
+import ArtFigure from './ArtFigure.astro';
+---
+<nav class="prompt-index" aria-label="按图查找提示词">
+  {archive.records.map((record) => <a href={`#${record.id}`}>{record.title}</a>)}
+</nav>
+{archive.records.map((record) => <section class="prompt-record" aria-labelledby={record.id}>
+  <h2 id={record.id}>{record.title}</h2>
+  <ArtFigure image={record.image} alt={record.title} />
+</section>)}

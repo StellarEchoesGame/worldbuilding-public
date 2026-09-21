@@ -1,0 +1,81 @@
+{
+  "date": "2026-09-21",
+  "stage": "concept-review-v0.1",
+  "browser": "Codex in-app browser",
+  "url": "http://127.0.0.1:4190/MothershipDesign/",
+  "image_loads": [
+    {
+      "file": "01-master-study.png",
+      "complete": true,
+      "naturalWidth": 1536,
+      "originalLinkMatches": true
+    },
+    {
+      "file": "02-exterior-views.png",
+      "complete": true,
+      "naturalWidth": 1536,
+      "originalLinkMatches": true
+    },
+    {
+      "file": "03-systems-exploded.png",
+      "complete": true,
+      "naturalWidth": 1536,
+      "originalLinkMatches": true
+    },
+    {
+      "file": "04-hangar-design.png",
+      "complete": true,
+      "naturalWidth": 1536,
+      "originalLinkMatches": true
+    },
+    {
+      "file": "04b-port-mechanisms.png",
+      "complete": true,
+      "naturalWidth": 1536,
+      "originalLinkMatches": true
+    },
+    {
+      "file": "interiors/05-bridge-interior.png",
+      "complete": true,
+      "naturalWidth": 1536,
+      "originalLinkMatches": true
+    },
+    {
+      "file": "interiors/06-habitation-interior.png",
+      "complete": true,
+      "naturalWidth": 1536,
+      "originalLinkMatches": true
+    },
+    {
+      "file": "units/07-role-lineup.png",
+      "complete": true,
+      "naturalWidth": 1536,
+      "originalLinkMatches": true
+    },
+    {
+      "file": "units/08-sentinel-breakdown.png",
+      "complete": true,
+      "naturalWidth": 1536,
+      "originalLinkMatches": true
+    },
+    {
+      "file": "units/09-workframe-breakdown.png",
+      "complete": true,
+      "naturalWidth": 1536,
+      "originalLinkMatches": true
+    }
+  ],
+  "local_links": {
+    "checked": 33,
+    "missing": 0
+  },
+  "json_files_parsed": 10,
+  "source_hashes_match": true,
+  "visual_reviews": {
+    "exterior": "dual ports, six-nozzle projection identity corrected",
+    "interior": "local gravity corrected; port scale remains unresolved",
+    "units": "back-view legs and callout identities corrected"
+  },
+  "blender_started": false,
+  "unity_assets_replaced": false
+}
