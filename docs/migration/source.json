@@ -1,0 +1,9 @@
+{
+  "schema_version": 1,
+  "source_repository": "https://github.com/redacted-user/stellar-echoes",
+  "source_commit": "e09845653450fc13aa5737e33a6decd9c4573348",
+  "source_tree": "e6eed27468a31a80d89c23c58f34d83f990e7ebd",
+  "filtered_import_commit": "12190e392de1b1a4f2a4b104275c66e445b64e1a",
+  "target_repository": "https://github.com/StellarEchoesGame/worldbuilding",
+  "method": "Path-filtered initial history with original commit authorship retained, followed by an explicit restructuring commit. The original repository is preserved."
+}

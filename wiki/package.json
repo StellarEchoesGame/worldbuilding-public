@@ -5,10 +5,12 @@
   "type": "module",
   "scripts": {
     "dev": "astro dev --host 127.0.0.1 --port 4191",
-    "build": "node scripts/prepare-records.mjs && astro build && node scripts/finalize-light.mjs",
+    "build": "npm run prepare:assets && node scripts/prepare-records.mjs && astro build && node scripts/finalize-light.mjs",
     "preview": "astro preview --host 127.0.0.1 --port 4191",
     "check:public": "node scripts/check-public.mjs",
-    "deploy": "node scripts/deploy.mjs"
+    "deploy": "node scripts/deploy.mjs",
+    "prepare:assets": "node scripts/prepare-assets.mjs",
+    "predev": "npm run prepare:assets && node scripts/prepare-records.mjs"
   },
   "dependencies": {
     "@astrojs/starlight": "0.42.2",

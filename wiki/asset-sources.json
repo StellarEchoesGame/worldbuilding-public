@@ -1,0 +1,166 @@
+{
+  "version": 1,
+  "description": "Public copies generated from canonical concept sources. Paths are repository-relative; hashes pin exact published bytes.",
+  "files": [
+    {
+      "source": "concepts/sketchbook/Ark-Aesthetics/04a-crown-of-dawn.png",
+      "destination": "art/archive/04a-crown-of-dawn.png",
+      "sha256": "23863dbe2445500d28e11ea0a63cc5b1ad5865a84165fa8fe06d13bf1ab082d4"
+    },
+    {
+      "source": "concepts/sketchbook/Ark-Aesthetics/04b-pilgrim-monolith.png",
+      "destination": "art/archive/04b-pilgrim-monolith.png",
+      "sha256": "8a638566b4fffe8616494d0b03cc086ec42f49b4ba5be63ad711ac474eb502e3"
+    },
+    {
+      "source": "concepts/sketchbook/Ark-Aesthetics/04c-stellar-seed.png",
+      "destination": "art/archive/04c-stellar-seed.png",
+      "sha256": "1bd87f0d6358c95deff2302a72444b23cdec38da870e4d99d1bb2c1df51f6c92"
+    },
+    {
+      "source": "concepts/sketchbook/Ark-Industrial/05-guihang-carrier.png",
+      "destination": "art/archive/05-guihang-carrier.png",
+      "sha256": "3a8f41610cc1e11b7453dde275004dce7d13e7d051d5606ce7876ec16a50e5e5"
+    },
+    {
+      "source": "concepts/mothership/01-master-study-v1.png",
+      "destination": "art/current/01-master-study-v1.png",
+      "sha256": "32a1ba7ac647d0e8d058394e61c020a54547064fa865fedd7a7f265d6da08ab9"
+    },
+    {
+      "source": "concepts/mothership/01-master-study.png",
+      "destination": "art/current/01-master-study.png",
+      "sha256": "59598f7dafba74a0fa0157372a0b2102dfca01dba37554933c90545228de6b80"
+    },
+    {
+      "source": "concepts/mothership/02-exterior-views-v1.png",
+      "destination": "art/current/02-exterior-views-v1.png",
+      "sha256": "d344cfb602f668c3a2a2f2b7b2ddca7ef66a80fa824f36ecf52818eb2935c90c"
+    },
+    {
+      "source": "concepts/mothership/02-exterior-views.png",
+      "destination": "art/current/02-exterior-views.png",
+      "sha256": "8cf1cedbc66e06b91d059a29c83619fc3b80323e1bb0973a5f7a93906d3dcd4c"
+    },
+    {
+      "source": "concepts/mothership/03-systems-exploded-v1.png",
+      "destination": "art/current/03-systems-exploded-v1.png",
+      "sha256": "c3683eb5cfc3c6e9993d0c1b597f8bd906756cb560f77e53724a6613432cbff7"
+    },
+    {
+      "source": "concepts/mothership/03-systems-exploded.png",
+      "destination": "art/current/03-systems-exploded.png",
+      "sha256": "92b407ab239ca1721590e8c8e35858cd70bad8220f24f12553e1966ca68613d3"
+    },
+    {
+      "source": "concepts/mothership/04-hangar-design.png",
+      "destination": "art/current/04-hangar-design.png",
+      "sha256": "35d77ea6cf4aa5bbefce05d61880fb551190edf6ffe15150d813dc1c1f20fdeb"
+    },
+    {
+      "source": "concepts/mothership/04b-port-mechanisms-v1.png",
+      "destination": "art/current/04b-port-mechanisms-v1.png",
+      "sha256": "2dc35ce91aaee8dd75d0dbcc95ea08d168f0108dd2f9d84176b8e0b06eacbda5"
+    },
+    {
+      "source": "concepts/mothership/04b-port-mechanisms.png",
+      "destination": "art/current/04b-port-mechanisms.png",
+      "sha256": "27d66e1c3c6bed7f9409a66ebf6cc34e5816c0b5e54e509d8ad2e64644f171a8"
+    },
+    {
+      "source": "concepts/mothership/LifeScenes/01-shift-mess.png",
+      "destination": "art/current/LifeScenes/01-shift-mess.png",
+      "sha256": "e3c0bc8589258d5bcb5aa0364dd25efe5a82d684bdaefccb7c4cbf78831e5383"
+    },
+    {
+      "source": "concepts/mothership/LifeScenes/02-habitation-lane.png",
+      "destination": "art/current/LifeScenes/02-habitation-lane.png",
+      "sha256": "a6933e38ed969999bc523e7b81c03a86e9bfea485d003188f1caac97cbf3125c"
+    },
+    {
+      "source": "concepts/mothership/LifeScenes/03-cultivation-commons-v1.png",
+      "destination": "art/current/LifeScenes/03-cultivation-commons-v1.png",
+      "sha256": "96b9572bf6d7a0e6ec2f97dfae8f7c74534746911c97f6eb81a1d4cbff922bd4"
+    },
+    {
+      "source": "concepts/mothership/LifeScenes/03-cultivation-commons.png",
+      "destination": "art/current/LifeScenes/03-cultivation-commons.png",
+      "sha256": "570c367d352ddb5cd0c255f878afe317b875ab1721cccca786389b178d352efc"
+    },
+    {
+      "source": "concepts/mothership/Neighborhood/01-neighborhood-plan.svg",
+      "destination": "art/current/Neighborhood/01-neighborhood-plan.svg",
+      "sha256": "ca8378c5612f68dcaf6f6ba07cf9f355c3361fd7b50d572d0cf2527cca1d69e6"
+    },
+    {
+      "source": "concepts/mothership/Neighborhood/02-neighborhood-section.svg",
+      "destination": "art/current/Neighborhood/02-neighborhood-section.svg",
+      "sha256": "3bc68e57725ee2804f89ab2eab65adb5fadd32ef04a080b51cc3984865b66201"
+    },
+    {
+      "source": "concepts/mothership/Neighborhood/03-neighborhood-cutaway-v1.png",
+      "destination": "art/current/Neighborhood/03-neighborhood-cutaway-v1.png",
+      "sha256": "85160920d93f7b12028dd2b447bc71bf4aeff7e50caf377dca7727acd438d6ae"
+    },
+    {
+      "source": "concepts/mothership/Neighborhood/03-neighborhood-cutaway.png",
+      "destination": "art/current/Neighborhood/03-neighborhood-cutaway.png",
+      "sha256": "56955066b37207b270fd07ba18a08759512b8efee638b9dadf51caed51270b92"
+    },
+    {
+      "source": "concepts/mothership/Neighborhood/04-cultivation-threshold.png",
+      "destination": "art/current/Neighborhood/04-cultivation-threshold.png",
+      "sha256": "6de89103ec49a54f459123ca2a6d5ebfeaaad39680f49d00e6c58d478111e1e8"
+    },
+    {
+      "source": "concepts/mothership/interiors/05-bridge-interior.png",
+      "destination": "art/current/interiors/05-bridge-interior.png",
+      "sha256": "ea7b2659fdad7c78d134367a1382bd15dfe7cd36e863c404b16633d067bca309"
+    },
+    {
+      "source": "concepts/mothership/interiors/06-habitation-interior-v1.png",
+      "destination": "art/current/interiors/06-habitation-interior-v1.png",
+      "sha256": "63853fed9be72cffaafca57fb529fb2e7b416a5a1236aa8bde4efaa615f6139b"
+    },
+    {
+      "source": "concepts/mothership/interiors/06-habitation-interior.png",
+      "destination": "art/current/interiors/06-habitation-interior.png",
+      "sha256": "32857785d718df0a2f0082eaeb8cc30d45e9bcebec0ffcba0f3c6e29bd67ceb7"
+    },
+    {
+      "source": "concepts/mothership/units/07-role-lineup.png",
+      "destination": "art/current/units/07-role-lineup.png",
+      "sha256": "f5997ac1cc25387f14c70c0f36d1e0516db45aae8b4876b7ba4bd48808e33335"
+    },
+    {
+      "source": "concepts/mothership/units/08-sentinel-breakdown-v1.png",
+      "destination": "art/current/units/08-sentinel-breakdown-v1.png",
+      "sha256": "fc6823551143cef503785c790e893975cd2cce9906baa08dff3af707a21e5b5b"
+    },
+    {
+      "source": "concepts/mothership/units/08-sentinel-breakdown.png",
+      "destination": "art/current/units/08-sentinel-breakdown.png",
+      "sha256": "0b071b9474fd594cf2939a9323a3f73b6d27e26c0fd4bdf3f00eb970f4769aec"
+    },
+    {
+      "source": "concepts/mothership/units/09-workframe-breakdown.png",
+      "destination": "art/current/units/09-workframe-breakdown.png",
+      "sha256": "4f9ec2592d9d2cfa80989986feee56ba11881b3a59cfe17cadddc1441a23bcd0"
+    },
+    {
+      "source": "concepts/mothership/Neighborhood/build_layout.py",
+      "destination": "records/neighborhood/build_layout.py",
+      "sha256": "bb9ae7e5859f9baa8ba72447200dbae0c59dd7473f80b2a39672a65d70177523"
+    },
+    {
+      "source": "concepts/mothership/Neighborhood/layout-check.json",
+      "destination": "records/neighborhood/layout-check.json",
+      "sha256": "3d8da7c5d2fbba456b8901e1a7a06ccdc7aab041b52e1162cc414e3799570e93"
+    },
+    {
+      "source": "concepts/mothership/Neighborhood/layout.json",
+      "destination": "records/neighborhood/layout.json",
+      "sha256": "ca9db5bf0c312da552b377e6efc45869667e8b8fdf6bc213a942006b470b6a6f"
+    }
+  ]
+}

@@ -1,5 +1,6 @@
 import { readdir, readFile, stat } from 'node:fs/promises';
 import path from 'node:path';
+import { createHash } from 'node:crypto';
 
 const root = path.resolve('dist');
 const walk = async (dir) => (await Promise.all((await readdir(dir, {withFileTypes:true})).map(async e => e.isDirectory() ? walk(path.join(dir,e.name)) : [path.join(dir,e.name)]))).flat();
@@ -39,6 +40,17 @@ for (const file of files) {
 if (htmlPages < 16) errors.push(`Expected home, gallery, 13 articles and 404; got ${htmlPages} HTML pages`);
 const searchFiles = files.filter(f => f.includes('/pagefind/') && f.endsWith('.pf_index'));
 if (searchFiles.length === 0) errors.push('Missing built Pagefind search index');
+const sourceAssets = JSON.parse(await readFile('asset-sources.json', 'utf8'));
+for (const asset of sourceAssets.files) {
+  try {
+    const bytes = await readFile(path.join(root, asset.destination));
+    if (createHash('sha256').update(bytes).digest('hex') !== asset.sha256) {
+      errors.push(`Built asset differs from pinned concept source: ${asset.destination}`);
+    }
+  } catch (error) {
+    errors.push(`Missing pinned asset: ${asset.destination} (${error.code})`);
+  }
+}
 const archive = JSON.parse(await readFile('src/data/prompt-records.json', 'utf8'));
 const exported = JSON.parse(await readFile(path.join(root,'records/concept-prompts.json'), 'utf8'));
 if (JSON.stringify(archive) !== JSON.stringify(exported)) errors.push('Public prompt export differs from source');
@@ -57,6 +69,6 @@ const rendered = Array.from(index.matchAll(/<pre\b[^>]*class="prompt-text"[^>]*>
 const originals = archive.records.flatMap(record=>record.steps.map(step=>step.prompt));
 if (JSON.stringify(rendered) !== JSON.stringify(originals)) errors.push('Rendered prompts differ from complete source text');
 for (const record of archive.records) if (!index.includes(`id="${record.id}"`)) errors.push(`Missing permanent prompt anchor: ${record.id}`);
-console.log(JSON.stringify({promptImages:images.length,originalPromptSteps:originals.length,renderedPromptSteps:rendered.length}));
+console.log(JSON.stringify({promptImages:images.length,originalPromptSteps:originals.length,renderedPromptSteps:rendered.length,pinnedAssets:sourceAssets.files.length}));
 console.log(JSON.stringify({files:files.length,htmlPages,internalReferences:links,searchIndexes:searchFiles.length,errors},null,2));
 if (errors.length) process.exit(1);

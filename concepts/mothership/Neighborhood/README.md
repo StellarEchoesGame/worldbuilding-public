@@ -8,7 +8,7 @@
 - [局部剖面与培养入口](02-neighborhood-section.svg)：上下层关系、通高空带和 V 卫生缓冲。
 - [邻里空间手稿](03-neighborhood-cutaway.png)与[培养入口手稿](04-cultivation-threshold.png)：局部空间关系与氛围诠释；[完整生成与返修提示词](prompts.json)。
 - [分配数据](layout.json)、[生成脚本](build_layout.py)、[检查记录](layout-check.json)。
-- 前置资料：[生活情境手稿](../LifeScenes/README.md)、[使命与生活基线](../../11-归航号使命与生活设计基线.md)。
+- 前置资料：[生活情境手稿](../LifeScenes/README.md)、[使命与生活基线](../../../world/11-归航号使命与生活设计基线.md)。
 
 ## 总体与面积口径
 

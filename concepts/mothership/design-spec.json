@@ -151,9 +151,9 @@
     "preserve awake relationships, valid stability and curiosity as independent exploration value; do not encode an inevitable destination",
     "keep historical prompts and generated image records unchanged; new mission acceptance is not visual or engineering approval"
   ],
-  "reference_concept": "../Sketchbook/Ark-Industrial/05-guihang-carrier.png",
+  "reference_concept": "../sketchbook/Ark-Industrial/05-guihang-carrier.png",
   "mission_baseline": {
-    "source": "../11-归航号使命与生活设计基线.md",
+    "source": "../../world/11-归航号使命与生活设计基线.md",
     "status": "user accepted mission direction; detailed spaces, technology and gameplay not approved or implemented",
     "identity": "independent civilization home with no reliable home port to depend on; continuous life and exploration",
     "history": "origin and whether a former home port ever existed remain undecided; migration is only a possible experience or later choice",

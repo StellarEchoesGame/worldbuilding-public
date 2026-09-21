@@ -39,3 +39,8 @@ outputs/*.zip
 # Reproducible render sequences and local player backups.
 outputs/cinematic-experiment-01/blender/frames/
 outputs/*_BackUpThisFolder_ButDontShipItWithYourGame/
+
+# Generated Wiki delivery copies; canonical sources live in concepts/.
+/wiki/public/art/
+/wiki/public/records/neighborhood/
+/wiki/public/records/concept-prompts.json

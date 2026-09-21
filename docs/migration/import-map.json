@@ -1,0 +1,1387 @@
+{
+  "schema_version": 1,
+  "source_repository": "https://github.com/redacted-user/stellar-echoes",
+  "source_commit": "e09845653450fc13aa5737e33a6decd9c4573348",
+  "source_tree": "e6eed27468a31a80d89c23c58f34d83f990e7ebd",
+  "filtered_import_commit": "12190e392de1b1a4f2a4b104275c66e445b64e1a",
+  "target_repository": "https://github.com/StellarEchoesGame/worldbuilding",
+  "method": "Path-filtered initial history with original commit authorship retained, followed by an explicit restructuring commit. The original repository is preserved.",
+  "entries": [
+    {
+      "source": ".gitattributes",
+      "repository": "worldbuilding",
+      "destination": ".gitattributes",
+      "original_git_blob": "baf21f89adfcce16586db86c61d0ca81f67392e6",
+      "original_sha256": "253fc9345472ded1d741ccd0271118e346d66beb29359278badcc8200597ef76",
+      "original_bytes": 1029
+    },
+    {
+      "source": ".gitignore",
+      "repository": "worldbuilding",
+      "destination": ".gitignore",
+      "original_git_blob": "436a67672f8e5c472e17dac5cbd2b148234f0eac",
+      "original_sha256": "748f1bc6530460de4827a1151200bd6724e63958d9294d8616cbf0fdb0c17bd2",
+      "original_bytes": 625
+    },
+    {
+      "source": "README.md",
+      "repository": "worldbuilding",
+      "destination": "docs/migration/original-monorepo-readme.md",
+      "original_git_blob": "e2ca1b7db077a1544d721740db040f40a0b2dca7",
+      "original_sha256": "35c01e3afb3494a7de66129354b0b3b2ec80d235aaf7c9178cb2b5b29cf0cb65",
+      "original_bytes": 3884
+    },
+    {
+      "source": "outputs/stellar-echoes-unity/Worldbuilding/01-研究与设计框架.md",
+      "repository": "worldbuilding",
+      "destination": "world/01-研究与设计框架.md",
+      "original_git_blob": "a4d930a4551de7a7002a6c7d48298798c52af656",
+      "original_sha256": "d73cd26f2a85e10fabebb4d4f96c2fa05535ce7a5e141968ce42e42486a45e23",
+      "original_bytes": 8343
+    },
+    {
+      "source": "outputs/stellar-echoes-unity/Worldbuilding/02-世界设定集.md",
+      "repository": "worldbuilding",
+      "destination": "world/02-世界设定集.md",
+      "original_git_blob": "0f9e17ae2c54fed7284e047f614af8bc50a44ac6",
+      "original_sha256": "79cf3fcf837157545fea801128d3e3d1fdd7880906898b67b7676144d912e027",
+      "original_bytes": 30389
+    },
+    {
+      "source": "outputs/stellar-echoes-unity/Worldbuilding/03-首章内容与制作约束.md",
+      "repository": "worldbuilding",
+      "destination": "world/03-首章内容与制作约束.md",
+      "original_git_blob": "682edb748e00d16a8a0b11280ec68dece18fef3c",
+      "original_sha256": "8c6f811bb8a24fc4d373de33c5b5a0cc39bc5efd981858290e2ee2f09502eb21",
+      "original_bytes": 18738
+    },
+    {
+      "source": "outputs/stellar-echoes-unity/Worldbuilding/04-InternalRef参考与框架修订.md",
+      "repository": "worldbuilding",
+      "destination": "world/04-InternalRef参考与框架修订.md",
+      "original_git_blob": "cc61e70dc69fce67f0dbeaac6678deed41d4fc76",
+      "original_sha256": "25b67f333376c0a2dafb592c9992f285ebcac2ce7f6f7e01882c8ac6e3bb550a",
+      "original_bytes": 9224
+    },
+    {
+      "source": "outputs/stellar-echoes-unity/Worldbuilding/05-最小世界观资产包.md",
+      "repository": "worldbuilding",
+      "destination": "world/05-最小世界观资产包.md",
+      "original_git_blob": "2e73157dc465e445de3bfd1c970b2e0a0ccc72f6",
+      "original_sha256": "7955adc7b45414d38bd9c3a0199b4a95d52e9e3cf29a612760a789c6d443571f",
+      "original_bytes": 15313
+    },
+    {
+      "source": "outputs/stellar-echoes-unity/Worldbuilding/06-世界观概念手稿.md",
+      "repository": "worldbuilding",
+      "destination": "world/06-世界观概念手稿.md",
+      "original_git_blob": "0c9a6f3700708e4149dca46b4504495263d35c80",
+      "original_sha256": "708bc2df51c529e6efccfe8f6d20b468aa5b6a326bfcc6a8bd07d66ec5515ab5",
+      "original_bytes": 7645
+    },
+    {
+      "source": "outputs/stellar-echoes-unity/Worldbuilding/07-科技纪元与方舟设计依据.md",
+      "repository": "worldbuilding",
+      "destination": "world/07-科技纪元与方舟设计依据.md",
+      "original_git_blob": "d4a1c2d3c96c233b78e248fdd7e1bd9e11b91659",
+      "original_sha256": "8b35971322997266782e9540c5d0a765df5b66a27985fe59a9a1ad0eeddc5606",
+      "original_bytes": 17863
+    },
+    {
+      "source": "outputs/stellar-echoes-unity/Worldbuilding/08-方舟科幻美术方向.md",
+      "repository": "worldbuilding",
+      "destination": "world/08-方舟科幻美术方向.md",
+      "original_git_blob": "1ed8d2ee2c422f36ffc4a289109c3992e05b4544",
+      "original_sha256": "472d3ae1e01560c56a247750047f8f663bc794fd4c6da511aa8a9b9ab3bb8991",
+      "original_bytes": 6492
+    },
+    {
+      "source": "outputs/stellar-echoes-unity/Worldbuilding/09-归航号工业舰船方向.md",
+      "repository": "worldbuilding",
+      "destination": "world/09-归航号工业舰船方向.md",
+      "original_git_blob": "3b39ae2d61abed8295022a2f46c500a3f8bccb0f",
+      "original_sha256": "e67b4dc9ab4253ac8259cab8223abdfb86c34258fbbc15486d6c17bb64ae1b05",
+      "original_bytes": 4031
+    },
+    {
+      "source": "outputs/stellar-echoes-unity/Worldbuilding/10-舰载机体与港口设计.md",
+      "repository": "worldbuilding",
+      "destination": "world/10-舰载机体与港口设计.md",
+      "original_git_blob": "513eeb4fb474de54716176f6c74758bca49905fd",
+      "original_sha256": "7bea763c3a8ccd5723cbf49c059068a9d1d62e761231b262346832579467cdd7",
+      "original_bytes": 7046
+    },
+    {
+      "source": "outputs/stellar-echoes-unity/Worldbuilding/11-归航号使命与生活设计基线.md",
+      "repository": "worldbuilding",
+      "destination": "world/11-归航号使命与生活设计基线.md",
+      "original_git_blob": "c802df9591375468c20619891a905ab038450361",
+      "original_sha256": "3a0d1ab0d11af14ba2c5287270319cb95837e692df29b879aee0eb0e917bef05",
+      "original_bytes": 4306
+    },
+    {
+      "source": "outputs/stellar-echoes-unity/Worldbuilding/12-后续制作路线图.md",
+      "repository": "worldbuilding",
+      "destination": "world/12-后续制作路线图.md",
+      "original_git_blob": "541fa166cc29eb9a93fe11d8ad18a8e6d71907cd",
+      "original_sha256": "8eea3b0510a31ecb4fa9629ccd6ca1bca11e8c6abc0276a7d93c74765db0c2dd",
+      "original_bytes": 12132
+    },
+    {
+      "source": "outputs/stellar-echoes-unity/Worldbuilding/MothershipDesign/01-master-study-v1.png",
+      "repository": "worldbuilding",
+      "destination": "concepts/mothership/01-master-study-v1.png",
+      "original_git_blob": "a1461324552fa764da363dfa24105f2d16d1610c",
+      "original_sha256": "32a1ba7ac647d0e8d058394e61c020a54547064fa865fedd7a7f265d6da08ab9",
+      "original_bytes": 2765087
+    },
+    {
+      "source": "outputs/stellar-echoes-unity/Worldbuilding/MothershipDesign/01-master-study.png",
+      "repository": "worldbuilding",
+      "destination": "concepts/mothership/01-master-study.png",
+      "original_git_blob": "71406dcfae6ffe51c5c759e87b14ecf2655852d7",
+      "original_sha256": "59598f7dafba74a0fa0157372a0b2102dfca01dba37554933c90545228de6b80",
+      "original_bytes": 2501523
+    },
+    {
+      "source": "outputs/stellar-echoes-unity/Worldbuilding/MothershipDesign/02-exterior-views-v1.png",
+      "repository": "worldbuilding",
+      "destination": "concepts/mothership/02-exterior-views-v1.png",
+      "original_git_blob": "491df06e8fed54add566d1edfa15fbceb924fe1c",
+      "original_sha256": "d344cfb602f668c3a2a2f2b7b2ddca7ef66a80fa824f36ecf52818eb2935c90c",
+      "original_bytes": 2828365
+    },
+    {
+      "source": "outputs/stellar-echoes-unity/Worldbuilding/MothershipDesign/02-exterior-views.png",
+      "repository": "worldbuilding",
+      "destination": "concepts/mothership/02-exterior-views.png",
+      "original_git_blob": "82f071c5fd7419c686bb70972c16d767c38246e6",
+      "original_sha256": "8cf1cedbc66e06b91d059a29c83619fc3b80323e1bb0973a5f7a93906d3dcd4c",
+      "original_bytes": 2465909
+    },
+    {
+      "source": "outputs/stellar-echoes-unity/Worldbuilding/MothershipDesign/03-systems-exploded-v1.png",
+      "repository": "worldbuilding",
+      "destination": "concepts/mothership/03-systems-exploded-v1.png",
+      "original_git_blob": "e73ed82b5c17222bf89a70aecc4eaf8ead83fc04",
+      "original_sha256": "c3683eb5cfc3c6e9993d0c1b597f8bd906756cb560f77e53724a6613432cbff7",
+      "original_bytes": 2907244
+    },
+    {
+      "source": "outputs/stellar-echoes-unity/Worldbuilding/MothershipDesign/03-systems-exploded.png",
+      "repository": "worldbuilding",
+      "destination": "concepts/mothership/03-systems-exploded.png",
+      "original_git_blob": "b471f5bd9ef8f30028a79092fe8579a63f45bea4",
+      "original_sha256": "92b407ab239ca1721590e8c8e35858cd70bad8220f24f12553e1966ca68613d3",
+      "original_bytes": 2644249
+    },
+    {
+      "source": "outputs/stellar-echoes-unity/Worldbuilding/MothershipDesign/04-hangar-design.png",
+      "repository": "worldbuilding",
+      "destination": "concepts/mothership/04-hangar-design.png",
+      "original_git_blob": "44d514dd3fe6360753a64bbfbbc202fd29276f41",
+      "original_sha256": "35d77ea6cf4aa5bbefce05d61880fb551190edf6ffe15150d813dc1c1f20fdeb",
+      "original_bytes": 3189563
+    },
+    {
+      "source": "outputs/stellar-echoes-unity/Worldbuilding/MothershipDesign/04b-port-mechanisms-v1.png",
+      "repository": "worldbuilding",
+      "destination": "concepts/mothership/04b-port-mechanisms-v1.png",
+      "original_git_blob": "90bd19f9cb35b272d0469e14dd3d2b7922803135",
+      "original_sha256": "2dc35ce91aaee8dd75d0dbcc95ea08d168f0108dd2f9d84176b8e0b06eacbda5",
+      "original_bytes": 3128421
+    },
+    {
+      "source": "outputs/stellar-echoes-unity/Worldbuilding/MothershipDesign/04b-port-mechanisms.png",
+      "repository": "worldbuilding",
+      "destination": "concepts/mothership/04b-port-mechanisms.png",
+      "original_git_blob": "35d63228e6c08f8260fa8e2fa0f8dd06fad625ec",
+      "original_sha256": "27d66e1c3c6bed7f9409a66ebf6cc34e5816c0b5e54e509d8ad2e64644f171a8",
+      "original_bytes": 2859436
+    },
+    {
+      "source": "outputs/stellar-echoes-unity/Worldbuilding/MothershipDesign/LifeScenes/01-shift-mess.png",
+      "repository": "worldbuilding",
+      "destination": "concepts/mothership/LifeScenes/01-shift-mess.png",
+      "original_git_blob": "e7c3b0bb68c630a0ec2e594bfa8e3fa9001f163a",
+      "original_sha256": "e3c0bc8589258d5bcb5aa0364dd25efe5a82d684bdaefccb7c4cbf78831e5383",
+      "original_bytes": 3235469
+    },
+    {
+      "source": "outputs/stellar-echoes-unity/Worldbuilding/MothershipDesign/LifeScenes/02-habitation-lane.png",
+      "repository": "worldbuilding",
+      "destination": "concepts/mothership/LifeScenes/02-habitation-lane.png",
+      "original_git_blob": "299e39b4853d9b525f2c5bcdd1789fd43d5a3afe",
+      "original_sha256": "a6933e38ed969999bc523e7b81c03a86e9bfea485d003188f1caac97cbf3125c",
+      "original_bytes": 2887440
+    },
+    {
+      "source": "outputs/stellar-echoes-unity/Worldbuilding/MothershipDesign/LifeScenes/03-cultivation-commons-v1.png",
+      "repository": "worldbuilding",
+      "destination": "concepts/mothership/LifeScenes/03-cultivation-commons-v1.png",
+      "original_git_blob": "12749df591fb7e1a084f4bc442120b58d128888f",
+      "original_sha256": "96b9572bf6d7a0e6ec2f97dfae8f7c74534746911c97f6eb81a1d4cbff922bd4",
+      "original_bytes": 3140057
+    },
+    {
+      "source": "outputs/stellar-echoes-unity/Worldbuilding/MothershipDesign/LifeScenes/03-cultivation-commons.png",
+      "repository": "worldbuilding",
+      "destination": "concepts/mothership/LifeScenes/03-cultivation-commons.png",
+      "original_git_blob": "f18a201aa6d590e28a2edfec21f41d8ba0d90d3f",
+      "original_sha256": "570c367d352ddb5cd0c255f878afe317b875ab1721cccca786389b178d352efc",
+      "original_bytes": 3007862
+    },
+    {
+      "source": "outputs/stellar-echoes-unity/Worldbuilding/MothershipDesign/LifeScenes/README.md",
+      "repository": "worldbuilding",
+      "destination": "concepts/mothership/LifeScenes/README.md",
+      "original_git_blob": "7b09f075be55b3187c2617f82e1660d90b41484e",
+      "original_sha256": "850255fca2517ddda7a3f626c1bd70141b18aed3f9a78b3c94180a6977154ccc",
+      "original_bytes": 3164
+    },
+    {
+      "source": "outputs/stellar-echoes-unity/Worldbuilding/MothershipDesign/LifeScenes/brief.md",
+      "repository": "worldbuilding",
+      "destination": "concepts/mothership/LifeScenes/brief.md",
+      "original_git_blob": "015b93d55c70738023ebead8b38fad19279e4999",
+      "original_sha256": "ff2a7489125be5464962d8ef05e8eee4d40f6ec03fa4ee8269c2b78b291b2a27",
+      "original_bytes": 5540
+    },
+    {
+      "source": "outputs/stellar-echoes-unity/Worldbuilding/MothershipDesign/LifeScenes/manifest.json",
+      "repository": "worldbuilding",
+      "destination": "concepts/mothership/LifeScenes/manifest.json",
+      "original_git_blob": "3c3db10d6880b5c9bbba01e4a874dde21a7f79db",
+      "original_sha256": "3f710f8b69619d5f5f33b76314d6191cad48bd094780e758f79b9329bf4bdb21",
+      "original_bytes": 1160
+    },
+    {
+      "source": "outputs/stellar-echoes-unity/Worldbuilding/MothershipDesign/LifeScenes/prompts.json",
+      "repository": "worldbuilding",
+      "destination": "concepts/mothership/LifeScenes/prompts.json",
+      "original_git_blob": "71b07381c5340ce5303c2bb901aec1d35d2ab79a",
+      "original_sha256": "fa978ee9c543ed73d6f5d8ba3fdec560587cddfcaa51077b8ee490e077d44135",
+      "original_bytes": 22610
+    },
+    {
+      "source": "outputs/stellar-echoes-unity/Worldbuilding/MothershipDesign/LifeScenes/review.md",
+      "repository": "worldbuilding",
+      "destination": "concepts/mothership/LifeScenes/review.md",
+      "original_git_blob": "bdba69bddaace90efd38b024ff99f6fdb3d07e9f",
+      "original_sha256": "40ad5e5bbb90bb0f139eb6efb3d11db57093333ba894bf00f7d30c3a024dd152",
+      "original_bytes": 4169
+    },
+    {
+      "source": "outputs/stellar-echoes-unity/Worldbuilding/MothershipDesign/Neighborhood/01-neighborhood-plan.svg",
+      "repository": "worldbuilding",
+      "destination": "concepts/mothership/Neighborhood/01-neighborhood-plan.svg",
+      "original_git_blob": "0a5826d3607bf7fca6a345c6c263f8a48620e3de",
+      "original_sha256": "ca8378c5612f68dcaf6f6ba07cf9f355c3361fd7b50d572d0cf2527cca1d69e6",
+      "original_bytes": 45392
+    },
+    {
+      "source": "outputs/stellar-echoes-unity/Worldbuilding/MothershipDesign/Neighborhood/02-neighborhood-section.svg",
+      "repository": "worldbuilding",
+      "destination": "concepts/mothership/Neighborhood/02-neighborhood-section.svg",
+      "original_git_blob": "7aae905b93f0a237b84a331d1f7f1d8f5633009e",
+      "original_sha256": "3bc68e57725ee2804f89ab2eab65adb5fadd32ef04a080b51cc3984865b66201",
+      "original_bytes": 7098
+    },
+    {
+      "source": "outputs/stellar-echoes-unity/Worldbuilding/MothershipDesign/Neighborhood/03-neighborhood-cutaway-v1.png",
+      "repository": "worldbuilding",
+      "destination": "concepts/mothership/Neighborhood/03-neighborhood-cutaway-v1.png",
+      "original_git_blob": "68560f27a3a3337a593217534f6aa79ecd759658",
+      "original_sha256": "85160920d93f7b12028dd2b447bc71bf4aeff7e50caf377dca7727acd438d6ae",
+      "original_bytes": 2980430
+    },
+    {
+      "source": "outputs/stellar-echoes-unity/Worldbuilding/MothershipDesign/Neighborhood/03-neighborhood-cutaway.png",
+      "repository": "worldbuilding",
+      "destination": "concepts/mothership/Neighborhood/03-neighborhood-cutaway.png",
+      "original_git_blob": "5273c0c00c425daa8683aad52aab70e84904cad4",
+      "original_sha256": "56955066b37207b270fd07ba18a08759512b8efee638b9dadf51caed51270b92",
+      "original_bytes": 2680080
+    },
+    {
+      "source": "outputs/stellar-echoes-unity/Worldbuilding/MothershipDesign/Neighborhood/04-cultivation-threshold.png",
+      "repository": "worldbuilding",
+      "destination": "concepts/mothership/Neighborhood/04-cultivation-threshold.png",
+      "original_git_blob": "b569905f759366a89702a9cdbb97572052e06dd9",
+      "original_sha256": "6de89103ec49a54f459123ca2a6d5ebfeaaad39680f49d00e6c58d478111e1e8",
+      "original_bytes": 2839350
+    },
+    {
+      "source": "outputs/stellar-echoes-unity/Worldbuilding/MothershipDesign/Neighborhood/README.md",
+      "repository": "worldbuilding",
+      "destination": "concepts/mothership/Neighborhood/README.md",
+      "original_git_blob": "dfd1c89aac1e5ef9ad197013012050db3ddfbe5c",
+      "original_sha256": "152f50eb16cf35c9db369ecc732b36ff830a65ca27cb6eb86eef565439e9d7b4",
+      "original_bytes": 7905
+    },
+    {
+      "source": "outputs/stellar-echoes-unity/Worldbuilding/MothershipDesign/Neighborhood/build_layout.py",
+      "repository": "worldbuilding",
+      "destination": "concepts/mothership/Neighborhood/build_layout.py",
+      "original_git_blob": "a2ceaebd1332c4ec8b0e1fa9684bd154fbbec491",
+      "original_sha256": "bb9ae7e5859f9baa8ba72447200dbae0c59dd7473f80b2a39672a65d70177523",
+      "original_bytes": 16912
+    },
+    {
+      "source": "outputs/stellar-echoes-unity/Worldbuilding/MothershipDesign/Neighborhood/cutaway-edit-prompt.txt",
+      "repository": "worldbuilding",
+      "destination": "concepts/mothership/Neighborhood/cutaway-edit-prompt.txt",
+      "original_git_blob": "18fee7409b1d1037e50aaf13139edf13ec9d6cb5",
+      "original_sha256": "ee166e9aa18c20ffcaf96d9bec1829bc1dd2093622561d875f068f8c26858c97",
+      "original_bytes": 1747
+    },
+    {
+      "source": "outputs/stellar-echoes-unity/Worldbuilding/MothershipDesign/Neighborhood/layout-check.json",
+      "repository": "worldbuilding",
+      "destination": "concepts/mothership/Neighborhood/layout-check.json",
+      "original_git_blob": "c1e2fe9e817573a995a2873a1e16a30309b0d6a6",
+      "original_sha256": "3d8da7c5d2fbba456b8901e1a7a06ccdc7aab041b52e1162cc414e3799570e93",
+      "original_bytes": 604
+    },
+    {
+      "source": "outputs/stellar-echoes-unity/Worldbuilding/MothershipDesign/Neighborhood/layout.json",
+      "repository": "worldbuilding",
+      "destination": "concepts/mothership/Neighborhood/layout.json",
+      "original_git_blob": "f5480768db390b53c04cd66ff13f522f8ac3a6f9",
+      "original_sha256": "ca9db5bf0c312da552b377e6efc45869667e8b8fdf6bc213a942006b470b6a6f",
+      "original_bytes": 32427
+    },
+    {
+      "source": "outputs/stellar-echoes-unity/Worldbuilding/MothershipDesign/Neighborhood/manifest.json",
+      "repository": "worldbuilding",
+      "destination": "concepts/mothership/Neighborhood/manifest.json",
+      "original_git_blob": "b30b6b2da9fd75c083cded76d7da7d930df76401",
+      "original_sha256": "1ad75d721d09d84db3743b77bb4cd97ae0c1b360b39329682b89ca574bde5d87",
+      "original_bytes": 1697
+    },
+    {
+      "source": "outputs/stellar-echoes-unity/Worldbuilding/MothershipDesign/Neighborhood/prompts.json",
+      "repository": "worldbuilding",
+      "destination": "concepts/mothership/Neighborhood/prompts.json",
+      "original_git_blob": "eff23d12bb8b140a93b98d169c1204b4829718eb",
+      "original_sha256": "2c8bbfaa54a47705f8dec829f6598c576f7cf60a66156d0ac2b2472d4b97db44",
+      "original_bytes": 14452
+    },
+    {
+      "source": "outputs/stellar-echoes-unity/Worldbuilding/MothershipDesign/Neighborhood/review.md",
+      "repository": "worldbuilding",
+      "destination": "concepts/mothership/Neighborhood/review.md",
+      "original_git_blob": "b961988ef35e406801fefd061cdad1bd41b3c510",
+      "original_sha256": "522fdc801ee596ce097591c5d033fa32a186563329ce2a8431e7af0835ba727e",
+      "original_bytes": 3437
+    },
+    {
+      "source": "outputs/stellar-echoes-unity/Worldbuilding/MothershipDesign/README.md",
+      "repository": "worldbuilding",
+      "destination": "concepts/mothership/README.md",
+      "original_git_blob": "4fcb2625c13eb11de056b3a0bd7bc7af1b5da8ef",
+      "original_sha256": "fbb4d1a558da20d6aa83af294cf28d44935af3fc5a6aaedf0c9bdced275cb7a8",
+      "original_bytes": 5518
+    },
+    {
+      "source": "outputs/stellar-echoes-unity/Worldbuilding/MothershipDesign/assets-manifest.json",
+      "repository": "worldbuilding",
+      "destination": "concepts/mothership/assets-manifest.json",
+      "original_git_blob": "d41059cd8086ab116d66d5700a4d482df510df73",
+      "original_sha256": "f1f48faa556275819a577ed6d9cb5d8a1f759107e3909eb3c2ffb85fdf6dcec3",
+      "original_bytes": 5142
+    },
+    {
+      "source": "outputs/stellar-echoes-unity/Worldbuilding/MothershipDesign/design-brief.md",
+      "repository": "worldbuilding",
+      "destination": "concepts/mothership/design-brief.md",
+      "original_git_blob": "3dcd688d28058cb88733fb58ac0f82cd5720d70f",
+      "original_sha256": "64df8b1a37fa7d6f783865ab6c22c2ec89d54d4d5847b2cbc31ce7ef0d4d1fdf",
+      "original_bytes": 3526
+    },
+    {
+      "source": "outputs/stellar-echoes-unity/Worldbuilding/MothershipDesign/design-spec.json",
+      "repository": "worldbuilding",
+      "destination": "concepts/mothership/design-spec.json",
+      "original_git_blob": "7c3a407041804359a99693991e9e15f01bf51fec",
+      "original_sha256": "5818fcb4eaa6d1f88e688c3943b85f3b18f915a2543f193d70c66df6e2e2f540",
+      "original_bytes": 6822
+    },
+    {
+      "source": "outputs/stellar-echoes-unity/Worldbuilding/MothershipDesign/final-review-correction-prompts.json",
+      "repository": "worldbuilding",
+      "destination": "concepts/mothership/final-review-correction-prompts.json",
+      "original_git_blob": "975222e537c4c273f3e467a89a74ee986f7eced0",
+      "original_sha256": "dad16cc077c288281838231c69dbc34eefb7c3faee6ad0f2f12e576eb1a3a2f6",
+      "original_bytes": 4363
+    },
+    {
+      "source": "outputs/stellar-echoes-unity/Worldbuilding/MothershipDesign/index.html",
+      "repository": "worldbuilding",
+      "destination": "concepts/mothership/index.html",
+      "original_git_blob": "cf1b1d3343a82037de2f7d2fd7c80205ce523a88",
+      "original_sha256": "e3899813d3e4dd76a0e869514836fb3aa0f7b9de7095f92d1e2757e802b0ceb0",
+      "original_bytes": 7324
+    },
+    {
+      "source": "outputs/stellar-echoes-unity/Worldbuilding/MothershipDesign/interiors/05-bridge-interior.png",
+      "repository": "worldbuilding",
+      "destination": "concepts/mothership/interiors/05-bridge-interior.png",
+      "original_git_blob": "4ca3d1e2dee07a52774b70fd7f962eda3833a6fc",
+      "original_sha256": "ea7b2659fdad7c78d134367a1382bd15dfe7cd36e863c404b16633d067bca309",
+      "original_bytes": 3223829
+    },
+    {
+      "source": "outputs/stellar-echoes-unity/Worldbuilding/MothershipDesign/interiors/06-habitation-interior-v1.png",
+      "repository": "worldbuilding",
+      "destination": "concepts/mothership/interiors/06-habitation-interior-v1.png",
+      "original_git_blob": "f2697feacf4ea2ccc1b7ad065b880ec737eee19b",
+      "original_sha256": "63853fed9be72cffaafca57fb529fb2e7b416a5a1236aa8bde4efaa615f6139b",
+      "original_bytes": 3261880
+    },
+    {
+      "source": "outputs/stellar-echoes-unity/Worldbuilding/MothershipDesign/interiors/06-habitation-interior.png",
+      "repository": "worldbuilding",
+      "destination": "concepts/mothership/interiors/06-habitation-interior.png",
+      "original_git_blob": "e965c2710bca2fcd93b7f5986859fa3d22448ff8",
+      "original_sha256": "32857785d718df0a2f0082eaeb8cc30d45e9bcebec0ffcba0f3c6e29bd67ceb7",
+      "original_bytes": 2729070
+    },
+    {
+      "source": "outputs/stellar-echoes-unity/Worldbuilding/MothershipDesign/interiors/concept-brief.md",
+      "repository": "worldbuilding",
+      "destination": "concepts/mothership/interiors/concept-brief.md",
+      "original_git_blob": "88d58c74c07121e062d5e0c7e0f9a01b210b2f46",
+      "original_sha256": "1321ed7dfa165d8405d3ba46dd17226e142984a412f5ad9b104a794aeaa229cc",
+      "original_bytes": 4560
+    },
+    {
+      "source": "outputs/stellar-echoes-unity/Worldbuilding/MothershipDesign/master-correction-prompt.json",
+      "repository": "worldbuilding",
+      "destination": "concepts/mothership/master-correction-prompt.json",
+      "original_git_blob": "dc2fabca96fe56c5f5f38a059c039d6ccc13423e",
+      "original_sha256": "cde6b49fbfaf2590b0c5ecd6305fb132430b5494447fe467aff4a206b5136a91",
+      "original_bytes": 2347
+    },
+    {
+      "source": "outputs/stellar-echoes-unity/Worldbuilding/MothershipDesign/master-prompt.json",
+      "repository": "worldbuilding",
+      "destination": "concepts/mothership/master-prompt.json",
+      "original_git_blob": "1ffa494343ff2cf54f96d354faa29ceaf1fb4903",
+      "original_sha256": "0ab3eca65c13f01ed631f4bfaf9e84f3992dbc701531b67dc680c7f381a60212",
+      "original_bytes": 3873
+    },
+    {
+      "source": "outputs/stellar-echoes-unity/Worldbuilding/MothershipDesign/pages.js",
+      "repository": "worldbuilding",
+      "destination": "concepts/mothership/pages.js",
+      "original_git_blob": "9e06acfdb4ee5e498e011f32a66f8993fed8d964",
+      "original_sha256": "ddf1267fb1c407addc4d4677794c0d9f31c0ef9a49136253b0987fb21aa90a8b",
+      "original_bytes": 6208
+    },
+    {
+      "source": "outputs/stellar-echoes-unity/Worldbuilding/MothershipDesign/prompts.json",
+      "repository": "worldbuilding",
+      "destination": "concepts/mothership/prompts.json",
+      "original_git_blob": "01899fc4d0c7da3fb51857ad571b9f978baf0509",
+      "original_sha256": "62837636e1aa81fb97ff110517f1573681e72c1a786581e23e57656d9a725114",
+      "original_bytes": 42532
+    },
+    {
+      "source": "outputs/stellar-echoes-unity/Worldbuilding/MothershipDesign/review-correction-prompts.json",
+      "repository": "worldbuilding",
+      "destination": "concepts/mothership/review-correction-prompts.json",
+      "original_git_blob": "d2399ae1b47d623d77255102aec984f678b3ec32",
+      "original_sha256": "ef2c12fe39270c536bf173d81251e82f8f46bd22d775e03befcf8ec0a80d98b8",
+      "original_bytes": 6854
+    },
+    {
+      "source": "outputs/stellar-echoes-unity/Worldbuilding/MothershipDesign/review.md",
+      "repository": "worldbuilding",
+      "destination": "concepts/mothership/review.md",
+      "original_git_blob": "8e838dacdef8d6590669fece8f3cb783107fb6a4",
+      "original_sha256": "ff6576410b187a5181ce5fd731fcef28780b90afbfeb1e41df145626ff4b0be8",
+      "original_bytes": 4431
+    },
+    {
+      "source": "outputs/stellar-echoes-unity/Worldbuilding/MothershipDesign/units/07-role-lineup.png",
+      "repository": "worldbuilding",
+      "destination": "concepts/mothership/units/07-role-lineup.png",
+      "original_git_blob": "8d5bbd0c0e35564a161172652d46506602321728",
+      "original_sha256": "f5997ac1cc25387f14c70c0f36d1e0516db45aae8b4876b7ba4bd48808e33335",
+      "original_bytes": 3021241
+    },
+    {
+      "source": "outputs/stellar-echoes-unity/Worldbuilding/MothershipDesign/units/08-sentinel-breakdown-v1.png",
+      "repository": "worldbuilding",
+      "destination": "concepts/mothership/units/08-sentinel-breakdown-v1.png",
+      "original_git_blob": "6a2cd6157265f2086967d64df176d1cad0d51861",
+      "original_sha256": "fc6823551143cef503785c790e893975cd2cce9906baa08dff3af707a21e5b5b",
+      "original_bytes": 3007873
+    },
+    {
+      "source": "outputs/stellar-echoes-unity/Worldbuilding/MothershipDesign/units/08-sentinel-breakdown.png",
+      "repository": "worldbuilding",
+      "destination": "concepts/mothership/units/08-sentinel-breakdown.png",
+      "original_git_blob": "7e8d7c1cff3ae28e1443ffaf3b08acfb29057123",
+      "original_sha256": "0b071b9474fd594cf2939a9323a3f73b6d27e26c0fd4bdf3f00eb970f4769aec",
+      "original_bytes": 2643880
+    },
+    {
+      "source": "outputs/stellar-echoes-unity/Worldbuilding/MothershipDesign/units/09-workframe-breakdown.png",
+      "repository": "worldbuilding",
+      "destination": "concepts/mothership/units/09-workframe-breakdown.png",
+      "original_git_blob": "2db0d47fe3fabd22e290c99dea9d4d179b7075bd",
+      "original_sha256": "4f9ec2592d9d2cfa80989986feee56ba11881b3a59cfe17cadddc1441a23bcd0",
+      "original_bytes": 3059106
+    },
+    {
+      "source": "outputs/stellar-echoes-unity/Worldbuilding/MothershipDesign/units/combat-reference-notes.md",
+      "repository": "worldbuilding",
+      "destination": "concepts/mothership/units/combat-reference-notes.md",
+      "original_git_blob": "1e07cbff58df44b6b78ee701352cc54a6f6f1b25",
+      "original_sha256": "e8ddcb69e1575f1f3de155de1e8e1753e4b86a704fcb5a6c09b05179af156d72",
+      "original_bytes": 5590
+    },
+    {
+      "source": "outputs/stellar-echoes-unity/Worldbuilding/MothershipDesign/units/master-prompt.json",
+      "repository": "worldbuilding",
+      "destination": "concepts/mothership/units/master-prompt.json",
+      "original_git_blob": "7147d57fb43db0c6360d5804cce9c39b3b82a335",
+      "original_sha256": "5008c5bbfc2d6992c05d2fcbb2e10a3c7df6de05ebf713496ba87187672da103",
+      "original_bytes": 3372
+    },
+    {
+      "source": "outputs/stellar-echoes-unity/Worldbuilding/MothershipDesign/verification.json",
+      "repository": "worldbuilding",
+      "destination": "concepts/mothership/verification.json",
+      "original_git_blob": "d679fce74f06e31179b68270980a433f9e7d86e4",
+      "original_sha256": "89722f2b4dc9b1c79ff6ea75b4885bbb0718be791a4a8ae26b6c35491663f8d4",
+      "original_bytes": 2020
+    },
+    {
+      "source": "outputs/stellar-echoes-unity/Worldbuilding/MothershipDesign/wave2-prompts.json",
+      "repository": "worldbuilding",
+      "destination": "concepts/mothership/wave2-prompts.json",
+      "original_git_blob": "23bf857c073ad65fb0e3daf5d400633c9d673e96",
+      "original_sha256": "99743dac2d22d3ca30ca87fc0989a9da368a107ea5bfe70b2397f2c15e634879",
+      "original_bytes": 9601
+    },
+    {
+      "source": "outputs/stellar-echoes-unity/Worldbuilding/MothershipDesign/wave3-prompts.json",
+      "repository": "worldbuilding",
+      "destination": "concepts/mothership/wave3-prompts.json",
+      "original_git_blob": "3896343771eec568d11de24df378788fa18e29e3",
+      "original_sha256": "48c253357a1de6ca4665b86c92b829442bbe7b6c13eae662090f9680fa2c0bb9",
+      "original_bytes": 10655
+    },
+    {
+      "source": "outputs/stellar-echoes-unity/Worldbuilding/README.md",
+      "repository": "worldbuilding",
+      "destination": "world/README.md",
+      "original_git_blob": "3eb206ef5cb142fdf94fc6c248615da16617eb25",
+      "original_sha256": "106448bca8891cbf25204a60208e144919814fe289ebd465aa8deb6a64547b52",
+      "original_bytes": 7169
+    },
+    {
+      "source": "outputs/stellar-echoes-unity/Worldbuilding/Sketchbook/01-ark-form-v2.png",
+      "repository": "worldbuilding",
+      "destination": "concepts/sketchbook/01-ark-form-v2.png",
+      "original_git_blob": "ec3b1f3cecb4b974bfacbc1a78f311a5c5d24d39",
+      "original_sha256": "fd6dee8e9f2e7623ec52624f3aee1ae80ebd7930bc8f9464150a03d07bd9f213",
+      "original_bytes": 2719449
+    },
+    {
+      "source": "outputs/stellar-echoes-unity/Worldbuilding/Sketchbook/01-ark-form.png",
+      "repository": "worldbuilding",
+      "destination": "concepts/sketchbook/01-ark-form.png",
+      "original_git_blob": "327453b5cc5416db7af335cec0eab27f324ab761",
+      "original_sha256": "94008500d606d5e298d1ba8a1ccfa82166bdf2325481c4e96ac0be220072a7b6",
+      "original_bytes": 3052136
+    },
+    {
+      "source": "outputs/stellar-echoes-unity/Worldbuilding/Sketchbook/02-station-families.png",
+      "repository": "worldbuilding",
+      "destination": "concepts/sketchbook/02-station-families.png",
+      "original_git_blob": "57a3ffd14c7a4976ef4e5f0939ee93abd34e0f14",
+      "original_sha256": "ed5a50880ece88516f68221dc1907311a2748e18b20977337ee6116c7e8648e6",
+      "original_bytes": 2828879
+    },
+    {
+      "source": "outputs/stellar-echoes-unity/Worldbuilding/Sketchbook/03-handover-objects.png",
+      "repository": "worldbuilding",
+      "destination": "concepts/sketchbook/03-handover-objects.png",
+      "original_git_blob": "00e0def6dcb934f83ee90e05345bbaf3d709d5c8",
+      "original_sha256": "7cb84a2a5635a6665e01ad84dfcd64e6c04560586800673499b54b296ea88c57",
+      "original_bytes": 2786956
+    },
+    {
+      "source": "outputs/stellar-echoes-unity/Worldbuilding/Sketchbook/Ark-Aesthetics/04a-crown-of-dawn.png",
+      "repository": "worldbuilding",
+      "destination": "concepts/sketchbook/Ark-Aesthetics/04a-crown-of-dawn.png",
+      "original_git_blob": "471858ddd3c4ac873c3acb4116eecf0537f45cd2",
+      "original_sha256": "23863dbe2445500d28e11ea0a63cc5b1ad5865a84165fa8fe06d13bf1ab082d4",
+      "original_bytes": 2313478
+    },
+    {
+      "source": "outputs/stellar-echoes-unity/Worldbuilding/Sketchbook/Ark-Aesthetics/04b-pilgrim-monolith.png",
+      "repository": "worldbuilding",
+      "destination": "concepts/sketchbook/Ark-Aesthetics/04b-pilgrim-monolith.png",
+      "original_git_blob": "4014ba2ad78530269ae04ace0c7045d8b1a89ea5",
+      "original_sha256": "8a638566b4fffe8616494d0b03cc086ec42f49b4ba5be63ad711ac474eb502e3",
+      "original_bytes": 2263006
+    },
+    {
+      "source": "outputs/stellar-echoes-unity/Worldbuilding/Sketchbook/Ark-Aesthetics/04c-stellar-seed.png",
+      "repository": "worldbuilding",
+      "destination": "concepts/sketchbook/Ark-Aesthetics/04c-stellar-seed.png",
+      "original_git_blob": "777f5a33b701bef1b35459c5abc88c5a8fd32e61",
+      "original_sha256": "1bd87f0d6358c95deff2302a72444b23cdec38da870e4d99d1bb2c1df51f6c92",
+      "original_bytes": 2341172
+    },
+    {
+      "source": "outputs/stellar-echoes-unity/Worldbuilding/Sketchbook/Ark-Aesthetics/assets.json",
+      "repository": "worldbuilding",
+      "destination": "concepts/sketchbook/Ark-Aesthetics/assets.json",
+      "original_git_blob": "9ccfd03dfffc0c1a138e82b51afbf2cc3ef8274d",
+      "original_sha256": "18dace8704ca136d78224ec2c15a6543371d742bd78088efebf71dc2641dea1d",
+      "original_bytes": 1213
+    },
+    {
+      "source": "outputs/stellar-echoes-unity/Worldbuilding/Sketchbook/Ark-Aesthetics/prompt-set.json",
+      "repository": "worldbuilding",
+      "destination": "concepts/sketchbook/Ark-Aesthetics/prompt-set.json",
+      "original_git_blob": "07af3b46a1207faed61ef32d4d1f6ab556a6d21e",
+      "original_sha256": "29122643e9dc74993f01f2e420fe2d0b2aeed817dd8e2b324b0340717d220bcf",
+      "original_bytes": 7141
+    },
+    {
+      "source": "outputs/stellar-echoes-unity/Worldbuilding/Sketchbook/Ark-Industrial/05-guihang-carrier.png",
+      "repository": "worldbuilding",
+      "destination": "concepts/sketchbook/Ark-Industrial/05-guihang-carrier.png",
+      "original_git_blob": "865d3d1a3f4163430266c6610c114d2450777101",
+      "original_sha256": "3a8f41610cc1e11b7453dde275004dce7d13e7d051d5606ce7876ec16a50e5e5",
+      "original_bytes": 2066742
+    },
+    {
+      "source": "outputs/stellar-echoes-unity/Worldbuilding/Sketchbook/Ark-Industrial/port-and-unit-prompts.json",
+      "repository": "worldbuilding",
+      "destination": "concepts/sketchbook/Ark-Industrial/port-and-unit-prompts.json",
+      "original_git_blob": "9fc28a570cdb4a940f9bcde22de2fae5ce95091f",
+      "original_sha256": "e3ae5915d517ee216cfc5dbcdc97d0c448a132cc7af386e45c1e188281a04c3c",
+      "original_bytes": 6317
+    },
+    {
+      "source": "outputs/stellar-echoes-unity/Worldbuilding/Sketchbook/Ark-Industrial/prompt.json",
+      "repository": "worldbuilding",
+      "destination": "concepts/sketchbook/Ark-Industrial/prompt.json",
+      "original_git_blob": "9e38a0ad3d8c2d804995c127a41758363fb6bb24",
+      "original_sha256": "d2205413d8e0ff89a48d6f35cfafb7e0fe694f02a01cec6eca295dcfd4ff1273",
+      "original_bytes": 3794
+    },
+    {
+      "source": "outputs/stellar-echoes-unity/Worldbuilding/Sketchbook/README.md",
+      "repository": "worldbuilding",
+      "destination": "concepts/sketchbook/README.md",
+      "original_git_blob": "f9ab8196535530af1c7dd4d1870b6db2e53804ec",
+      "original_sha256": "5e3d86e7eda67bb510229b72fcc33f2506b98686c2bdacb11e9259b953ade202",
+      "original_bytes": 4497
+    },
+    {
+      "source": "outputs/stellar-echoes-unity/Worldbuilding/Sketchbook/assets.json",
+      "repository": "worldbuilding",
+      "destination": "concepts/sketchbook/assets.json",
+      "original_git_blob": "beb480eb78bff8bf2bc1224c2cfea085655fe3d0",
+      "original_sha256": "210f93a746642ae3fa85a3062287109d9b2dec75ad770ed1e702c78d5ddb806a",
+      "original_bytes": 1018
+    },
+    {
+      "source": "outputs/stellar-echoes-unity/Worldbuilding/Sketchbook/prompts.json",
+      "repository": "worldbuilding",
+      "destination": "concepts/sketchbook/prompts.json",
+      "original_git_blob": "47c5b80ee0ffc929188cd6a856d4a0da9113484d",
+      "original_sha256": "015a5c16faaf8e524f41e60835315ac672e7bad66b60efd983207189e516d65e",
+      "original_bytes": 8761
+    },
+    {
+      "source": "outputs/stellar-echoes-unity/Worldbuilding/Sketchbook/revision-prompts.json",
+      "repository": "worldbuilding",
+      "destination": "concepts/sketchbook/revision-prompts.json",
+      "original_git_blob": "169bb2947729936664d10cf3445e913b78492d17",
+      "original_sha256": "4bd17b413023e757f050f4a60a7c8a5fda0896dd8ae26a83ac3dcfa75caca156",
+      "original_bytes": 2284
+    },
+    {
+      "source": "outputs/stellar-echoes-wiki/README.md",
+      "repository": "worldbuilding",
+      "destination": "wiki/README.md",
+      "original_git_blob": "c0eafd91fb01ba3f26ae8080f1ab8ab09d2002be",
+      "original_sha256": "e1072c31304b0e687a32d03ec26bc5e21c80ef5b787f5a0b31252661ad5eecba",
+      "original_bytes": 2250
+    },
+    {
+      "source": "outputs/stellar-echoes-wiki/astro.config.mjs",
+      "repository": "worldbuilding",
+      "destination": "wiki/astro.config.mjs",
+      "original_git_blob": "46d3da8c131d62d4fca7d12bd26411d5d6887f63",
+      "original_sha256": "04b732fb9fad94e442574d29f7f3404daad5a2689eeae2c79625d6c5ed7023aa",
+      "original_bytes": 2917
+    },
+    {
+      "source": "outputs/stellar-echoes-wiki/package-lock.json",
+      "repository": "worldbuilding",
+      "destination": "wiki/package-lock.json",
+      "original_git_blob": "df2ea84b799888822d7849cbc21645e9e43dc12f",
+      "original_sha256": "356f97262b750c88e5e67ccf2fec41a1877b978b71384142992bdac1ac66ebf8",
+      "original_bytes": 259915
+    },
+    {
+      "source": "outputs/stellar-echoes-wiki/package.json",
+      "repository": "worldbuilding",
+      "destination": "wiki/package.json",
+      "original_git_blob": "b4cbdd6700b2f666d9f2e803617bc743effe02cb",
+      "original_sha256": "daa11c95aaf76da1a25dea770a731076cda45d4c07f7155edc4341954a408dad",
+      "original_bytes": 583
+    },
+    {
+      "source": "outputs/stellar-echoes-wiki/public/_headers",
+      "repository": "worldbuilding",
+      "destination": "wiki/public/_headers",
+      "original_git_blob": "d1a05149d96d3515af5985c736845c7ba76ac290",
+      "original_sha256": "1c8ede297bfb622cb6d36641ea35b4169c500cd719ec5e9011de2721765472a9",
+      "original_bytes": 157
+    },
+    {
+      "source": "outputs/stellar-echoes-wiki/public/art/archive/04a-crown-of-dawn.png",
+      "repository": "worldbuilding",
+      "destination": "wiki/public/art/archive/04a-crown-of-dawn.png",
+      "original_git_blob": "471858ddd3c4ac873c3acb4116eecf0537f45cd2",
+      "original_sha256": "23863dbe2445500d28e11ea0a63cc5b1ad5865a84165fa8fe06d13bf1ab082d4",
+      "original_bytes": 2313478
+    },
+    {
+      "source": "outputs/stellar-echoes-wiki/public/art/archive/04b-pilgrim-monolith.png",
+      "repository": "worldbuilding",
+      "destination": "wiki/public/art/archive/04b-pilgrim-monolith.png",
+      "original_git_blob": "4014ba2ad78530269ae04ace0c7045d8b1a89ea5",
+      "original_sha256": "8a638566b4fffe8616494d0b03cc086ec42f49b4ba5be63ad711ac474eb502e3",
+      "original_bytes": 2263006
+    },
+    {
+      "source": "outputs/stellar-echoes-wiki/public/art/archive/04c-stellar-seed.png",
+      "repository": "worldbuilding",
+      "destination": "wiki/public/art/archive/04c-stellar-seed.png",
+      "original_git_blob": "777f5a33b701bef1b35459c5abc88c5a8fd32e61",
+      "original_sha256": "1bd87f0d6358c95deff2302a72444b23cdec38da870e4d99d1bb2c1df51f6c92",
+      "original_bytes": 2341172
+    },
+    {
+      "source": "outputs/stellar-echoes-wiki/public/art/archive/05-guihang-carrier.png",
+      "repository": "worldbuilding",
+      "destination": "wiki/public/art/archive/05-guihang-carrier.png",
+      "original_git_blob": "865d3d1a3f4163430266c6610c114d2450777101",
+      "original_sha256": "3a8f41610cc1e11b7453dde275004dce7d13e7d051d5606ce7876ec16a50e5e5",
+      "original_bytes": 2066742
+    },
+    {
+      "source": "outputs/stellar-echoes-wiki/public/art/current/01-master-study-v1.png",
+      "repository": "worldbuilding",
+      "destination": "wiki/public/art/current/01-master-study-v1.png",
+      "original_git_blob": "a1461324552fa764da363dfa24105f2d16d1610c",
+      "original_sha256": "32a1ba7ac647d0e8d058394e61c020a54547064fa865fedd7a7f265d6da08ab9",
+      "original_bytes": 2765087
+    },
+    {
+      "source": "outputs/stellar-echoes-wiki/public/art/current/01-master-study.png",
+      "repository": "worldbuilding",
+      "destination": "wiki/public/art/current/01-master-study.png",
+      "original_git_blob": "71406dcfae6ffe51c5c759e87b14ecf2655852d7",
+      "original_sha256": "59598f7dafba74a0fa0157372a0b2102dfca01dba37554933c90545228de6b80",
+      "original_bytes": 2501523
+    },
+    {
+      "source": "outputs/stellar-echoes-wiki/public/art/current/02-exterior-views-v1.png",
+      "repository": "worldbuilding",
+      "destination": "wiki/public/art/current/02-exterior-views-v1.png",
+      "original_git_blob": "491df06e8fed54add566d1edfa15fbceb924fe1c",
+      "original_sha256": "d344cfb602f668c3a2a2f2b7b2ddca7ef66a80fa824f36ecf52818eb2935c90c",
+      "original_bytes": 2828365
+    },
+    {
+      "source": "outputs/stellar-echoes-wiki/public/art/current/02-exterior-views.png",
+      "repository": "worldbuilding",
+      "destination": "wiki/public/art/current/02-exterior-views.png",
+      "original_git_blob": "82f071c5fd7419c686bb70972c16d767c38246e6",
+      "original_sha256": "8cf1cedbc66e06b91d059a29c83619fc3b80323e1bb0973a5f7a93906d3dcd4c",
+      "original_bytes": 2465909
+    },
+    {
+      "source": "outputs/stellar-echoes-wiki/public/art/current/03-systems-exploded-v1.png",
+      "repository": "worldbuilding",
+      "destination": "wiki/public/art/current/03-systems-exploded-v1.png",
+      "original_git_blob": "e73ed82b5c17222bf89a70aecc4eaf8ead83fc04",
+      "original_sha256": "c3683eb5cfc3c6e9993d0c1b597f8bd906756cb560f77e53724a6613432cbff7",
+      "original_bytes": 2907244
+    },
+    {
+      "source": "outputs/stellar-echoes-wiki/public/art/current/03-systems-exploded.png",
+      "repository": "worldbuilding",
+      "destination": "wiki/public/art/current/03-systems-exploded.png",
+      "original_git_blob": "b471f5bd9ef8f30028a79092fe8579a63f45bea4",
+      "original_sha256": "92b407ab239ca1721590e8c8e35858cd70bad8220f24f12553e1966ca68613d3",
+      "original_bytes": 2644249
+    },
+    {
+      "source": "outputs/stellar-echoes-wiki/public/art/current/04-hangar-design.png",
+      "repository": "worldbuilding",
+      "destination": "wiki/public/art/current/04-hangar-design.png",
+      "original_git_blob": "44d514dd3fe6360753a64bbfbbc202fd29276f41",
+      "original_sha256": "35d77ea6cf4aa5bbefce05d61880fb551190edf6ffe15150d813dc1c1f20fdeb",
+      "original_bytes": 3189563
+    },
+    {
+      "source": "outputs/stellar-echoes-wiki/public/art/current/04b-port-mechanisms-v1.png",
+      "repository": "worldbuilding",
+      "destination": "wiki/public/art/current/04b-port-mechanisms-v1.png",
+      "original_git_blob": "90bd19f9cb35b272d0469e14dd3d2b7922803135",
+      "original_sha256": "2dc35ce91aaee8dd75d0dbcc95ea08d168f0108dd2f9d84176b8e0b06eacbda5",
+      "original_bytes": 3128421
+    },
+    {
+      "source": "outputs/stellar-echoes-wiki/public/art/current/04b-port-mechanisms.png",
+      "repository": "worldbuilding",
+      "destination": "wiki/public/art/current/04b-port-mechanisms.png",
+      "original_git_blob": "35d63228e6c08f8260fa8e2fa0f8dd06fad625ec",
+      "original_sha256": "27d66e1c3c6bed7f9409a66ebf6cc34e5816c0b5e54e509d8ad2e64644f171a8",
+      "original_bytes": 2859436
+    },
+    {
+      "source": "outputs/stellar-echoes-wiki/public/art/current/LifeScenes/01-shift-mess.png",
+      "repository": "worldbuilding",
+      "destination": "wiki/public/art/current/LifeScenes/01-shift-mess.png",
+      "original_git_blob": "e7c3b0bb68c630a0ec2e594bfa8e3fa9001f163a",
+      "original_sha256": "e3c0bc8589258d5bcb5aa0364dd25efe5a82d684bdaefccb7c4cbf78831e5383",
+      "original_bytes": 3235469
+    },
+    {
+      "source": "outputs/stellar-echoes-wiki/public/art/current/LifeScenes/02-habitation-lane.png",
+      "repository": "worldbuilding",
+      "destination": "wiki/public/art/current/LifeScenes/02-habitation-lane.png",
+      "original_git_blob": "299e39b4853d9b525f2c5bcdd1789fd43d5a3afe",
+      "original_sha256": "a6933e38ed969999bc523e7b81c03a86e9bfea485d003188f1caac97cbf3125c",
+      "original_bytes": 2887440
+    },
+    {
+      "source": "outputs/stellar-echoes-wiki/public/art/current/LifeScenes/03-cultivation-commons-v1.png",
+      "repository": "worldbuilding",
+      "destination": "wiki/public/art/current/LifeScenes/03-cultivation-commons-v1.png",
+      "original_git_blob": "12749df591fb7e1a084f4bc442120b58d128888f",
+      "original_sha256": "96b9572bf6d7a0e6ec2f97dfae8f7c74534746911c97f6eb81a1d4cbff922bd4",
+      "original_bytes": 3140057
+    },
+    {
+      "source": "outputs/stellar-echoes-wiki/public/art/current/LifeScenes/03-cultivation-commons.png",
+      "repository": "worldbuilding",
+      "destination": "wiki/public/art/current/LifeScenes/03-cultivation-commons.png",
+      "original_git_blob": "f18a201aa6d590e28a2edfec21f41d8ba0d90d3f",
+      "original_sha256": "570c367d352ddb5cd0c255f878afe317b875ab1721cccca786389b178d352efc",
+      "original_bytes": 3007862
+    },
+    {
+      "source": "outputs/stellar-echoes-wiki/public/art/current/Neighborhood/01-neighborhood-plan.svg",
+      "repository": "worldbuilding",
+      "destination": "wiki/public/art/current/Neighborhood/01-neighborhood-plan.svg",
+      "original_git_blob": "0a5826d3607bf7fca6a345c6c263f8a48620e3de",
+      "original_sha256": "ca8378c5612f68dcaf6f6ba07cf9f355c3361fd7b50d572d0cf2527cca1d69e6",
+      "original_bytes": 45392
+    },
+    {
+      "source": "outputs/stellar-echoes-wiki/public/art/current/Neighborhood/02-neighborhood-section.svg",
+      "repository": "worldbuilding",
+      "destination": "wiki/public/art/current/Neighborhood/02-neighborhood-section.svg",
+      "original_git_blob": "7aae905b93f0a237b84a331d1f7f1d8f5633009e",
+      "original_sha256": "3bc68e57725ee2804f89ab2eab65adb5fadd32ef04a080b51cc3984865b66201",
+      "original_bytes": 7098
+    },
+    {
+      "source": "outputs/stellar-echoes-wiki/public/art/current/Neighborhood/03-neighborhood-cutaway-v1.png",
+      "repository": "worldbuilding",
+      "destination": "wiki/public/art/current/Neighborhood/03-neighborhood-cutaway-v1.png",
+      "original_git_blob": "68560f27a3a3337a593217534f6aa79ecd759658",
+      "original_sha256": "85160920d93f7b12028dd2b447bc71bf4aeff7e50caf377dca7727acd438d6ae",
+      "original_bytes": 2980430
+    },
+    {
+      "source": "outputs/stellar-echoes-wiki/public/art/current/Neighborhood/03-neighborhood-cutaway.png",
+      "repository": "worldbuilding",
+      "destination": "wiki/public/art/current/Neighborhood/03-neighborhood-cutaway.png",
+      "original_git_blob": "5273c0c00c425daa8683aad52aab70e84904cad4",
+      "original_sha256": "56955066b37207b270fd07ba18a08759512b8efee638b9dadf51caed51270b92",
+      "original_bytes": 2680080
+    },
+    {
+      "source": "outputs/stellar-echoes-wiki/public/art/current/Neighborhood/04-cultivation-threshold.png",
+      "repository": "worldbuilding",
+      "destination": "wiki/public/art/current/Neighborhood/04-cultivation-threshold.png",
+      "original_git_blob": "b569905f759366a89702a9cdbb97572052e06dd9",
+      "original_sha256": "6de89103ec49a54f459123ca2a6d5ebfeaaad39680f49d00e6c58d478111e1e8",
+      "original_bytes": 2839350
+    },
+    {
+      "source": "outputs/stellar-echoes-wiki/public/art/current/interiors/05-bridge-interior.png",
+      "repository": "worldbuilding",
+      "destination": "wiki/public/art/current/interiors/05-bridge-interior.png",
+      "original_git_blob": "4ca3d1e2dee07a52774b70fd7f962eda3833a6fc",
+      "original_sha256": "ea7b2659fdad7c78d134367a1382bd15dfe7cd36e863c404b16633d067bca309",
+      "original_bytes": 3223829
+    },
+    {
+      "source": "outputs/stellar-echoes-wiki/public/art/current/interiors/06-habitation-interior-v1.png",
+      "repository": "worldbuilding",
+      "destination": "wiki/public/art/current/interiors/06-habitation-interior-v1.png",
+      "original_git_blob": "f2697feacf4ea2ccc1b7ad065b880ec737eee19b",
+      "original_sha256": "63853fed9be72cffaafca57fb529fb2e7b416a5a1236aa8bde4efaa615f6139b",
+      "original_bytes": 3261880
+    },
+    {
+      "source": "outputs/stellar-echoes-wiki/public/art/current/interiors/06-habitation-interior.png",
+      "repository": "worldbuilding",
+      "destination": "wiki/public/art/current/interiors/06-habitation-interior.png",
+      "original_git_blob": "e965c2710bca2fcd93b7f5986859fa3d22448ff8",
+      "original_sha256": "32857785d718df0a2f0082eaeb8cc30d45e9bcebec0ffcba0f3c6e29bd67ceb7",
+      "original_bytes": 2729070
+    },
+    {
+      "source": "outputs/stellar-echoes-wiki/public/art/current/units/07-role-lineup.png",
+      "repository": "worldbuilding",
+      "destination": "wiki/public/art/current/units/07-role-lineup.png",
+      "original_git_blob": "8d5bbd0c0e35564a161172652d46506602321728",
+      "original_sha256": "f5997ac1cc25387f14c70c0f36d1e0516db45aae8b4876b7ba4bd48808e33335",
+      "original_bytes": 3021241
+    },
+    {
+      "source": "outputs/stellar-echoes-wiki/public/art/current/units/08-sentinel-breakdown-v1.png",
+      "repository": "worldbuilding",
+      "destination": "wiki/public/art/current/units/08-sentinel-breakdown-v1.png",
+      "original_git_blob": "6a2cd6157265f2086967d64df176d1cad0d51861",
+      "original_sha256": "fc6823551143cef503785c790e893975cd2cce9906baa08dff3af707a21e5b5b",
+      "original_bytes": 3007873
+    },
+    {
+      "source": "outputs/stellar-echoes-wiki/public/art/current/units/08-sentinel-breakdown.png",
+      "repository": "worldbuilding",
+      "destination": "wiki/public/art/current/units/08-sentinel-breakdown.png",
+      "original_git_blob": "7e8d7c1cff3ae28e1443ffaf3b08acfb29057123",
+      "original_sha256": "0b071b9474fd594cf2939a9323a3f73b6d27e26c0fd4bdf3f00eb970f4769aec",
+      "original_bytes": 2643880
+    },
+    {
+      "source": "outputs/stellar-echoes-wiki/public/art/current/units/09-workframe-breakdown.png",
+      "repository": "worldbuilding",
+      "destination": "wiki/public/art/current/units/09-workframe-breakdown.png",
+      "original_git_blob": "2db0d47fe3fabd22e290c99dea9d4d179b7075bd",
+      "original_sha256": "4f9ec2592d9d2cfa80989986feee56ba11881b3a59cfe17cadddc1441a23bcd0",
+      "original_bytes": 3059106
+    },
+    {
+      "source": "outputs/stellar-echoes-wiki/public/favicon.svg",
+      "repository": "worldbuilding",
+      "destination": "wiki/public/favicon.svg",
+      "original_git_blob": "803f5b5d2988b1343c9873ac8c59e0e71baf7f77",
+      "original_sha256": "41f448e82200ee22abaa09fcf729447461bc5d8b9f4e93498e480b4fb6eddacd",
+      "original_bytes": 234
+    },
+    {
+      "source": "outputs/stellar-echoes-wiki/public/records/art-manifest.json",
+      "repository": "worldbuilding",
+      "destination": "wiki/public/records/art-manifest.json",
+      "original_git_blob": "e4a40f2570c7e88b6f75f640d488cb01cfedcb2b",
+      "original_sha256": "cfa90a07c503224749e4c660b65cc58b69de81fc98ab42422a3d77d876de2f7a",
+      "original_bytes": 6477
+    },
+    {
+      "source": "outputs/stellar-echoes-wiki/public/records/concept-prompts.json",
+      "repository": "worldbuilding",
+      "destination": "wiki/public/records/concept-prompts.json",
+      "original_git_blob": "a282c5a2e248fb465492b231c47d271263701819",
+      "original_sha256": "aa95e837a40c77045f941444343a84e6c1b118a6365988c157ee87f9cbc0d057",
+      "original_bytes": 117006
+    },
+    {
+      "source": "outputs/stellar-echoes-wiki/public/records/neighborhood/build_layout.py",
+      "repository": "worldbuilding",
+      "destination": "wiki/public/records/neighborhood/build_layout.py",
+      "original_git_blob": "a2ceaebd1332c4ec8b0e1fa9684bd154fbbec491",
+      "original_sha256": "bb9ae7e5859f9baa8ba72447200dbae0c59dd7473f80b2a39672a65d70177523",
+      "original_bytes": 16912
+    },
+    {
+      "source": "outputs/stellar-echoes-wiki/public/records/neighborhood/layout-check.json",
+      "repository": "worldbuilding",
+      "destination": "wiki/public/records/neighborhood/layout-check.json",
+      "original_git_blob": "c1e2fe9e817573a995a2873a1e16a30309b0d6a6",
+      "original_sha256": "3d8da7c5d2fbba456b8901e1a7a06ccdc7aab041b52e1162cc414e3799570e93",
+      "original_bytes": 604
+    },
+    {
+      "source": "outputs/stellar-echoes-wiki/public/records/neighborhood/layout.json",
+      "repository": "worldbuilding",
+      "destination": "wiki/public/records/neighborhood/layout.json",
+      "original_git_blob": "f5480768db390b53c04cd66ff13f522f8ac3a6f9",
+      "original_sha256": "ca9db5bf0c312da552b377e6efc45869667e8b8fdf6bc213a942006b470b6a6f",
+      "original_bytes": 32427
+    },
+    {
+      "source": "outputs/stellar-echoes-wiki/scripts/check-public.mjs",
+      "repository": "worldbuilding",
+      "destination": "wiki/scripts/check-public.mjs",
+      "original_git_blob": "c0e759653cae4c5cc2ed77aede5bea102d92d802",
+      "original_sha256": "4ccdb624f9a3382de919287f4b108904011deced025462e6d8567e69f6e55153",
+      "original_bytes": 4729
+    },
+    {
+      "source": "outputs/stellar-echoes-wiki/scripts/deploy.mjs",
+      "repository": "worldbuilding",
+      "destination": "wiki/scripts/deploy.mjs",
+      "original_git_blob": "af6090fee2871902ce6417f510022d1006acf565",
+      "original_sha256": "63020d47e3fcf656ec323130e17e40fc7ed7a80c35fdfcd4957d296c4bde852b",
+      "original_bytes": 701
+    },
+    {
+      "source": "outputs/stellar-echoes-wiki/scripts/finalize-light.mjs",
+      "repository": "worldbuilding",
+      "destination": "wiki/scripts/finalize-light.mjs",
+      "original_git_blob": "3c827a6e258c109adc092f3dd5a20e09f5c739c9",
+      "original_sha256": "c7990179fbcdebf39e6d1e319e7b1e276a470561bce1ffd8c0b16ef9cf9d1fe8",
+      "original_bytes": 685
+    },
+    {
+      "source": "outputs/stellar-echoes-wiki/scripts/prepare-records.mjs",
+      "repository": "worldbuilding",
+      "destination": "wiki/scripts/prepare-records.mjs",
+      "original_git_blob": "95990b53efdbd5d99c4d7c4b9469d1198bf2bb7e",
+      "original_sha256": "1b9fa3801016705ed597ac281f7d345b724fe7dab63c306e457ca81ddf67f248",
+      "original_bytes": 235
+    },
+    {
+      "source": "outputs/stellar-echoes-wiki/src/components/ArtFigure.astro",
+      "repository": "worldbuilding",
+      "destination": "wiki/src/components/ArtFigure.astro",
+      "original_git_blob": "6cba57236008750579498d225b0cbb89710e0313",
+      "original_sha256": "e36e7db6bc4b889807c2e8500d0b5c03c24c3c132d8b0c163656a69daa655b78",
+      "original_bytes": 315
+    },
+    {
+      "source": "outputs/stellar-echoes-wiki/src/components/ArtGallery.astro",
+      "repository": "worldbuilding",
+      "destination": "wiki/src/components/ArtGallery.astro",
+      "original_git_blob": "f581d841cd94049855b1f5dec43c4d13f0e5c7ea",
+      "original_sha256": "c2443aeca7d3198fddbf3de210ec4d366e36042bbd2217ecc901e186a38b582f",
+      "original_bytes": 1078
+    },
+    {
+      "source": "outputs/stellar-echoes-wiki/src/components/Footer.astro",
+      "repository": "worldbuilding",
+      "destination": "wiki/src/components/Footer.astro",
+      "original_git_blob": "229472e6f9ecefd0875d6509093c15ee80d0db85",
+      "original_sha256": "873031938137c0a788e959a50d184e1d93e62f64318b4c47c46608c542587061",
+      "original_bytes": 4157
+    },
+    {
+      "source": "outputs/stellar-echoes-wiki/src/components/HomeArchive.astro",
+      "repository": "worldbuilding",
+      "destination": "wiki/src/components/HomeArchive.astro",
+      "original_git_blob": "2932b8ae334cc19176ee6d84fb2408db108a2854",
+      "original_sha256": "5bbaec6f1128e4c098bb4bb8af181903930fb5ad76d886bcc134d0329f4781b9",
+      "original_bytes": 3988
+    },
+    {
+      "source": "outputs/stellar-echoes-wiki/src/components/LightTheme.astro",
+      "repository": "worldbuilding",
+      "destination": "wiki/src/components/LightTheme.astro",
+      "original_git_blob": "c81e1fa916881554f0c7eb5a98aaae9c56b7f783",
+      "original_sha256": "a663141c57af6987b0c58f96341b0f6d47f5a52654b8ea5d114a92650f5b1c8b",
+      "original_bytes": 162
+    },
+    {
+      "source": "outputs/stellar-echoes-wiki/src/components/NoThemeSelect.astro",
+      "repository": "worldbuilding",
+      "destination": "wiki/src/components/NoThemeSelect.astro",
+      "original_git_blob": "eae7c8f5842cb0bd56126232e91cdde0b01bd13f",
+      "original_sha256": "5a6e272c584c401638e6c5d7aa08321264abcd4bb1f1e30705b50fc53ccede41",
+      "original_bytes": 73
+    },
+    {
+      "source": "outputs/stellar-echoes-wiki/src/components/PromptArchive.astro",
+      "repository": "worldbuilding",
+      "destination": "wiki/src/components/PromptArchive.astro",
+      "original_git_blob": "ecbede98817efc8e14a013eb13891f266edfe88d",
+      "original_sha256": "84c5f504062b5d2c83739796d4e4c6351643ca749bbd12a05345fa34e411194a",
+      "original_bytes": 456
+    },
+    {
+      "source": "outputs/stellar-echoes-wiki/src/components/PromptDetails.astro",
+      "repository": "worldbuilding",
+      "destination": "wiki/src/components/PromptDetails.astro",
+      "original_git_blob": "42e7fb1cb9b11c403818e70dc0240f600134fa9a",
+      "original_sha256": "6430912e540a2bb45a80ce9c447db57f6a2a5450f1714a4ee7f5a494dddd6844",
+      "original_bytes": 2475
+    },
+    {
+      "source": "outputs/stellar-echoes-wiki/src/content.config.ts",
+      "repository": "worldbuilding",
+      "destination": "wiki/src/content.config.ts",
+      "original_git_blob": "e54e72fa2e218b6cafd8f5713036712415f38512",
+      "original_sha256": "9bce46e72dd49a6e09a20dbc5386164cb5fdfed32c628dff22a447fd298e9d7e",
+      "original_bytes": 368
+    },
+    {
+      "source": "outputs/stellar-echoes-wiki/src/content/docs/404.md",
+      "repository": "worldbuilding",
+      "destination": "wiki/src/content/docs/404.md",
+      "original_git_blob": "6909e3c80c95ec96e9bfdac00409fb1f3ed4ee15",
+      "original_sha256": "7ff52d5886bf57a3061576200fedc2f141e05c6d2b34d902afe8e105ecd590f5",
+      "original_bytes": 390
+    },
+    {
+      "source": "outputs/stellar-echoes-wiki/src/content/docs/gallery.mdx",
+      "repository": "worldbuilding",
+      "destination": "wiki/src/content/docs/gallery.mdx",
+      "original_git_blob": "7b17c0384dd8f584ae3b819e3d4da2acf51d57fb",
+      "original_sha256": "506cd3575b78b0ed4875c7bf6f29d81d61fc2de338f8287c6ff0ccb3cadf0814",
+      "original_bytes": 958
+    },
+    {
+      "source": "outputs/stellar-echoes-wiki/src/content/docs/guide/about.md",
+      "repository": "worldbuilding",
+      "destination": "wiki/src/content/docs/guide/about.md",
+      "original_git_blob": "5c58ce08a05b5cff79579dfd8b86b60b4a0c3de0",
+      "original_sha256": "7162b3e5f9025fa2ed2d6c4b51aedfbf4a09d745d2a9ef79f511d7584980025f",
+      "original_bytes": 2764
+    },
+    {
+      "source": "outputs/stellar-echoes-wiki/src/content/docs/guide/contributing.md",
+      "repository": "worldbuilding",
+      "destination": "wiki/src/content/docs/guide/contributing.md",
+      "original_git_blob": "b976a2d7488507658670870406976a7d48907724",
+      "original_sha256": "4e75a23c68892630e23e0ff821fd1b62394749eb3a8350e95fdf9cc17b8f5962",
+      "original_bytes": 3404
+    },
+    {
+      "source": "outputs/stellar-echoes-wiki/src/content/docs/index.mdx",
+      "repository": "worldbuilding",
+      "destination": "wiki/src/content/docs/index.mdx",
+      "original_git_blob": "f1e3fba1d1215172ad84ec38a3511f85deae40f6",
+      "original_sha256": "5bdf05eaf76e819dd05b8acf9a4f9d54aacb6b22557d9259cb88e71e8856d236",
+      "original_bytes": 781
+    },
+    {
+      "source": "outputs/stellar-echoes-wiki/src/content/docs/process/archive.mdx",
+      "repository": "worldbuilding",
+      "destination": "wiki/src/content/docs/process/archive.mdx",
+      "original_git_blob": "4366c28e4c6f3a8869ffdf91fe3a60947770862e",
+      "original_sha256": "6f909b53aa490bb04d94b14558e13826c3246e4304aa6dcf59afcebfda019fea",
+      "original_bytes": 4795
+    },
+    {
+      "source": "outputs/stellar-echoes-wiki/src/content/docs/process/decisions.md",
+      "repository": "worldbuilding",
+      "destination": "wiki/src/content/docs/process/decisions.md",
+      "original_git_blob": "4d51901d3e95f458f3b3c0a880d638d385927106",
+      "original_sha256": "480b48ce6e5a31c11be48ca2772a3ea32ee1f45b88163dd1fe0ec756646b1bd7",
+      "original_bytes": 4131
+    },
+    {
+      "source": "outputs/stellar-echoes-wiki/src/content/docs/process/reviews.md",
+      "repository": "worldbuilding",
+      "destination": "wiki/src/content/docs/process/reviews.md",
+      "original_git_blob": "1b866d438a66505f22da9c6fadb68ebf085f6b64",
+      "original_sha256": "de800bfae6a06795c415dd9e9f4713db91e3d4d6febdb6c728f24e78d977ef04",
+      "original_bytes": 7685
+    },
+    {
+      "source": "outputs/stellar-echoes-wiki/src/content/docs/process/roadmap.md",
+      "repository": "worldbuilding",
+      "destination": "wiki/src/content/docs/process/roadmap.md",
+      "original_git_blob": "f6cb774176709a0cc712410c415504ae14f2faa1",
+      "original_sha256": "11cb16035ab5e3e33b608747805722765952778447c91ed56cea17ff2f69a0b1",
+      "original_bytes": 12261
+    },
+    {
+      "source": "outputs/stellar-echoes-wiki/src/content/docs/process/timeline.md",
+      "repository": "worldbuilding",
+      "destination": "wiki/src/content/docs/process/timeline.md",
+      "original_git_blob": "65db5975fa0fdfe2d3a675abdc66d2ca812d4496",
+      "original_sha256": "bf214cf30d97b2a30ac0fc0580c551b296fc69a202b9fe79c7c71874a56adeca",
+      "original_bytes": 6646
+    },
+    {
+      "source": "outputs/stellar-echoes-wiki/src/content/docs/prompts.mdx",
+      "repository": "worldbuilding",
+      "destination": "wiki/src/content/docs/prompts.mdx",
+      "original_git_blob": "26a9508dde19c7c16be6d9364eb912194f978f82",
+      "original_sha256": "d45988dacdd3e89be2a6e41e68915d8a89f755dc77e18a9e8cd048db86f83b3d",
+      "original_bytes": 1024
+    },
+    {
+      "source": "outputs/stellar-echoes-wiki/src/content/docs/ship/interiors.mdx",
+      "repository": "worldbuilding",
+      "destination": "wiki/src/content/docs/ship/interiors.mdx",
+      "original_git_blob": "fda100980fba0a469a69125ae2e8e5eb841c21f8",
+      "original_sha256": "9a5681ae2ccf612cc1c57d6f7cd1a272b497e3dbe5458285e7d6b8634cff5414",
+      "original_bytes": 8126
+    },
+    {
+      "source": "outputs/stellar-echoes-wiki/src/content/docs/ship/neighborhood.mdx",
+      "repository": "worldbuilding",
+      "destination": "wiki/src/content/docs/ship/neighborhood.mdx",
+      "original_git_blob": "97d98b9400dfd86bf7e841060bb4feac8b82f8fb",
+      "original_sha256": "99e4c163cd8950f4023dafd982572ea3dc6b4c265aa3b47fcc7ded2ea15ec5c4",
+      "original_bytes": 9480
+    },
+    {
+      "source": "outputs/stellar-echoes-wiki/src/content/docs/ship/overview.mdx",
+      "repository": "worldbuilding",
+      "destination": "wiki/src/content/docs/ship/overview.mdx",
+      "original_git_blob": "86fccfb4a0410de75b41588fb698ff0bdc1c9988",
+      "original_sha256": "3415cf4ada169994b2c0f3c91287bafd49eff6e1dc6b3e12c866574f2469ae6b",
+      "original_bytes": 4085
+    },
+    {
+      "source": "outputs/stellar-echoes-wiki/src/content/docs/ship/ports.mdx",
+      "repository": "worldbuilding",
+      "destination": "wiki/src/content/docs/ship/ports.mdx",
+      "original_git_blob": "14f71a4b0f1e51b1ceed88405334a2191d45cc4b",
+      "original_sha256": "705b61948ee5c7853e050da170ca05e868486ea0c27ef9ba05b5d90e97d2a0df",
+      "original_bytes": 3670
+    },
+    {
+      "source": "outputs/stellar-echoes-wiki/src/content/docs/ship/views.mdx",
+      "repository": "worldbuilding",
+      "destination": "wiki/src/content/docs/ship/views.mdx",
+      "original_git_blob": "2ba24303cdb43a0781efe8446d1fbe5e817eb061",
+      "original_sha256": "e150ae1af9e4925b2acc67cc83af68604bf6278d0e30cd7d7bc3e4788473b53c",
+      "original_bytes": 3185
+    },
+    {
+      "source": "outputs/stellar-echoes-wiki/src/content/docs/units/overview.mdx",
+      "repository": "worldbuilding",
+      "destination": "wiki/src/content/docs/units/overview.mdx",
+      "original_git_blob": "e3315a4db47b251201d8ad147c03c610a107b93b",
+      "original_sha256": "5f899698df965a89681066f2a9fcec5f16efef8f66bfe5f47d0e519ffe05246e",
+      "original_bytes": 4865
+    },
+    {
+      "source": "outputs/stellar-echoes-wiki/src/content/docs/world/ark.md",
+      "repository": "worldbuilding",
+      "destination": "wiki/src/content/docs/world/ark.md",
+      "original_git_blob": "25ed684f3ff2d38781fdd32e20521fc7059a7742",
+      "original_sha256": "0c45846f54d57b4c3b352421904d54e415d90b57b519a375841d954213885c65",
+      "original_bytes": 5105
+    },
+    {
+      "source": "outputs/stellar-echoes-wiki/src/content/docs/world/civilization.md",
+      "repository": "worldbuilding",
+      "destination": "wiki/src/content/docs/world/civilization.md",
+      "original_git_blob": "c0760fee9e2c4e204343f0764c4dac3eb32bc54c",
+      "original_sha256": "84ea9c30ec377b4cbce77c64697bfc447272073e590187c7a2057e5632796fa6",
+      "original_bytes": 3959
+    },
+    {
+      "source": "outputs/stellar-echoes-wiki/src/content/docs/world/history.md",
+      "repository": "worldbuilding",
+      "destination": "wiki/src/content/docs/world/history.md",
+      "original_git_blob": "71cf4d5669efaadc87fb1e255bc80f34116e31b4",
+      "original_sha256": "fd2a6572e042879dff1919d69d5ab0009d0c4f72f452e6a590be8de29137763c",
+      "original_bytes": 3939
+    },
+    {
+      "source": "outputs/stellar-echoes-wiki/src/content/docs/world/overview.md",
+      "repository": "worldbuilding",
+      "destination": "wiki/src/content/docs/world/overview.md",
+      "original_git_blob": "9115e0c5a7139831ab9b6664f7fdfcb5ae4ee78d",
+      "original_sha256": "8b7ec262ca990d33f76051485be41ba25504065c48819b5a6cea1a52d813c0c0",
+      "original_bytes": 4811
+    },
+    {
+      "source": "outputs/stellar-echoes-wiki/src/content/docs/world/people.md",
+      "repository": "worldbuilding",
+      "destination": "wiki/src/content/docs/world/people.md",
+      "original_git_blob": "b450b30ded3cec55681e11f669510835130fb27b",
+      "original_sha256": "1685e083a61808e64bd542be8b4f0f0a5562a06f4d793b766d438f7fa222c25a",
+      "original_bytes": 4218
+    },
+    {
+      "source": "outputs/stellar-echoes-wiki/src/content/docs/world/rules.md",
+      "repository": "worldbuilding",
+      "destination": "wiki/src/content/docs/world/rules.md",
+      "original_git_blob": "09ea5404910be1c5d4c3c7a0180dc5eb09a58a25",
+      "original_sha256": "9c4428bca0960cde9b97d2ad9fa29758841e43d911eb6247cd30d689c7eb766e",
+      "original_bytes": 4562
+    },
+    {
+      "source": "outputs/stellar-echoes-wiki/src/content/docs/world/technology.md",
+      "repository": "worldbuilding",
+      "destination": "wiki/src/content/docs/world/technology.md",
+      "original_git_blob": "76deb92c3dad8846dcc9d62c552bfd9d5fe8e7ff",
+      "original_sha256": "cc0aba8f0503710ea378d6b0999d04ab7835985dbc647fb395118e6347f61f40",
+      "original_bytes": 5452
+    },
+    {
+      "source": "outputs/stellar-echoes-wiki/src/content/docs/world/tidal-garden.md",
+      "repository": "worldbuilding",
+      "destination": "wiki/src/content/docs/world/tidal-garden.md",
+      "original_git_blob": "0f3164fa5c23083a4d6234b3b6899f273412d40f",
+      "original_sha256": "1bd69d4aea52e9f87fce1593728f592a5f43d2b9d1c32c625e09db0d7f33955e",
+      "original_bytes": 3963
+    },
+    {
+      "source": "outputs/stellar-echoes-wiki/src/content/i18n/zh-CN.json",
+      "repository": "worldbuilding",
+      "destination": "wiki/src/content/i18n/zh-CN.json",
+      "original_git_blob": "22ae95748f7340a9bda07136b594d63e5cd7982c",
+      "original_sha256": "9d3f1210966ea52b433b821ace0d758ba499f071c172782d94b2ac2d201cce32",
+      "original_bytes": 744
+    },
+    {
+      "source": "outputs/stellar-echoes-wiki/src/data/art.json",
+      "repository": "worldbuilding",
+      "destination": "wiki/src/data/art.json",
+      "original_git_blob": "cfaba49040ab7f1e27da27b96bfdcff735a31810",
+      "original_sha256": "c4f69d7517c1e04a23ae07fc8892f2f4fca554a70d56b0de6d06a40a855c9189",
+      "original_bytes": 10792
+    },
+    {
+      "source": "outputs/stellar-echoes-wiki/src/data/prompt-records.json",
+      "repository": "worldbuilding",
+      "destination": "wiki/src/data/prompt-records.json",
+      "original_git_blob": "a282c5a2e248fb465492b231c47d271263701819",
+      "original_sha256": "aa95e837a40c77045f941444343a84e6c1b118a6365988c157ee87f9cbc0d057",
+      "original_bytes": 117006
+    },
+    {
+      "source": "outputs/stellar-echoes-wiki/src/styles/wiki.css",
+      "repository": "worldbuilding",
+      "destination": "wiki/src/styles/wiki.css",
+      "original_git_blob": "782d7f13b7ef052c0aab48a61c3403068c246603",
+      "original_sha256": "65af56c2b184ddadab43358265119d7dff0ad425be2d5e72c9ca1d385e62d569",
+      "original_bytes": 13495
+    },
+    {
+      "source": "outputs/stellar-echoes-wiki/tsconfig.json",
+      "repository": "worldbuilding",
+      "destination": "wiki/tsconfig.json",
+      "original_git_blob": "d3998ed979a92e7ffcd395df762db91a9932e622",
+      "original_sha256": "3b26bcd1eb0f4de19eb74674755e77a9a10f857934748d5af615b9903da6bea5",
+      "original_bytes": 37
+    },
+    {
+      "source": "outputs/stellar-echoes-wiki/wrangler.jsonc",
+      "repository": "worldbuilding",
+      "destination": "wiki/wrangler.jsonc",
+      "original_git_blob": "092b35cb41287af7507464b164108705500d440d",
+      "original_sha256": "50dae83087c60c384aae4e484a7ec9ac5558e29b83ec765331e9afef322092f6",
+      "original_bytes": 112
+    }
+  ]
+}
