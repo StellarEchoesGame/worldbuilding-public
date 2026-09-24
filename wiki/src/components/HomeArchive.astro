@@ -1,28 +1,28 @@
 ---
 const entries = [
-  { no: '01', title: '航路与时代', question: '共同抵达，为什么没有等来接班？', text: '从相互依赖的港口，到逐渐变稀的航次。理解今天的空站从何而来。', href: '/world/history/' },
-  { no: '02', title: '文明与值守公约', question: '陌生人凭什么信任一盏灯？', text: '灯塔网络、三类历史职责，以及允许后来者接手的承诺。', href: '/world/civilization/' },
-  { no: '03', title: '潮汐之庭', question: '我们抵达了怎样的地方？', text: '珠母星与冰环之下，三座设施分别守着物资、种源与航图。', href: '/world/tidal-garden/' },
-  { no: '04', title: '归航号', question: '一艘船怎样成为家园？', text: '没有可依赖母港的共同体，在船上持续生活，探索值得前往的远方。', href: '/world/ark/' },
-  { no: '05', title: '船员与共同生活', question: '我们究竟在为谁远航？', text: '从七人到九人。专业、愿望、餐桌与值班表，让远航有具体的牵挂。', href: '/world/people/' },
-  { no: '06', title: '科技与能力边界', question: '能够走多远，要付出什么？', text: '迁徙、休眠、人工重力与循环系统，以及仍待收敛的时代和规模。', href: '/world/technology/' },
+  { no: '01', title: '时代、空间与历史', question: '一个能远行的宇宙，为什么不能同时抵达？', text: '航约428，远汐星域处在稀疏人类航网的边缘；四段历史与三张有日期的图，决定今天能相信什么。', href: '/world/history/' },
+  { no: '02', title: '战争与启航', question: '一个本有余力的地方，为什么留不住一艘船？', text: '晷川遭阈庭联政有限入侵，本地抵抗与外部支援仍在进行；远航号被迫离港，先让生活延续。', href: '/world/war/' },
+  { no: '03', title: '远汐星域、晷川与息壤', question: '我们要去的地方，究竟是什么？', text: '八个恒星系、两个星际测点、十六个重点区域；息壤是一处局部新手作业群，不是预定母港。', href: '/world/places/' },
+  { no: '04', title: '归航号', question: '一艘武装远征舰，怎样继续容纳生活？', text: '初名远航号，载着持续生活的共同体；接回他人、共同议事之后，它有了新的名字。', href: '/world/ark/' },
+  { no: '05', title: '居民与共同生活', question: '远航的日子，具体由谁来过？', text: '住舱、餐桌、邻居和孩子；人物的愿望不从任务栏里生出来。', href: '/world/people/' },
+  { no: '06', title: '航程、舰长与玩家', question: '玩家带着怎样的家出发？', text: '舰长的决定、五类玩法的共同循环、从远航号到归航号的主线，以及首发星图的边界。', href: '/world/voyage/' },
 ];
 ---
 <section class="world-opening" aria-label="世界的三个尺度">
   <div><span class="eyebrow">STELLAR ECHOES / 世界设定集</span><p>远行时，宇宙巨大。<br />靠近时，看见人的痕迹。<br />归来时，让生活好一点。</p></div>
   <ol class="world-scales">
     <li><span>身边</span><a href="/world/people/">一张餐桌，一班值守的人 <span aria-hidden="true">↗</span></a></li>
-    <li><span>近域</span><a href="/world/tidal-garden/">一片能够亲自验证的星域 <span aria-hidden="true">↗</span></a></li>
-    <li><span>远方</span><a href="/world/history/">一条尚待重新接续的航路 <span aria-hidden="true">↗</span></a></li>
+    <li><span>近域</span><a href="/world/places/">一片先要亲自探明的星域 <span aria-hidden="true">↗</span></a></li>
+    <li><span>远方</span><a href="/world/history/">一段仍有分歧的历史 <span aria-hidden="true">↗</span></a></li>
   </ol>
 </section>
 <section class="world-atlas" aria-labelledby="world-atlas">
-  <div class="atlas-heading"><div><span class="eyebrow">READ THE WORLD</span><h2 id="world-atlas">从时代，读到一盏生活灯。</h2></div><p>沿编号阅读，也可以从一个问题进入。<br />每篇正文都能独立理解，并通向相关设定。</p></div>
+  <div class="atlas-heading"><div><span class="eyebrow">READ THE WORLD</span><h2 id="world-atlas">从时代，读到一张餐桌。</h2></div><p>沿编号阅读，也可以从一个问题进入。<br />每篇正文都能独立理解，并通向相关设定。</p></div>
   <div class="world-entry-grid">{entries.map(entry => <a href={entry.href}><span class="entry-number">{entry.no}</span><h3>{entry.title}</h3><strong>{entry.question}</strong><p>{entry.text}</p><span class="entry-open">阅读条目 <span aria-hidden="true">↗</span></span></a>)}</div>
-  <a class="rules-strip" href="/world/rules/"><span class="eyebrow">贯穿所有条目的依据</span><strong>宇宙规则</strong><span>物资不会凭空出现，旧录音不等于新的回应。八条规则，让探索中的选择有重量。</span><span aria-hidden="true">↗</span></a>
+  <a class="rules-strip" href="/world/rules/"><span class="eyebrow">贯穿所有条目的依据</span><strong>宇宙规则与固定事实</strong><span>哪些事实固定，哪些结果交给行动；五个反例检验，让探索中的选择有重量。</span><span aria-hidden="true">↗</span></a>
 </section>
 <section class="archive-door" aria-labelledby="archive-door-title">
   <div><span class="eyebrow">FROM WORLD TO FORM</span><h2 id="archive-door-title">这个世界，怎样被画出来。</h2><p>设定回答它为何存在；手稿研究它的形体与空间；制作记录保存每次取舍。图像与完整生成提示词一起归档。</p><div class="archive-links"><a href="/gallery/">视觉设计档案 ↗</a><a href="/prompts/">逐图生成提示词 ↗</a><a href="/process/timeline/">制作过程 ↗</a></div></div>
   <figure><a href="/ship/overview/"><img src="/art/current/01-master-study.png" width="1536" height="1024" alt="归航号工业母舰概念手稿，进入母舰视觉设计档案" loading="lazy" /></a><figcaption>归航号 · 当前外形研究 <a href="/prompts/#master-study">完整提示词 ↗</a></figcaption></figure>
 </section>
-<p class="world-edition">公开创作档案 · 世界设定仍在生长，科技纪年与总体尺度保留候选标记。<a href="/guide/about/">了解内容状态与阅读方法 ↗</a></p>
+<p class="world-edition">公开创作档案 · 世界设定按 revision 8 与参考集 8.1 整理，标注"待深化"的内容仍会修订。<a href="/guide/about/">了解内容状态与阅读方法 ↗</a></p>
