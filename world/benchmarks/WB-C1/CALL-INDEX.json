@@ -1,0 +1,101 @@
+{
+ "note": "Index of the five real Claude Code CLI calls that produced WB-C1 v0–v1.2. Hashes re-verified against calls/*/claude-output.md and the frozen prompt copies at generation time. Cost is the CLI client estimate, not a gateway invoice. output_characters counts the model text as returned (len(result)); calls/*/claude-output.md stores that text plus one trailing LF, so its file length is output_characters + 1.",
+ "generated_by": "Claude Fable 5.1 session, 2026-09-24",
+ "calls": [
+  {
+   "stage": "independent",
+   "label": "v0 独立设计",
+   "status": "success",
+   "stop_reason": "end_turn",
+   "requested_model": "claude-code/claude-opus-5-5[1M]",
+   "canonical_models": [
+    "claude-opus-5-5"
+   ],
+   "provider_host": "third-party-gateway.invalid",
+   "effort": "high",
+   "started_utc": "2026-09-24T04:55:30.930202+00:00",
+   "prompt_sha256": "f36ad1c1e0cfb5ce43fa53285016064bff7f19d14a1712fee58e3937df9b9780",
+   "prompt_file_as_recorded": "inputs/independent-design-brief.md",
+   "frozen_prompt_copy": "inputs/independent-design-brief.md",
+   "output_sha256": "d8bad9dc0adbe79d3ea2079e7e87a366e5bdae2911bdf890d4f00f212a923ab1",
+   "output_characters": 7060,
+   "cli_estimated_cost_usd": 0.284068
+  },
+  {
+   "stage": "revision-1",
+   "label": "修订 1（失败，max_tokens 空返回）",
+   "status": "failure",
+   "stop_reason": "max_tokens",
+   "requested_model": "claude-code/claude-opus-5-5[1M]",
+   "canonical_models": [
+    "claude-opus-5-5"
+   ],
+   "provider_host": "third-party-gateway.invalid",
+   "effort": "high",
+   "started_utc": "2026-09-24T05:02:37.179424+00:00",
+   "prompt_sha256": "5be27d5cbbadced907ddbd9d245ec84cec6a163f32ccd0986e82cbec6ba483ad",
+   "prompt_file_as_recorded": "inputs/revision-brief.md",
+   "frozen_prompt_copy": "calls/revision-1/input.md",
+   "output_sha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b",
+   "output_characters": 0,
+   "cli_estimated_cost_usd": 0.5078577999999999
+  },
+  {
+   "stage": "revision-2",
+   "label": "v1 协议全文",
+   "status": "success",
+   "stop_reason": "end_turn",
+   "requested_model": "claude-code/claude-opus-5-5[1M]",
+   "canonical_models": [
+    "claude-opus-5-5"
+   ],
+   "provider_host": "third-party-gateway.invalid",
+   "effort": "medium",
+   "started_utc": "2026-09-24T05:11:22.696156+00:00",
+   "prompt_sha256": "7e6b1d34412d908f10d75bf0b867a0f36017befe2e943cfadc35a7e039b0687f",
+   "prompt_file_as_recorded": "inputs/revision-brief.md",
+   "frozen_prompt_copy": "calls/revision-2/input.md",
+   "output_sha256": "56c7fd6b4e80e8a91787502ab8450eecd4740d05f9cc111ba1461a8201e331fd",
+   "output_characters": 11469,
+   "cli_estimated_cost_usd": 0.469468
+  },
+  {
+   "stage": "revision-3",
+   "label": "v1.1 勘误及执行补充",
+   "status": "success",
+   "stop_reason": "end_turn",
+   "requested_model": "claude-code/claude-opus-5-5[1M]",
+   "canonical_models": [
+    "claude-opus-5-5"
+   ],
+   "provider_host": "third-party-gateway.invalid",
+   "effort": "medium",
+   "started_utc": "2026-09-24T05:16:54.753184+00:00",
+   "prompt_sha256": "b2e9c426a686eb2e41d1ae81fd803d26d9d9387df83b8ca958159bb24ac9cfd3",
+   "prompt_file_as_recorded": "inputs/revision-brief.md",
+   "frozen_prompt_copy": "calls/revision-3/input.md",
+   "output_sha256": "4ca00abcc6d378bc8f6df8e7acf3686f8dfc174994230874809cb46b561b4cbc",
+   "output_characters": 8775,
+   "cli_estimated_cost_usd": 0.495163
+  },
+  {
+   "stage": "revision-4",
+   "label": "v1.2 判定勘误",
+   "status": "success",
+   "stop_reason": "end_turn",
+   "requested_model": "claude-code/claude-opus-5-5[1M]",
+   "canonical_models": [
+    "claude-opus-5-5"
+   ],
+   "provider_host": "third-party-gateway.invalid",
+   "effort": "low",
+   "started_utc": "2026-09-24T05:22:31.069073+00:00",
+   "prompt_sha256": "ccb0346ccfbeeb4e00d39be0cf569f45ed3095c3dd05656ee45a11308f3233a8",
+   "prompt_file_as_recorded": "inputs/revision-brief.md",
+   "frozen_prompt_copy": "calls/revision-4/input.md",
+   "output_sha256": "0d2ec1eb53a70e325b1cb9a19787ba2b048d5ba7bc681b619a548b215b6b8adf",
+   "output_characters": 1280,
+   "cli_estimated_cost_usd": 0.048688
+  }
+ ]
+}
