@@ -69,4 +69,4 @@ next:
 - [文明与相遇](/world/civilization/)
 - [科技与能力边界](/world/technology/)
 
-设定依据：[总稿·被截断的班期，与第一次归向接应](https://github.com/StellarEchoesGame/worldbuilding/blob/main/world/current/03-war-and-departure.md)；[参考集 8.1·04 战争、安全与外交](https://github.com/StellarEchoesGame/worldbuilding/blob/main/world/current/reference/04-war-and-diplomacy.md)（W01、W02、W05、W06）。 仓库链接目前需要仓库访问权限。
+设定依据：[总稿·被截断的班期，与第一次归向接应](https://github.com/StellarEchoesGame/worldbuilding/blob/main/world/current/03-war-and-departure.md)；[参考集 8.1·04 战争、安全与外交](https://github.com/StellarEchoesGame/worldbuilding/blob/main/world/current/reference/04-war-and-diplomacy.md)（W01、W02、W05、W06）。

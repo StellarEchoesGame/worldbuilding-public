@@ -70,4 +70,4 @@ next:
 - [战争与启航](/world/war/)
 - [舰载单元总览](/units/overview/)
 
-设定依据：参考集 8.1《[科技、基础设施与能力边界](https://github.com/StellarEchoesGame/worldbuilding/blob/main/world/current/reference/02-technology-and-infrastructure.md)》；总稿《[宇宙基线](https://github.com/StellarEchoesGame/worldbuilding/blob/main/world/current/01-universe.md)》。 仓库链接目前需要仓库访问权限。
+设定依据：参考集 8.1《[科技、基础设施与能力边界](https://github.com/StellarEchoesGame/worldbuilding/blob/main/world/current/reference/02-technology-and-infrastructure.md)》；总稿《[宇宙基线](https://github.com/StellarEchoesGame/worldbuilding/blob/main/world/current/01-universe.md)》。

@@ -65,4 +65,4 @@ next:
 - [居民与共同生活](/world/people/)
 - [文明](/world/civilization/)
 
-设定依据：总稿《[航程、舰长与玩家的选择](https://github.com/StellarEchoesGame/worldbuilding/blob/main/world/current/05-voyage-and-play.md)》《[使这个世界能够继续写下去](https://github.com/StellarEchoesGame/worldbuilding/blob/main/world/current/06-continuity-and-map.md)》。 仓库链接目前需要仓库访问权限。
+设定依据：总稿《[航程、舰长与玩家的选择](https://github.com/StellarEchoesGame/worldbuilding/blob/main/world/current/05-voyage-and-play.md)》《[使这个世界能够继续写下去](https://github.com/StellarEchoesGame/worldbuilding/blob/main/world/current/06-continuity-and-map.md)》。

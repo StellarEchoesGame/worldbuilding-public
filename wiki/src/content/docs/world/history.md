@@ -68,4 +68,4 @@ next:
 - [远汐星域、晷川与息壤](/world/places/)
 - [战争与占领](/world/war/)
 
-设定依据：参考集 8.1「[空间、地方与历史](https://github.com/StellarEchoesGame/worldbuilding/blob/main/world/current/reference/01-space-and-history.md)」；总稿「时代与尺度」「四段历史与仍然存在的分歧」「三张有日期的图」。 仓库链接目前需要仓库访问权限。
+设定依据：参考集 8.1「[空间、地方与历史](https://github.com/StellarEchoesGame/worldbuilding/blob/main/world/current/reference/01-space-and-history.md)」；总稿「时代与尺度」「四段历史与仍然存在的分歧」「三张有日期的图」。

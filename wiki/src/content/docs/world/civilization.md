@@ -58,4 +58,4 @@ next:
 - [远汐星域、晷川与息壤](/world/places/)：晷川所在的地理背景
 - [战争与启航](/world/war/)：入侵之后的战事与启航
 
-设定依据：[总稿《二、有人生活在人的地图之外》](https://github.com/StellarEchoesGame/worldbuilding/blob/main/world/current/02-civilizations.md)；[参考集 8.1《06 · 文化、身体与相遇》](https://github.com/StellarEchoesGame/worldbuilding/blob/main/world/current/reference/06-culture-and-contact.md)。 仓库链接目前需要仓库访问权限。
+设定依据：[总稿《二、有人生活在人的地图之外》](https://github.com/StellarEchoesGame/worldbuilding/blob/main/world/current/02-civilizations.md)；[参考集 8.1《06 · 文化、身体与相遇》](https://github.com/StellarEchoesGame/worldbuilding/blob/main/world/current/reference/06-culture-and-contact.md)。

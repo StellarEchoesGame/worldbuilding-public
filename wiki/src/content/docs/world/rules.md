@@ -67,4 +67,4 @@ next:
 - [航程、舰长与玩家](/world/voyage/)
 - [战争与启航](/world/war/)
 
-设定依据：总稿〔[共同底稿、地方差异与事实；五个反例检验；同一组信号，三种访问顺序；作者答案与待深化项](https://github.com/StellarEchoesGame/worldbuilding/blob/main/world/current/06-continuity-and-map.md)〕〔[哪些事实固定，哪些结果交给行动](https://github.com/StellarEchoesGame/worldbuilding/blob/main/world/current/05-voyage-and-play.md)〕；参考集 8.1〔[本版事实的四种地位；核心事实表；神秘与未定，不混在一个口袋](https://github.com/StellarEchoesGame/worldbuilding/blob/main/world/current/reference/07-register-and-creation.md)〕。 仓库链接目前需要仓库访问权限。
+设定依据：总稿〔[共同底稿、地方差异与事实；五个反例检验；同一组信号，三种访问顺序；作者答案与待深化项](https://github.com/StellarEchoesGame/worldbuilding/blob/main/world/current/06-continuity-and-map.md)〕〔[哪些事实固定，哪些结果交给行动](https://github.com/StellarEchoesGame/worldbuilding/blob/main/world/current/05-voyage-and-play.md)〕；参考集 8.1〔[本版事实的四种地位；核心事实表；神秘与未定，不混在一个口袋](https://github.com/StellarEchoesGame/worldbuilding/blob/main/world/current/reference/07-register-and-creation.md)〕。

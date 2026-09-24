@@ -56,4 +56,4 @@ next:
 - [战争与启航](/world/war/)
 - [舰船总览](/ship/overview/)
 
-设定依据：总稿〔[864是一次人口截面；舰长、专业岗位和居民各自能决定什么](https://github.com/StellarEchoesGame/worldbuilding/blob/main/world/current/04-life-and-people.md)〕〔[归航号：一次完成的承诺](https://github.com/StellarEchoesGame/worldbuilding/blob/main/world/current/03-war-and-departure.md)〕；参考集 8.1〔[家园舰的三类权责；四个地方怎样作决定](https://github.com/StellarEchoesGame/worldbuilding/blob/main/world/current/reference/03-government-and-economy.md)〕〔[循环的边界；一批料怎样成为生活；谁使一整天能够持续](https://github.com/StellarEchoesGame/worldbuilding/blob/main/world/current/reference/05-ecology-and-everyday.md)〕。 仓库链接目前需要仓库访问权限。
+设定依据：总稿〔[864是一次人口截面；舰长、专业岗位和居民各自能决定什么](https://github.com/StellarEchoesGame/worldbuilding/blob/main/world/current/04-life-and-people.md)〕〔[归航号：一次完成的承诺](https://github.com/StellarEchoesGame/worldbuilding/blob/main/world/current/03-war-and-departure.md)〕；参考集 8.1〔[家园舰的三类权责；四个地方怎样作决定](https://github.com/StellarEchoesGame/worldbuilding/blob/main/world/current/reference/03-government-and-economy.md)〕〔[循环的边界；一批料怎样成为生活；谁使一整天能够持续](https://github.com/StellarEchoesGame/worldbuilding/blob/main/world/current/reference/05-ecology-and-everyday.md)〕。

@@ -70,4 +70,4 @@ next:
 
 相关条目：[归航号 · 移动的家园](/world/ark/)、[航程、舰长与玩家](/world/voyage/)、[文明](/world/civilization/)。
 
-设定依据：总稿《[船上值得回来的生活](https://github.com/StellarEchoesGame/worldbuilding/blob/main/world/current/04-life-and-people.md)》；参考集 8.1《[生态循环与完整日常](https://github.com/StellarEchoesGame/worldbuilding/blob/main/world/current/reference/05-ecology-and-everyday.md)》《[文化、身体与相遇](https://github.com/StellarEchoesGame/worldbuilding/blob/main/world/current/reference/06-culture-and-contact.md)》。 仓库链接目前需要仓库访问权限。
+设定依据：总稿《[船上值得回来的生活](https://github.com/StellarEchoesGame/worldbuilding/blob/main/world/current/04-life-and-people.md)》；参考集 8.1《[生态循环与完整日常](https://github.com/StellarEchoesGame/worldbuilding/blob/main/world/current/reference/05-ecology-and-everyday.md)》《[文化、身体与相遇](https://github.com/StellarEchoesGame/worldbuilding/blob/main/world/current/reference/06-culture-and-contact.md)》。
