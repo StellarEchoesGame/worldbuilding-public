@@ -19,7 +19,7 @@
 
 ## 历史与手稿
 
-[revision 7 总稿](history/revision-7/BOOK.md)保留自然灾害及息壤发展示范史的原文，仅作历史版本；[原入口](history/README-before-revision-8.md)保留更早创作阶段。
+[revision 7 总稿](history/revision-7/BOOK.md)保留自然灾害及息壤发展示范史的原文，仅作历史版本；[修订 8 输入](history/inputs-revision-8/README.md)按 `current/inputs.json` 的哈希原样收录整合时读取的任务成果，同样只是输入而非现行设定；[原入口](history/README-before-revision-8.md)保留更早创作阶段。
 
 原有01—12文档保留研究、早期设定和概念推导过程，均增加版本说明。文中“现行”或“下一步”是当时状态，不自动恢复被暂停的制作计划。[母舰概念包](../concepts/mothership/README.md)及其原始提示词保持原样，须按新版用途、人口和命名重新评审后才进入后续制作。
 

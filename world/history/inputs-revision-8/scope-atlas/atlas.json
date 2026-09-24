@@ -1,0 +1,22 @@
+{
+  "version": "0.1",
+  "status": "authored proposal; not canon, not runtime API, not astronomical catalogue",
+  "coordinate_frame": "fictional local Cartesian design coordinates in light-years; arbitrary origin, not the Sun; not orbital positions",
+  "scales": {"settled_network_maximum_span_ly": 1000, "regional_verified_archive_outer_example_distance_from_sun_ly": 3000, "regional_branch_distance_from_sun_ly": 500, "region_maximum_span_ly": 80, "launch_map_target_span_ly": 40},
+  "nodes": [
+    {"id":"S0","name":"晷川","kind":"stellar_system","xyz_ly":[-10,0,0],"areas":1,"access":"prologue_only","communities":["晷川幸存者"]},
+    {"id":"S1","name":"息壤所在系","kind":"stellar_system","xyz_ly":[-4,-2,1],"areas":3,"access":"revisitable","communities":[]},
+    {"id":"S2","name":"砧港所在系","kind":"stellar_system","xyz_ly":[3,4,0],"areas":2,"access":"revisitable","communities":["砧港"]},
+    {"id":"S3","name":"栖衡节点所在系","kind":"stellar_system","xyz_ly":[5,-5,0],"areas":2,"access":"revisitable","communities":["栖衡"]},
+    {"id":"S4","name":"逐霜当期节点所在系","kind":"stellar_system","xyz_ly":[10,2,1],"areas":1,"access":"revisitable","communities":["逐霜"]},
+    {"id":"S5","name":"协作节点所在系","kind":"stellar_system","xyz_ly":[12,-6,-1],"areas":1,"access":"revisitable","communities":["砧港","栖衡","逐霜"]},
+    {"id":"S6","name":"前沿甲","kind":"stellar_system","xyz_ly":[20,3,1],"areas":2,"access":"revisitable","communities":[]},
+    {"id":"S7","name":"前沿乙","kind":"stellar_system","xyz_ly":[20,-7,-1],"areas":2,"access":"revisitable","communities":["地方作业队，关联待定"]},
+    {"id":"I0","name":"鹤灯测点甲","kind":"interstellar_waypoint","xyz_ly":[26,4,0],"areas":1,"access":"revisitable","communities":[]},
+    {"id":"I1","name":"鹤灯测点乙","kind":"interstellar_waypoint","xyz_ly":[28,-4,0],"areas":1,"access":"revisitable","communities":[]}
+  ],
+  "edges": [["S0","S1"],["S1","S2"],["S2","S3"],["S2","S4"],["S3","S4"],["S3","S5"],["S4","S5"],["S4","S6"],["S5","S6"],["S5","S7"],["S6","S7"],["S6","I0"],["S7","I1"],["I0","I1"]],
+  "edge_meaning": "candidate surveyed or surveyable legs featured in launch scope; no hard gates or proof of fuel, service, instantaneous access or reversible conditions",
+  "mothership_in_area_count": false,
+  "first_launch_region_bounds_include_only_selected_destinations": true
+}

@@ -15,7 +15,7 @@ revision 8把已同意的战争开场、多文明接触、母舰命名、舰长�
 | [航程与玩家](05-voyage-and-play.md) | 舰长、五类玩法的共同循环、主线与分支 |
 | [连续性和地图](06-continuity-and-map.md) | 时序、接应演绎、反例、首发范围与留白 |
 | [修订对照](REVISION.md) | 接受、替换、保留和暂不决定的内容 |
-| [来源清单](inputs.json) | 输入版本、SHA-256、原任务与采用范围 |
+| [来源清单](inputs.json) | 输入版本、SHA-256、原任务与采用范围；原文见 [history/inputs-revision-8](../history/inputs-revision-8/README.md) |
 | [审读与验证](REVIEW.md) | 冻结版本、独立审读、修改与验证范围 |
 
 总稿由六个源章节依序生成，编辑源文后运行 `python3 world/current/build_book.py`，同时更新 `manuscript-hashes.json`。它只整编文本，不生成宇宙、不定义游戏接口。
