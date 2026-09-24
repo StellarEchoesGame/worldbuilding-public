@@ -17,9 +17,13 @@
 
 [修订对照](current/REVISION.md)说明哪些旧内容被替换、保留或留待深化；[审读记录](current/REVIEW.md)说明检查范围与限制。
 
+## 评测
+
+[世界观评测](benchmarks/README.md)记录对现行设定的评分与评测方法：WB-B1（[#32](https://github.com/StellarEchoesGame/worldbuilding/issues/32)）已对 reference 8.1 完成一轮评分；WB-C1（[#33](https://github.com/StellarEchoesGame/worldbuilding/issues/33)）交付了 v1.3 可执行协议与判定代码，尚未对正文运行，首次运行见 [#40](https://github.com/StellarEchoesGame/worldbuilding/issues/40)。评测快照和分数不是设定本身，写作以 `current/` 为准。
+
 ## 历史与手稿
 
-[revision 7 总稿](history/revision-7/BOOK.md)保留自然灾害及息壤发展示范史的原文，仅作历史版本；[修订 8 输入](history/inputs-revision-8/README.md)按 `current/inputs.json` 的哈希原样收录整合时读取的任务成果，同样只是输入而非现行设定；[原入口](history/README-before-revision-8.md)保留更早创作阶段。
+[revision 7 总稿](history/revision-7/BOOK.md)保留自然灾害及息壤发展示范史的原文，仅作历史版本；[修订 8 输入](history/inputs-revision-8/README.md)按 `current/inputs.json` 的哈希原样收录整合时读取的任务成果，同样只是输入而非现行设定；[原入口](history/README-before-revision-8.md)按原字节保留更早创作阶段，其相对链接仍以原位置 `world/` 为基准，从 `history/` 打开时不能直接跳转。
 
 原有01—12文档保留研究、早期设定和概念推导过程，均增加版本说明。文中“现行”或“下一步”是当时状态，不自动恢复被暂停的制作计划。[母舰概念包](../concepts/mothership/README.md)及其原始提示词保持原样，须按新版用途、人口和命名重新评审后才进入后续制作。
 

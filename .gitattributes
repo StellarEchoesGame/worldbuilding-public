@@ -12,6 +12,8 @@
 *.prefab text eol=lf
 *.asset text eol=lf
 *.mat text eol=lf
+# Hash-pinned raw call artifacts must check out byte-for-byte on every platform.
+world/benchmarks/**/*.txt text eol=lf
 
 # Original art, models, fonts and rendered media are versioned with Git LFS.
 *.png filter=lfs diff=lfs merge=lfs -text

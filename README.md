@@ -2,14 +2,14 @@
 
 这是 [StellarEchoesGame](https://github.com/StellarEchoesGame) 的世界观、概念手稿与制作 Wiki 仓库。游戏运行工程、Blender 运行资产和过场制作工程在 [game](https://github.com/StellarEchoesGame/game)；本仓可以独立构建公开 Wiki，不需要检出游戏仓库。
 
-在线阅读：[群星回响 Wiki](https://wiki.stellar-echoes.online/)。本地世界设定参考集8.1不代表公开站点已同步，交付状态见 [WB-D1 #31](https://github.com/StellarEchoesGame/worldbuilding/issues/31)。当前母舰仍处于概念设计阶段；平剖、透视图和提示词中的目标不代表工程验证或 Unity 实装。
+在线阅读：[群星回响 Wiki](https://wiki.stellar-echoes.online/)。本地世界设定参考集8.1尚未同步到公开站点，同步进度见 [#35](https://github.com/StellarEchoesGame/worldbuilding/issues/35)；参考集本身的交付记录见 [WB-D1 #31](https://github.com/StellarEchoesGame/worldbuilding/issues/31)。当前母舰仍处于概念设计阶段；平剖、透视图和提示词中的目标不代表工程验证或 Unity 实装。
 
 ## 从哪里读
 
 - [世界观入口](world/README.md)：[世界设定参考集8.1](world/current/reference/README.md)按领域查阅；[revision 8总稿](world/current/BOOK.md)保留主线及共同底稿。
 - [母舰概念包](concepts/mothership/README.md)：外形、港口、舰内、机体、邻里平剖及返修记录。
 - [早期手稿](concepts/sketchbook/README.md)：保留探索方向和实际生成历史。
-- [历史制作路线图](world/12-后续制作路线图.md)：原 M1—M9 计划继续暂停，当前只推进世界观；当前任务为 [WB-D1 #31](https://github.com/StellarEchoesGame/worldbuilding/issues/31)。
+- [历史制作路线图](world/12-后续制作路线图.md)：原 M1—M9 计划继续暂停，当前只推进世界观。进行中的事项以 [GitHub issues](https://github.com/StellarEchoesGame/worldbuilding/issues) 为准：[#35](https://github.com/StellarEchoesGame/worldbuilding/issues/35) 公开 Wiki 同步到 revision 8、[#40](https://github.com/StellarEchoesGame/worldbuilding/issues/40) WB-C1 首次运行；参考集 8.1（[#31](https://github.com/StellarEchoesGame/worldbuilding/issues/31)）与 WB-C1 协议（[#33](https://github.com/StellarEchoesGame/worldbuilding/issues/33)）已交付。
 - [Wiki 编辑说明](wiki/README.md)：公开条目、图鉴与完整提示词的展示方式。
 
 ## 目录职责
@@ -17,6 +17,8 @@
 | 目录 | 维护内容 |
 | --- | --- |
 | `world/` | 世界设定正文、设计依据与候选方案；明确历史记录、当前设定和未定项 |
+| `world/current/` | 现行设定：revision 8 总稿、世界设定参考集 8.1、修订对照与输入清单 |
+| `world/benchmarks/` | 世界观评测快照与协议（WB-B1 已完成一轮评分，WB-C1 协议已交付、尚未运行）；不是另一份正典 |
 | `concepts/mothership/` | 母舰原图、历史版本、原始生成输入、设计规格与布局数据 |
 | `concepts/sketchbook/` | 前期概念探索、原图与生成记录 |
 | `wiki/` | Astro/Starlight 站点、公开文章、图鉴与适合公开的提示词记录 |
