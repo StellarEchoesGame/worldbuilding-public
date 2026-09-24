@@ -1,0 +1,77 @@
+{
+  "stage": "independent",
+  "client_version": "2.1.281 (Claude Code)",
+  "requested_model": "claude-code/claude-opus-5-5[1M]",
+  "configured_provider_host": "third-party-gateway.invalid",
+  "prompt_file": "inputs/independent-design-brief.md",
+  "prompt_sha256": "f36ad1c1e0cfb5ce43fa53285016064bff7f19d14a1712fee58e3937df9b9780",
+  "system_sha256": "2549ae8e277352311ac6a0e9714a1784d9d7255507b37b5f18ad25fe22a03949",
+  "started_utc": "2026-09-24T04:55:30.930202+00:00",
+  "tools_enabled": false,
+  "memory_project_autodiscovery": false,
+  "session_persistence": false,
+  "effort": "high",
+  "cli_budget_cap_usd": 8,
+  "prior_benchmark_shared": false,
+  "independence_limit": "Provider/model identity is configuration and response metadata, not cryptographic upstream attestation.",
+  "finished_utc": "2026-09-24T04:58:06.608364+00:00",
+  "exit_code": 0,
+  "stdout_sha256": "6b52ae000494b47100d911010df220d58584ea9eb0f77ad01a6fd3fcbcac7be0",
+  "is_error": false,
+  "subtype": "success",
+  "model_usage": {
+    "claude-code/claude-opus-5-5[1m]": {
+      "inputTokens": 2,
+      "outputTokens": 13871,
+      "cacheReadInputTokens": 0,
+      "cacheCreationInputTokens": 1328,
+      "webSearchRequests": 0,
+      "costUSD": 0.284068,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 128000,
+      "thinkingTokens": 6926,
+      "canonicalModel": "claude-opus-5-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  },
+  "usage": {
+    "input_tokens": 2,
+    "cache_creation_input_tokens": 1328,
+    "cache_read_input_tokens": 0,
+    "output_tokens": 13871,
+    "output_tokens_details": {
+      "thinking_tokens": 6926
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 0,
+      "ephemeral_5m_input_tokens": 1328
+    },
+    "inference_geo": "not_available",
+    "iterations": [
+      {
+        "input_tokens": 2,
+        "output_tokens": 13871,
+        "cache_read_input_tokens": 0,
+        "cache_creation_input_tokens": 1328,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 1328,
+          "ephemeral_1h_input_tokens": 0
+        },
+        "type": "message"
+      }
+    ],
+    "speed": "standard"
+  },
+  "cli_estimated_cost_usd": 0.284068,
+  "duration_ms": 154977,
+  "num_turns": 1,
+  "output_sha256": "d8bad9dc0adbe79d3ea2079e7e87a366e5bdae2911bdf890d4f00f212a923ab1",
+  "output_characters": 7060,
+  "status": "success"
+}

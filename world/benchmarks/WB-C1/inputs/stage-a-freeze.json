@@ -1,0 +1,8 @@
+{
+  "stage": "independent design",
+  "input_files": {
+    "inputs/independent-design-brief.md": "f36ad1c1e0cfb5ce43fa53285016064bff7f19d14a1712fee58e3937df9b9780",
+    "inputs/system.txt": "2549ae8e277352311ac6a0e9714a1784d9d7255507b37b5f18ad25fe22a03949"
+  },
+  "excluded": "No WB-B1 protocol, scores, source setting or old review supplied; only product brief and neutral system instruction."
+}

@@ -1,0 +1,50 @@
+{
+  "issue": {
+    "labels": [
+      {
+        "id": "LA_kwDOUjsOvs8AAAAC3JsuAw",
+        "name": "type:task",
+        "description": "有明确交付和验收的执行任务",
+        "color": "1d76db"
+      }
+    ],
+    "state": "CLOSED",
+    "stateReason": "COMPLETED",
+    "url": "https://github.com/StellarEchoesGame/worldbuilding/issues/32",
+    "body_exact_match": true,
+    "body_sha256": "b70b0b8c211d31608e811eca9553330446d318646bc3c27e7aa3cdd2ed4fc7e3"
+  },
+  "preregister": {
+    "url": "https://github.com/StellarEchoesGame/worldbuilding/issues/32#issuecomment-5807606155",
+    "created_at": "2026-09-24T04:20:31Z",
+    "sha256": "976e3c47028111fb3e7e62bc15224b671b4b26e9f3a30b6c4b9eb97ccc8c09d4",
+    "exact_match": true
+  },
+  "test_material": {
+    "url": "https://github.com/StellarEchoesGame/worldbuilding/issues/32#issuecomment-5807673766",
+    "sha256": "339124c81a3cc903231bf0390cf88da27f9485815dfa7c0f412be72027f484a3",
+    "exact_match": true
+  },
+  "results": [
+    {
+      "name": "raw-judge-a-comment.md",
+      "url": "https://github.com/StellarEchoesGame/worldbuilding/issues/32#issuecomment-5807795413",
+      "sha256": "2df1463e54d721d9288a5e26ae3e0cff00a7246d89aebe7203b94d7ea7201a4b",
+      "exact_match": true
+    },
+    {
+      "name": "raw-judge-b-comment.md",
+      "url": "https://github.com/StellarEchoesGame/worldbuilding/issues/32#issuecomment-5807796901",
+      "sha256": "e7cfd71251d39611b9ca8b77976a29b54b059fac39e44148ce30d5ed908744b8",
+      "exact_match": true
+    },
+    {
+      "name": "report-comment.md",
+      "url": "https://github.com/StellarEchoesGame/worldbuilding/issues/32#issuecomment-5807818107",
+      "sha256": "f3acc6a29a4616b602586d5c5e60e113cd892a3e43a997f927e0bd6df2055b14",
+      "exact_match": true
+    }
+  ],
+  "git_published": false,
+  "wiki_deployed": false
+}

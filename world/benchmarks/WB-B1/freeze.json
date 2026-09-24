@@ -1,0 +1,18 @@
+{
+  "phase": "all inputs, method, questions and assignments frozen before scoring",
+  "utc": "2026-09-24T04:23:29.772131+00:00",
+  "files": {
+    "PROTOCOL.md": "dc89ede29b9aad2826821559dbd3fbb7987120119ac702c0dae5d69ebb65ed53",
+    "config.json": "77ec642b385923b699a1c6c83d18a34a1d3a133765fb3cd6639f9b485cb4ccf1",
+    "questions/public.json": "148d7f1d2c5e01518c6573b04c1b6cf919f08598ca3fce6d22889d9e446e495f",
+    "questions/controls.json": "5e56b558cbb64d4c73ed068eb961f530ab5c578a3ebb1011f3869a62c243349e",
+    "method/control-key.json": "03e55ab04a94ff1f0cdc9a0dbe71b34edc33ff252d6f104974bd256879c90d19",
+    "input-manifest.json": "8f0dccbc16b45296b44181f73c4aaeb3e27cecdcf14791b3833eae66cc5e5945",
+    "JUDGE-INSTRUCTIONS.md": "bdac5b85b4a1599b18f39210665ff3f260be49f2ec5a683369657cff7784dc35",
+    "score.py": "a208af596654d1db8cac331445ee849d9b7fc820ed603a9208af70f927a0ba1f",
+    "questions/fresh.json": "9887ad0826ed1a4045c001cf0b1b38bd71d230191cd4abbb05e5db1c062949a5",
+    "method/fresh-provenance.md": "8dbdd1ab7257ac7f70fd142bc63e65bf79cbfd6ded4a6e1827c0a1fce5cf0f04",
+    "runs/initial/prompt-a.md": "d63b41050900d6d7639f680c2dee8413d71acf12bd5fad90573f6e1501f68cc6",
+    "runs/initial/prompt-b.md": "6fdb4ff979a77d1d6bf1b3ae12c45302bf26c44f94bb9172cfb8b1acdb52eb37"
+  }
+}

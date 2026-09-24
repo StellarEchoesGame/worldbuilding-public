@@ -1,0 +1,15 @@
+{
+  "base_book_sha256": "438c4e31b2e6bd7446d9e162aef4efe89d0154b2446bc28cfbbfff9d954e2898",
+  "reference_revision": "8.1",
+  "documents": {
+    "01-space-and-history.md": "89343038060ef68b967a046e324e888f27485e40ec6d7b5ce79a13df17767af4",
+    "02-technology-and-infrastructure.md": "37d7eb827428cca193ce84419b61bf86bc1a0bbd4bbb954f4f18f10501e36e65",
+    "03-government-and-economy.md": "e48050f48383648cac978359bd885975bc0a5baa9ffa756567b4b6ff3d46f542",
+    "04-war-and-diplomacy.md": "93db7bbfdba90d3419272cd2b96a15677b150551978e61af2a989495200e5e1a",
+    "05-ecology-and-everyday.md": "f32e56378232ae1c986df4f02b7ce42a849b1ddcc3d3053a59a7a6740afce531",
+    "06-culture-and-contact.md": "4a21b1da9131a32507a66712f0506868afb74deef305471e2f8c7a1ee2711917",
+    "07-register-and-creation.md": "40ae6ccf497f910a79c3a664699be63de0ffd657d3f1e46ba5524fbe8d6007cc",
+    "08-cross-system-cases.md": "e12827289297af404cb3e223c140f8b677d1d624674aa982a6deb77d5bea2c1e"
+  },
+  "reference_book_sha256": "16b693573402c93aa35ad74efea51da3eecc33b1b5a87a8f63e72a03721bd61c"
+}

@@ -1,0 +1,18 @@
+{
+  "source_sha256": "438c4e31b2e6bd7446d9e162aef4efe89d0154b2446bc28cfbbfff9d954e2898",
+  "chapter_count": 6,
+  "legacy_originals_preserved": 12,
+  "population": "passed",
+  "family_count": 407,
+  "reception_peak": 858,
+  "post_reception_residents": 810,
+  "map_nodes": 10,
+  "map_areas": 16,
+  "map_edges": 15,
+  "independent_cycles": 6,
+  "maximum_span_ly": 38.2099,
+  "git_diff_check": "passed",
+  "scope": "worldbuilding text; no engineering or runtime validation",
+  "current_entry_local_links_checked": 27,
+  "current_entry_local_link_errors": []
+}

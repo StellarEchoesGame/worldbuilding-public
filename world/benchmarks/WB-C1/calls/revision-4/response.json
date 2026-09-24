@@ -1,0 +1,97 @@
+{
+  "duration_api_ms": 22562,
+  "stop_reason": "end_turn",
+  "session_id": "c96b0d46-cb83-4497-afa1-794043e5d131",
+  "total_cost_usd": 0.048688,
+  "usage": {
+    "input_tokens": 2,
+    "cache_creation_input_tokens": 1292,
+    "cache_read_input_tokens": 0,
+    "output_tokens": 2111,
+    "output_tokens_details": {
+      "thinking_tokens": 912
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 0,
+      "ephemeral_5m_input_tokens": 1292
+    },
+    "inference_geo": "not_available",
+    "iterations": [
+      {
+        "input_tokens": 2,
+        "output_tokens": 2111,
+        "cache_read_input_tokens": 0,
+        "cache_creation_input_tokens": 1292,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 1292,
+          "ephemeral_1h_input_tokens": 0
+        },
+        "type": "message"
+      }
+    ],
+    "speed": "standard"
+  },
+  "modelUsage": {
+    "claude-code/claude-opus-5-5[1m]": {
+      "inputTokens": 2,
+      "outputTokens": 2111,
+      "cacheReadInputTokens": 0,
+      "cacheCreationInputTokens": 1292,
+      "webSearchRequests": 0,
+      "costUSD": 0.048688,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 128000,
+      "thinkingTokens": 912,
+      "canonicalModel": "claude-opus-5-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  },
+  "permission_denials": [],
+  "terminal_reason": "completed",
+  "fast_mode_state": "off",
+  "fast_mode_disabled_reason": "sdk_opt_in_required",
+  "subagent_stats": {
+    "spawned": 0,
+    "requested": {
+      "background": 0,
+      "foreground": 0,
+      "unset": 0
+    },
+    "started_in_background": 0,
+    "max_depth": 0,
+    "spawned_by_subagents": 0,
+    "completed": 0,
+    "failed": 0,
+    "killed": {
+      "parent": 0,
+      "user": 0,
+      "system": 0
+    },
+    "refused": {
+      "depth_limit": 0,
+      "concurrency_limit": 0,
+      "budget": 0
+    },
+    "by_type": {}
+  },
+  "is_error": false,
+  "num_turns": 1,
+  "subtype": "success",
+  "api_error_status": null,
+  "result": "# v1.2 判定勘误（整体替换 G1.1）\n\n**适用范围**：本条只替换 G1.1。其他协议条款保持不变，包括第2节的事实复核、5.5的硬失败核对、6.3的定位要求，以及 v1 的子问分类规则。\n\n## 0. 状态登记\n\n每个子问只能登记为以下四种状态之一：\n- **有据**\n- **已查缺失**\n- **未检**\n- **层级未决**\n\n登记时遵守以下规则：\n- **有据的标准**：必须有可定位的原文依据。评委的推断、补全或新设定都不算有据。评委不得创造新的世界事实。\n- **E0与留白**：E0 按原子问分类规则归类。★子问不接受留白，不得视为有据或\"不适用\"。★子问查完仍为留白时，登记为已查缺失。\n\n## 1. 失败事实\n\n以下三类登记为失败事实，每项须附定位：\n1. 经5.5核对确认的硬失败代码；\n2. 已查缺失的★子问；\n3. 已被触发且确认成立的专用失败条款，包括 T06\"全部由资源导出\"和 T13对照不成立（见6.3）。\n\n失败事实只能由第2节的事实复核撤销。其他子问的状态不能使其消失。\n\n## 2. 判定顺序（取第一条符合的）\n\n1. **存在失败事实 → 失败。** 已证实失败优先于一切未检。其余未检子问写入附注。\n2. **任一★子问未检 → 证据不足。**\n3. **T09 按专用计数判定**，以下结果均受第5步封顶：\n   - 三问为完整计数规则，层级未决不计入有据数。\n   - 有据数≥2 → 通过。第三问为已查缺失或未检均不影响结果；若为未检，须注明。\n   - 有据数=1，且其余两问均已查完 → 有条件通过。\n   - 有据数=0，且三问均已查完 → 失败。\n   - 其余情形 → 证据不足。\n4. **通用规则**，适用于除 T09 外的所有题，以及未被触发的专用条款：\n   - 任一非★子问为已查缺失或层级未决 → 有条件通过。\n   - 任一非★子问未检，其余均有据 → 有条件通过，并标注\"含未检非★，上限可能为通过\"。\n   - 全部有据 → 通过。\n5. **层级未决封顶**：任何题只要存在层级未决，最高只能判有条件通过。专用条款和 T09 计数都不能突破此封顶。\n\n## 3. 专用条款的回退\n\nT06、T08、T10、T11、T13 的专用条款只在其列明的触发条件成立时生效。成立时，由该条款决定其所覆盖的子问。\n\n触发条件不成立时，这些子问回到第2步和第4步的通用规则处理。不得以\"本题有专用判据\"为由判无档。\n\n## 4. 唯一输出\n\n① **T02：★代价未检，其余三问有据，无失败事实**\n→ **证据不足**（第2步）。\n\n② **T02：★代价已查缺失，另有子问未检**\n→ **失败**（第1步）。未检子问写入附注。\n\n③ **T09：两问有据，一问已查缺失，无层级未决**\n→ **通过**（第3步）。\n\n④ **T06：未触发\"全部由资源导出\"，非★子问\"差异原因\"已查缺失，其余子问有据，无失败事实**\n→ 按第3节回到通用规则，判**有条件通过**（第4步）。",
+  "ttft_ms": 12197,
+  "type": "result",
+  "duration_ms": 23240,
+  "uuid": "b9a4e214-92c0-4339-8f46-93394fb8dce8",
+  "ttft_stream_ms": 2763,
+  "time_to_request_ms": 680,
+  "first_content_frame_ms": 2763,
+  "queued_turn_count": 0,
+  "result_index": 0
+}

@@ -1,0 +1,80 @@
+{
+  "stage": "revision-3",
+  "client_version": "2.1.281 (Claude Code)",
+  "requested_model": "claude-code/claude-opus-5-5[1M]",
+  "configured_provider_host": "third-party-gateway.invalid",
+  "prompt_file": "inputs/revision-brief.md",
+  "prompt_sha256": "b2e9c426a686eb2e41d1ae81fd803d26d9d9387df83b8ca958159bb24ac9cfd3",
+  "system_sha256": "2549ae8e277352311ac6a0e9714a1784d9d7255507b37b5f18ad25fe22a03949",
+  "started_utc": "2026-09-24T05:16:54.753184+00:00",
+  "tools_enabled": false,
+  "memory_project_autodiscovery": false,
+  "session_persistence": false,
+  "effort": "medium",
+  "max_output_tokens": 32000,
+  "cli_budget_cap_usd": 8,
+  "prior_benchmark_shared": false,
+  "prior_claude_draft_shared": true,
+  "independent_execution_review_shared": true,
+  "independence_limit": "Provider/model identity is configuration and response metadata, not cryptographic upstream attestation.",
+  "finished_utc": "2026-09-24T05:20:47.519601+00:00",
+  "exit_code": 0,
+  "stdout_sha256": "bfa4bf9c2e463eb4a47b0e5a44f4083c44e9145c94d3444df57b53809fd25265",
+  "is_error": false,
+  "subtype": "success",
+  "model_usage": {
+    "claude-code/claude-opus-5-5[1m]": {
+      "inputTokens": 2,
+      "outputTokens": 21470,
+      "cacheReadInputTokens": 0,
+      "cacheCreationInputTokens": 13151,
+      "webSearchRequests": 0,
+      "costUSD": 0.495163,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 128000,
+      "thinkingTokens": 13033,
+      "canonicalModel": "claude-opus-5-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  },
+  "usage": {
+    "input_tokens": 2,
+    "cache_creation_input_tokens": 13151,
+    "cache_read_input_tokens": 0,
+    "output_tokens": 21470,
+    "output_tokens_details": {
+      "thinking_tokens": 13033
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 0,
+      "ephemeral_5m_input_tokens": 13151
+    },
+    "inference_geo": "not_available",
+    "iterations": [
+      {
+        "input_tokens": 2,
+        "output_tokens": 21470,
+        "cache_read_input_tokens": 0,
+        "cache_creation_input_tokens": 13151,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 13151,
+          "ephemeral_1h_input_tokens": 0
+        },
+        "type": "message"
+      }
+    ],
+    "speed": "standard"
+  },
+  "cli_estimated_cost_usd": 0.495163,
+  "duration_ms": 232094,
+  "num_turns": 1,
+  "output_sha256": "4ca00abcc6d378bc8f6df8e7acf3686f8dfc174994230874809cb46b561b4cbc",
+  "output_characters": 8775,
+  "status": "success"
+}

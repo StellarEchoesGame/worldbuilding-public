@@ -1,0 +1,12 @@
+{
+  "revision": 8,
+  "chapters": {
+    "01-universe.md": "f452ecf939b6d56bf5da66aeaecc37420e6a0068d0187659ba8ffc1d67051211",
+    "02-civilizations.md": "cdf985ef74166b0afb0ac7b4292f062f40614e875a6adb7f755e4ac78d93bf09",
+    "03-war-and-departure.md": "1773894ad74b7ba465933a4cdbac9de1bce9623c51738a9d3828d74cbe28acc2",
+    "04-life-and-people.md": "b2a8af43173b3a6789a177b322ea4358c3faeb20e224d0afcdbf7d6b7252dfd1",
+    "05-voyage-and-play.md": "da766cece9caa2b974d1f4b397c988841c143b443c195d79b77168ca60f71505",
+    "06-continuity-and-map.md": "c96aac6bcdf6b23733cb523c8e90cfa51a5a3fb063bab2867bbf82d94df1dfd8"
+  },
+  "book_sha256": "438c4e31b2e6bd7446d9e162aef4efe89d0154b2446bc28cfbbfff9d954e2898"
+}

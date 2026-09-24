@@ -1,0 +1,1 @@
+{"synthetic_checks": ["all 4 scores = 100", "one 75-point judge cannot be averaged into a pass", "a 0-score case blocks a 95-point result", "invented quotation rejected", "input mutation rejected"], "passed": true, "scope": "arithmetic and integrity only"}

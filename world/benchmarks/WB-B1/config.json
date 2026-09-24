@@ -1,0 +1,51 @@
+{
+  "benchmark": "WB-B1",
+  "version": "1.0",
+  "dimensions": [
+    {
+      "id": "D1",
+      "name": "共同事实与连续性",
+      "weight": 15
+    },
+    {
+      "id": "D2",
+      "name": "能力代价与因果",
+      "weight": 15
+    },
+    {
+      "id": "D3",
+      "name": "独立运转的社会",
+      "weight": 15
+    },
+    {
+      "id": "D4",
+      "name": "主题、人物与选择",
+      "weight": 15
+    },
+    {
+      "id": "D5",
+      "name": "宇宙惊奇与探索",
+      "weight": 10
+    },
+    {
+      "id": "D6",
+      "name": "文明差异与辨识度",
+      "weight": 10
+    },
+    {
+      "id": "D7",
+      "name": "局部生成与扩展",
+      "weight": 10
+    },
+    {
+      "id": "D8",
+      "name": "可理解与可查阅",
+      "weight": 10
+    }
+  ],
+  "minimum_total_per_judge": 80,
+  "minimum_dimension_per_judge": 2.5,
+  "disagreement_case_delta": 2,
+  "disagreement_dimension_delta": 1,
+  "disagreement_total_delta": 10
+}

@@ -1,0 +1,79 @@
+{
+  "benchmark": "WB-B1",
+  "input_manifest_sha256": "8f0dccbc16b45296b44181f73c4aaeb3e27cecdcf14791b3833eae66cc5e5945",
+  "frozen_hashes_match": true,
+  "case_coverage": 24,
+  "control_coverage": 4,
+  "evidence_quotes_match": true,
+  "judges": [
+    {
+      "judge": "judge-a",
+      "raw_sha256": "d30549547514d3feba8156e61676fb8110fd3d958eab46910a06ed0a41303448",
+      "total_exact": "1135/12",
+      "total": 94.58,
+      "dimensions": {
+        "D1": 4.0,
+        "D2": 4.0,
+        "D3": 3.6667,
+        "D4": 3.3333,
+        "D5": 3.6667,
+        "D6": 3.6667,
+        "D7": 4.0,
+        "D8": 4.0
+      },
+      "zero_cases": [],
+      "below_minimum_dimensions": [],
+      "control_numeric_checks": {
+        "C01": true,
+        "C02": true,
+        "C03": true,
+        "C04": true
+      },
+      "gates": {
+        "H1": "pass",
+        "H2": "pass",
+        "H3": "pass",
+        "H4": "pass"
+      },
+      "numeric_candidate_pass": true
+    },
+    {
+      "judge": "judge-b",
+      "raw_sha256": "383c953f29a737946940c96207ed9a439ace883e1a7ee73f0918b399db1b65b1",
+      "total_exact": "375/4",
+      "total": 93.75,
+      "dimensions": {
+        "D1": 4.0,
+        "D2": 4.0,
+        "D3": 3.6667,
+        "D4": 3.3333,
+        "D5": 3.6667,
+        "D6": 3.3333,
+        "D7": 4.0,
+        "D8": 4.0
+      },
+      "zero_cases": [],
+      "below_minimum_dimensions": [],
+      "control_numeric_checks": {
+        "C01": true,
+        "C02": true,
+        "C03": true,
+        "C04": true
+      },
+      "gates": {
+        "H1": "pass",
+        "H2": "pass",
+        "H3": "pass",
+        "H4": "pass"
+      },
+      "numeric_candidate_pass": true
+    }
+  ],
+  "required_adjudication": {
+    "cases": [],
+    "dimensions": [],
+    "total": false,
+    "gates": []
+  },
+  "limits": "Arithmetic and quotation checks only. Gate reasoning, controls and subjective quality require independent content review. No automatic acceptance."
+}

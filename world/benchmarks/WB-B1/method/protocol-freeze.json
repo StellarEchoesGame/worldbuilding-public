@@ -1,0 +1,14 @@
+{
+  "phase": "protocol frozen before fresh cases and scoring",
+  "utc": "2026-09-24T04:19:06.407932+00:00",
+  "files": {
+    "PROTOCOL.md": "dc89ede29b9aad2826821559dbd3fbb7987120119ac702c0dae5d69ebb65ed53",
+    "config.json": "77ec642b385923b699a1c6c83d18a34a1d3a133765fb3cd6639f9b485cb4ccf1",
+    "questions/public.json": "148d7f1d2c5e01518c6573b04c1b6cf919f08598ca3fce6d22889d9e446e495f",
+    "questions/controls.json": "5e56b558cbb64d4c73ed068eb961f530ab5c578a3ebb1011f3869a62c243349e",
+    "method/control-key.json": "03e55ab04a94ff1f0cdc9a0dbe71b34edc33ff252d6f104974bd256879c90d19",
+    "input-manifest.json": "8f0dccbc16b45296b44181f73c4aaeb3e27cecdcf14791b3833eae66cc5e5945",
+    "JUDGE-INSTRUCTIONS.md": "bdac5b85b4a1599b18f39210665ff3f260be49f2ec5a683369657cff7784dc35",
+    "score.py": "a208af596654d1db8cac331445ee849d9b7fc820ed603a9208af70f927a0ba1f"
+  }
+}

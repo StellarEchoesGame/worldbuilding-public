@@ -1,0 +1,67 @@
+{
+  "stage": "revision-1",
+  "client_version": "2.1.281 (Claude Code)",
+  "requested_model": "claude-code/claude-opus-5-5[1M]",
+  "configured_provider_host": "third-party-gateway.invalid",
+  "prompt_file": "inputs/revision-brief.md",
+  "prompt_sha256": "5be27d5cbbadced907ddbd9d245ec84cec6a163f32ccd0986e82cbec6ba483ad",
+  "system_sha256": "2549ae8e277352311ac6a0e9714a1784d9d7255507b37b5f18ad25fe22a03949",
+  "started_utc": "2026-09-24T05:02:37.179424+00:00",
+  "tools_enabled": false,
+  "memory_project_autodiscovery": false,
+  "session_persistence": false,
+  "effort": "high",
+  "cli_budget_cap_usd": 8,
+  "prior_benchmark_shared": false,
+  "prior_claude_draft_shared": true,
+  "independent_execution_review_shared": true,
+  "independence_limit": "Provider/model identity is configuration and response metadata, not cryptographic upstream attestation.",
+  "finished_utc": "2026-09-24T05:10:29.168784+00:00",
+  "exit_code": 0,
+  "stdout_sha256": "924e8cf48ddb30d131e0e49c9adfdd666329804ac06f930c6e2ce9620a2d4208",
+  "is_error": false,
+  "subtype": "success",
+  "model_usage": {
+    "claude-code/claude-opus-5-5[1m]": {
+      "inputTokens": 6,
+      "outputTokens": 22004,
+      "cacheReadInputTokens": 25094,
+      "cacheCreationInputTokens": 12547,
+      "webSearchRequests": 0,
+      "costUSD": 0.5078577999999999,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 128000,
+      "thinkingTokens": 22000,
+      "canonicalModel": "claude-opus-5-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  },
+  "usage": {
+    "input_tokens": 2,
+    "cache_creation_input_tokens": 12547,
+    "cache_read_input_tokens": 0,
+    "output_tokens": 2,
+    "output_tokens_details": {
+      "thinking_tokens": 0
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 0,
+      "ephemeral_5m_input_tokens": 12547
+    },
+    "inference_geo": "not_available",
+    "iterations": [],
+    "speed": "standard"
+  },
+  "cli_estimated_cost_usd": 0.5078577999999999,
+  "duration_ms": 471254,
+  "num_turns": 1,
+  "output_sha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b",
+  "output_characters": 0,
+  "status": "failure"
+}

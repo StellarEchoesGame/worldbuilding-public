@@ -1,0 +1,119 @@
+{
+  "revision": 8,
+  "date": "2026-09-24",
+  "integration_base": "27dbc0d02e398978a67ee534ce069d4d0cb1143b",
+  "inputs": [
+    {
+      "id": "world-book-revision-7",
+      "source_filename": "BOOK.md",
+      "task": "https://github.com/StellarEchoesGame/worldbuilding/issues/16",
+      "sha256": "3f15735dacb4e498580efbf6da87e5f0cbc3f1c0974ed9b240e7637d2de5cef2",
+      "use": "只继承未被新版战争/文明/主线替换的规则与人物；原文已归档"
+    },
+    {
+      "id": "mainline-framework",
+      "source_filename": "FRAMEWORK.md",
+      "task": "https://github.com/StellarEchoesGame/worldbuilding/issues/27",
+      "sha256": "eb926d6ddd1ba03a08b40aebde409c59e9e632d62ecad8927066c984342c6484",
+      "use": "主线阶段/人物欲望输入；自然灾害和原角色身份不继承"
+    },
+    {
+      "id": "cosmic-scope",
+      "source_filename": "SCOPE.md",
+      "task": "https://github.com/StellarEchoesGame/worldbuilding/issues/28",
+      "sha256": "785618cbf40b18d5ed03a62c4e0206b8f8a096912f71329999c7392628950fec",
+      "use": "采用尺度和16区域配额；S0与S7职责更新"
+    },
+    {
+      "id": "scope-atlas",
+      "source_filename": "atlas.json",
+      "task": "https://github.com/StellarEchoesGame/worldbuilding/issues/28",
+      "sha256": "55421887df1f2c1cfd64b4f74f8d90b3c42197460c7890da6b25d746bb2ae5c7",
+      "use": "沿用坐标；详细航段新增S0-S2"
+    },
+    {
+      "id": "route-departure",
+      "source_filename": "ROUTE.md",
+      "task": "https://github.com/StellarEchoesGame/worldbuilding/issues/29",
+      "sha256": "73626554867c98790cf7cdcfe44eaf780cb8adcb8cfa6cdcf06503654100eef7",
+      "use": "保留反例审查方法；旧和平/自然灾害时间与库存推演不沿用"
+    },
+    {
+      "id": "first-year-community",
+      "source_filename": "01-community.md",
+      "task": "https://github.com/StellarEchoesGame/worldbuilding/issues/23",
+      "sha256": "cdba25401e2e057a8a22511a769acef9357b173cc7e9d2a46f5750afbec3050d",
+      "use": "人口与家庭输入；旧日期/排班不成为战时证明"
+    },
+    {
+      "id": "first-year-culture",
+      "source_filename": "03-culture.md",
+      "task": "https://github.com/StellarEchoesGame/worldbuilding/issues/25",
+      "sha256": "cd514e9b69cbf626d7e558f014462581f2e7873202d6e5d6851aabf495dad37f",
+      "use": "生活细节输入；旧首年日期不继承"
+    }
+  ],
+  "legacy_preservation": [
+    {
+      "file": "world/01-研究与设计框架.md",
+      "original_sha256": "d73cd26f2a85e10fabebb4d4f96c2fa05535ce7a5e141968ce42e42486a45e23",
+      "preservation": "original bytes after the added version notice"
+    },
+    {
+      "file": "world/02-世界设定集.md",
+      "original_sha256": "79cf3fcf837157545fea801128d3e3d1fdd7880906898b67b7676144d912e027",
+      "preservation": "original bytes after the added version notice"
+    },
+    {
+      "file": "world/03-首章内容与制作约束.md",
+      "original_sha256": "4da9e6f45141bc0af457f795ff414a31aab0a0c4eee7914e17598a0a9adef4f1",
+      "preservation": "original bytes after the added version notice"
+    },
+    {
+      "file": "world/04-InternalRef参考与框架修订.md",
+      "original_sha256": "25b67f333376c0a2dafb592c9992f285ebcac2ce7f6f7e01882c8ac6e3bb550a",
+      "preservation": "original bytes after the added version notice"
+    },
+    {
+      "file": "world/05-最小世界观资产包.md",
+      "original_sha256": "7955adc7b45414d38bd9c3a0199b4a95d52e9e3cf29a612760a789c6d443571f",
+      "preservation": "original bytes after the added version notice"
+    },
+    {
+      "file": "world/06-世界观概念手稿.md",
+      "original_sha256": "46673b054b81277132420893fbe49e00e1fa59f609e463b3328a72f1b5176916",
+      "preservation": "original bytes after the added version notice"
+    },
+    {
+      "file": "world/07-科技纪元与方舟设计依据.md",
+      "original_sha256": "8b35971322997266782e9540c5d0a765df5b66a27985fe59a9a1ad0eeddc5606",
+      "preservation": "original bytes after the added version notice"
+    },
+    {
+      "file": "world/08-方舟科幻美术方向.md",
+      "original_sha256": "e23f36052ee9911ee58e8b0fb051b4bcd5659eb6aafe00830bd0e2f396be52c4",
+      "preservation": "original bytes after the added version notice"
+    },
+    {
+      "file": "world/09-归航号工业舰船方向.md",
+      "original_sha256": "3491e77d06383828b349549c74749fa1a0a35d5403db643b50607df11056d693",
+      "preservation": "original bytes after the added version notice"
+    },
+    {
+      "file": "world/10-舰载机体与港口设计.md",
+      "original_sha256": "693104f2d1a82a4687e82f4edf90d3958219d19a111fe0881750101090ccf43c",
+      "preservation": "original bytes after the added version notice"
+    },
+    {
+      "file": "world/11-归航号使命与生活设计基线.md",
+      "original_sha256": "3a0d1ab0d11af14ba2c5287270319cb95837e692df29b879aee0eb0e917bef05",
+      "preservation": "original bytes after the added version notice"
+    },
+    {
+      "file": "world/12-后续制作路线图.md",
+      "original_sha256": "8eea3b0510a31ecb4fa9629ccd6ca1bca11e8c6abc0276a7d93c74765db0c2dd",
+      "preservation": "original bytes after the added version notice"
+    }
+  ],
+  "legacy_readme_sha256": "d7d0ffdb60f448e36ad8c95d03f06eed2768c8f76dc6369f8be615b727a42995"
+}

@@ -1,0 +1,18 @@
+{
+  "issue": 32,
+  "preregister": {
+    "url": "https://github.com/StellarEchoesGame/worldbuilding/issues/32#issuecomment-5807606155",
+    "created_at": "2026-09-24T04:20:31Z",
+    "sha256": "976e3c47028111fb3e7e62bc15224b671b4b26e9f3a30b6c4b9eb97ccc8c09d4",
+    "exact_match": true
+  },
+  "freeze_sha256": "f90a14b5caa18b8f998dd72c67b1080862c1256ba159a7656f199cf29272b60a",
+  "method_and_fresh_author": "wb_b1_method",
+  "judge_a": "wb_b1_judge_a",
+  "judge_b": "wb_b1_judge_b",
+  "source_authors_are_not_judges": true,
+  "fork_turns": "none",
+  "different_model_families": false,
+  "model_settings": "inherited runtime; no model switch requested",
+  "source_changed_during_evaluation": false
+}
