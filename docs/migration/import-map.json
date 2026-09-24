@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "source_repository": "https://github.com/redacted-user/stellar-echoes",
+  "source_repository": "private personal repository (not published)",
   "source_commit": "e09845653450fc13aa5737e33a6decd9c4573348",
   "source_tree": "e6eed27468a31a80d89c23c58f34d83f990e7ebd",
   "filtered_import_commit": "12190e392de1b1a4f2a4b104275c66e445b64e1a",
@@ -58,7 +58,7 @@
     {
       "source": "outputs/stellar-echoes-unity/Worldbuilding/04-InternalRef参考与框架修订.md",
       "repository": "worldbuilding",
-      "destination": "world/04-InternalRef参考与框架修订.md",
+      "destination": null,
       "original_git_blob": "cc61e70dc69fce67f0dbeaac6678deed41d4fc76",
       "original_sha256": "25b67f333376c0a2dafb592c9992f285ebcac2ce7f6f7e01882c8ac6e3bb550a",
       "original_bytes": 9224

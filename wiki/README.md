@@ -26,13 +26,13 @@ npm run preview
 
 以上命令在 `wiki/` 中执行，也可从仓库根使用 `npm --prefix wiki …`。已用 Node.js 26.7.0、npm 11.19.0 独立安装依赖。`build` 与 `dev` 启动前会校验源素材哈希并生成副本；如果提示哈希不符，应检查源图和版本清单，不能跳过校验。
 
-本地预览在4191端口。生产构建包含全文搜索索引；开发服务器的搜索不作为验收依据。
+公开检查可通过环境变量 `PUBLIC_CHECK_DENYLIST`（逗号分隔）追加本地私有标记，例如个人账号名；这些值放在 `~/.secret` 下由 `source` 加载，不写进仓库。本地预览在4191端口。生产构建包含全文搜索索引；开发服务器的搜索不作为验收依据。
 
 ## 发布
 
 `wrangler.jsonc` 固定 Pages 项目 `stellar-echoes-wiki`，`scripts/deploy.mjs` 通过进程环境固定指定 Cloudflare account，并拒绝不一致的账户覆盖。命令 `npm run deploy` 发布构建产物；执行前需在进程环境提供该账户凭据。凭据不放入此工程或网页。
 
-正式域名为 `wiki.stellar-echoes.online`；原主域名通过单独的 Cloudflare Redirect Rule 保留路径跳转到 Wiki。后续发布应先构建、检查公开内容、实看页面并记录产物校验，再执行经授权的部署。工程仓库为 `StellarEchoesGame/worldbuilding`，本站位于 `wiki/`；未配置 Git 自动部署，提交或推送本身不会自动上线。拆仓及本地验证不调用发布命令，不修改现有域名、DNS、重定向或 Cloudflare 项目。
+正式域名为 `wiki.stellar-echoes.online`；原主域名通过单独的 Cloudflare Redirect Rule 保留路径跳转到 Wiki。后续发布应先构建、检查公开内容、实看页面并记录产物校验，再执行经授权的部署。工程仓库为 `StellarEchoesGame/worldbuilding-public`，本站位于 `wiki/`；未配置 Git 自动部署，提交或推送本身不会自动上线。拆仓及本地验证不调用发布命令，不修改现有域名、DNS、重定向或 Cloudflare 项目。
 
 ## 公开范围
 

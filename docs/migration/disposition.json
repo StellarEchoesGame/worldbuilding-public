@@ -45,10 +45,10 @@
     },
     {
       "source": "outputs/stellar-echoes-unity/Worldbuilding/04-InternalRef参考与框架修订.md",
-      "destination": "world/04-InternalRef参考与框架修订.md",
+      "destination": null,
       "original_sha256": "25b67f333376c0a2dafb592c9992f285ebcac2ce7f6f7e01882c8ac6e3bb550a",
       "current_sha256": "25b67f333376c0a2dafb592c9992f285ebcac2ce7f6f7e01882c8ac6e3bb550a",
-      "disposition": "retained_unchanged"
+      "disposition": "withheld_from_public_repository"
     },
     {
       "source": "outputs/stellar-echoes-unity/Worldbuilding/05-最小世界观资产包.md",
@@ -502,7 +502,7 @@
       "source": "outputs/stellar-echoes-unity/Worldbuilding/README.md",
       "destination": "world/README.md",
       "original_sha256": "106448bca8891cbf25204a60208e144919814fe289ebd465aa8deb6a64547b52",
-      "current_sha256": "d7d0ffdb60f448e36ad8c95d03f06eed2768c8f76dc6369f8be615b727a42995",
+      "current_sha256": "d19701bb4ea6a2a56190d0baf1910457f81df7aee6108cdae479a961303e9ac4",
       "disposition": "adapted_for_repository_layout"
     },
     {

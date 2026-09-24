@@ -9,7 +9,10 @@ const available = new Set(files);
 const errors = [];
 let links = 0;
 let htmlPages = 0;
-const forbidden = [/\/Users\//i,/redacted-handle/i,/127\.0\.0\.1/,/\.secret\//i,/feishu\.cn/i,/CLOUDFLARE_GLOBAL_API_KEY/,/X-Auth-Key/i,/sk-[A-Za-z0-9]{24,}/];
+// Extra private markers (personal handles, e-mail addresses) come from the local
+// environment so that the public repository never lists them: PUBLIC_CHECK_DENYLIST="a,b".
+const extra = (process.env.PUBLIC_CHECK_DENYLIST ?? '').split(',').map(s => s.trim()).filter(Boolean).map(s => new RegExp(s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i'));
+const forbidden = [...extra,/\/Users\//i,/127\.0\.0\.1/,/\.secret\//i,/feishu\.cn/i,/CLOUDFLARE_GLOBAL_API_KEY/,/X-Auth-Key/i,/sk-[A-Za-z0-9]{24,}/];
 for (const file of files) {
   const relative = path.relative(root,file);
   if (/\.env(?:\.|$)|(?:^|\/)node_modules\/|\.map$/.test(relative)) errors.push(`Unexpected public file: ${relative}`);

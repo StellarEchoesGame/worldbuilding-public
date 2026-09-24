@@ -38,7 +38,7 @@ python3 world/benchmarks/WB-C1/test_judgment.py
 | `revision-4` | 成功 | **v1.2 判定勘误**，整体替换 v1.1 的 G1.1（回应 `review/executability-v1.1.md` 唯一阻断） |
 | 合并 | 会话内 | **v1.3** `PROTOCOL.md` + `judgment.py`，经两轮独立可执行性审查（`review/executability-v1.3.md`） |
 
-所有 CLI 调用均显式指定 `claude-code/claude-opus-5-5[1M]`，响应规范模型标识 `claude-opus-5-5`，经本机既有 Third-party-gateway 网关；这是配置与响应元数据证据，不是网关上游身份的独立证明（`review/provenance.md`）。
+所有 CLI 调用均显式指定 `claude-code/claude-opus-5-5[1M]`，响应规范模型标识 `claude-opus-5-5`，经本机既有第三方网关；这是配置与响应元数据证据，不是网关上游身份的独立证明（`review/provenance.md`）。
 
 ## 作者与审查分工
 

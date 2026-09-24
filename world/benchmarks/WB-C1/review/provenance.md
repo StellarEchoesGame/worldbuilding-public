@@ -5,7 +5,7 @@
 ## 独立设计阶段
 
 - CLI：Claude Code 2.1.281，显式使用既有配置中的 Opus SKU `claude-code/claude-opus-5-5[1M]`，没有使用可能映射到其他家族的默认别名。
-- 路由：本机既有 Third-party-gateway，主机 `third-party-gateway.invalid`；返回规范模型标识 `claude-opus-5-5`。这是配置与响应元数据证据，不是对网关上游权重身份的独立证明。CLI 返回的 `provider: firstParty` 字段不能把中转调用变成直连官方。
+- 路由：本机既有第三方网关（主机名不随本仓库公开）；返回规范模型标识 `claude-opus-5-5`。这是配置与响应元数据证据，不是对网关上游权重身份的独立证明。CLI 返回的 `provider: firstParty` 字段不能把中转调用变成直连官方。
 - 输入仅为 `inputs/independent-design-brief.md` 和 `inputs/system.txt`；未提供原稿、旧题库、旧分数或旧审读。世界方向来自用户目标，因此这是独立方法设计，不是毫无项目先验。
 - 调用禁用工具、技能、MCP、项目自动发现、记忆和会话持久化；没有改动全局配置。
 - 原始 v0 保存在 `calls/independent/claude-output.md`，输入输出哈希及实际调用时间保存在同目录 `request-metadata.json`。
@@ -20,4 +20,4 @@
 
 本次交付方法设计及可执行性检查，不对世界正文运行新协议，不生成新成绩。外部模型能增加方法来源差异，不能消除共享训练知识、相近审美和模型共同偏差。实际作品吸引力仍需真实读者与游戏体验验证。
 
-CLI 的费用字段是客户端估算，不能冒称 Third-party-gateway 账单。密钥与完整用户配置均不进入交付包。
+CLI 的费用字段是客户端估算，不能冒称网关账单。密钥与完整用户配置均不进入交付包。

@@ -62,4 +62,4 @@ next:
 - [航程](/world/voyage/)
 - [母舰概览](/ship/overview/)
 
-设定依据：世界设定参考集 8.1 · 入口；revision 8 总稿 ·《一个能远行，却不能同时抵达的宇宙》《归航号：一次完成的承诺》《航程、舰长与玩家的选择》；[世界观当前版本入口](https://github.com/StellarEchoesGame/worldbuilding/blob/main/world/current/README.md)。
+设定依据：世界设定参考集 8.1 · 入口；revision 8 总稿 ·《一个能远行，却不能同时抵达的宇宙》《归航号：一次完成的承诺》《航程、舰长与玩家的选择》；[世界观当前版本入口](https://github.com/StellarEchoesGame/worldbuilding-public/blob/main/world/current/README.md)。

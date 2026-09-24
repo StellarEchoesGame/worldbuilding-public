@@ -70,11 +70,6 @@
       "preservation": "original bytes after the added version notice"
     },
     {
-      "file": "world/04-InternalRef参考与框架修订.md",
-      "original_sha256": "25b67f333376c0a2dafb592c9992f285ebcac2ce7f6f7e01882c8ac6e3bb550a",
-      "preservation": "original bytes after the added version notice"
-    },
-    {
       "file": "world/05-最小世界观资产包.md",
       "original_sha256": "7955adc7b45414d38bd9c3a0199b4a95d52e9e3cf29a612760a789c6d443571f",
       "preservation": "original bytes after the added version notice"
@@ -115,5 +110,5 @@
       "preservation": "original bytes after the added version notice"
     }
   ],
-  "legacy_readme_sha256": "d7d0ffdb60f448e36ad8c95d03f06eed2768c8f76dc6369f8be615b727a42995"
+  "legacy_readme_sha256": "d19701bb4ea6a2a56190d0baf1910457f81df7aee6108cdae479a961303e9ac4"
 }

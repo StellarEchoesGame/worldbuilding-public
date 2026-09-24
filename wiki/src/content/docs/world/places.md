@@ -70,4 +70,4 @@ next: {link: /world/civilization/, label: 文明与相遇}
 - [文明与相遇](/world/civilization/)
 - [战争与启航](/world/war/)
 
-设定依据：参考集 8.1《空间与历史》的“八个恒星系的地方档案”“S2—S5的环境差异”“两个星际测点与鹤灯”，总稿“晷川曾经足够好”“息壤让船能再走，不替宇宙画句号”“首发地图的具体分配”——见[参考集 8.1 · 空间与历史](https://github.com/StellarEchoesGame/worldbuilding/blob/main/world/current/reference/01-space-and-history.md)。
+设定依据：参考集 8.1《空间与历史》的“八个恒星系的地方档案”“S2—S5的环境差异”“两个星际测点与鹤灯”，总稿“晷川曾经足够好”“息壤让船能再走，不替宇宙画句号”“首发地图的具体分配”——见[参考集 8.1 · 空间与历史](https://github.com/StellarEchoesGame/worldbuilding-public/blob/main/world/current/reference/01-space-and-history.md)。

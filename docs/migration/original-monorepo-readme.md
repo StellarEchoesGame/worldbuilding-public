@@ -32,7 +32,7 @@
 
 ```sh
 git lfs install
-git clone https://github.com/redacted-user/stellar-echoes.git
+git clone <private-origin-repository>
 cd stellar-echoes
 git lfs pull
 git lfs fsck

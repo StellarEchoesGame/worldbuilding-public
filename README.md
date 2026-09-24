@@ -4,6 +4,10 @@
 
 在线阅读：[群星回响 Wiki](https://wiki.stellar-echoes.online/)。公开站点已于 2026-09-25 同步到 revision 8 与世界设定参考集 8.1（[#35](https://github.com/StellarEchoesGame/worldbuilding/issues/35)）；参考集本身的交付记录见 [WB-D1 #31](https://github.com/StellarEchoesGame/worldbuilding/issues/31)。当前母舰仍处于概念设计阶段；平剖、透视图和提示词中的目标不代表工程验证或 Unity 实装。
 
+## 版权与公开范围
+
+本仓库是 `StellarEchoesGame/worldbuilding` 私有工程仓库的公开版本：历史经过整理，一份内部参考记录与相关外部引用不随本仓库公开。任务与评审记录仍在私有仓库的 issue 中，公开读者可能无法打开文中的 issue 链接。本仓库的文字、概念图与提示词 © StellarEchoesGame，保留所有权利；文中提到的第三方作品名称与设定归各自权利人所有，不在本仓库范围内。
+
 ## 从哪里读
 
 - [世界观入口](world/README.md)：[世界设定参考集8.1](world/current/reference/README.md)按领域查阅；[revision 8总稿](world/current/BOOK.md)保留主线及共同底稿。
