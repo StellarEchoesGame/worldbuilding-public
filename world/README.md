@@ -4,7 +4,7 @@
 
 **一艘被战争迫使离港的家园舰，先让生活延续，再主动接回他人，最后带着自己选择的使命驶向未知。**
 
-按问题查阅[世界设定条目](current/reference/README.md)，需要先了解主线时读[revision 8总稿](current/BOOK.md)。[当前版本入口](current/README.md)区分二者。本轮是世界观文档，不表示线上 Wiki 或游戏已经采用新版。
+按问题查阅[世界设定条目](current/reference/README.md)，需要先了解主线时读[revision 8总稿](current/BOOK.md)。[当前版本入口](current/README.md)区分二者。线上 Wiki 已于 2026-09-25 按本版同步（[#35](https://github.com/StellarEchoesGame/worldbuilding/issues/35)）；游戏尚未采用新版。
 
 ## 这版的共同底稿
 
