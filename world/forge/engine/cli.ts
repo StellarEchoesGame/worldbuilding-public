@@ -8,14 +8,16 @@ import { judgeBackend } from './adapters/judges.ts';
 import { runProcess } from './adapters/process.ts';
 import type { Backend } from './adapters/types.ts';
 import { parseCell, type Canon } from './brief.ts';
-import { familyOf, loadConfig, type ForgeConfig, type WriterSlot } from './config.ts';
+import { familyOf, loadConfig, type ForgeConfig, type JudgeSpec, type LocalConfig, type WriterSlot } from './config.ts';
 import { isRecord, readString } from './json.ts';
 import { validateBenchmark } from './bench-validate.ts';
+import { mergeCanaryResults, runCanary } from './canary.ts';
+import { parsePrices, withPrices, type Prices } from './cost.ts';
 import { canonFiles, factRowsFrom, parseMergeDecision, parseRegister07, sourcesFromRound } from './inputs.ts';
 import { mergecheck } from './mergecheck.ts';
 import { runRound } from './round.ts';
 import { benchContext, findBenchmark, loadProtocolBundle, parseRollbacks, roundRules, type ProtocolBundle } from './rules.ts';
-import { readJson, readLines, roundPaths, sha256 } from './store.ts';
+import { readJson, readLines, roundPaths, sha256, writeJson, writeText } from './store.ts';
 import { parseBenchmark } from './taste.ts';
 import { checkTags, computeThinmap, DEFAULT_GAME_NEED, formatThinmap, parseAliases, parseGameNeed, parseRows, type Alias, type Row } from './thinmap.ts';
 import { launchUi } from './ui-launch.ts';
@@ -62,11 +64,21 @@ function parseJsonText(text: string, path: string): unknown {
   }
 }
 
+function prices(): Prices {
+  const p = parsePrices(jsonFile(join(ROOT, 'prices.json')));
+  if (!p.ok) fail(p.error);
+  return p.value;
+}
+
+function judge(spec: JudgeSpec, local: LocalConfig): Backend {
+  return withPrices(judgeBackend(spec, local), prices());
+}
+
 function writerBackend(cfg: ForgeConfig, slot: WriterSlot): Backend {
   const family = familyOf(slot.model, cfg.prefixes);
   if (family === null) fail(`no family for writer model ${slot.model}; add a prefix to families.json`);
   if (cfg.local === null) fail('local.json is required');
-  return gatewayBackend(slot, family, cfg.local);
+  return withPrices(gatewayBackend(slot, family, cfg.local), prices());
 }
 
 function loadCanon(): Canon {
@@ -81,7 +93,7 @@ async function doctor(): Promise<void> {
   if (local === null) fail('local.json is required');
   const prompt = '这是连通性测试。只回复 OK 两个字母，不要输出任何别的内容。';
   const role = '你是连通性测试助手，不使用任何工具。';
-  const backends: Backend[] = [...cfg.judges, cfg.maintainer].map((j) => judgeBackend(j, local));
+  const backends: Backend[] = [...cfg.judges, cfg.maintainer].map((j) => judge(j, local));
   const models = new Map<string, WriterSlot>();
   for (const s of [...cfg.slots, cfg.baseline]) if (!models.has(s.model)) models.set(s.model, { ...s, id: `writer:${s.model}`, maxTokens: 2000 });
   for (const slot of models.values()) backends.push(writerBackend(cfg, slot));
@@ -132,7 +144,7 @@ async function roundRun(args: readonly string[]): Promise<void> {
       sessionPairs: bundle.protocol.bars.sessionPairs,
       writers: cfg.slots.map((s) => writerBackend(cfg, s)),
       baselineWriter: writerBackend(cfg, cfg.baseline),
-      judges: cfg.judges.map((j) => ({ backend: judgeBackend(j, local), concurrency: j.concurrency })),
+      judges: cfg.judges.map((j) => ({ backend: judge(j, local), concurrency: j.concurrency })),
       judgeTimeoutMs: cfg.judgeTimeoutMs,
       writerTimeoutMs: cfg.writerTimeoutMs,
       rules: roundRules(bundle.protocol, benchRaw),
@@ -298,9 +310,34 @@ function mergeCheck(args: readonly string[]): void {
   if (!passed) process.exitCode = 1;
 }
 
+async function canary(args: readonly string[]): Promise<void> {
+  const cfg = config();
+  const local = cfg.local;
+  if (local === null) fail('local.json is required');
+  const only = option(args, '--only');
+  const wanted = only === null ? null : only.split(',').map((s) => s.trim());
+  const specs = [...cfg.judges, cfg.maintainer].filter((j) => wanted === null || wanted.includes(j.id));
+  if (specs.length === 0) fail(`no adapter matches --only ${only ?? ''}`);
+  if (local.privatePhrases.length === 0) process.stderr.write('注意：local.json 的 private_phrases 为空，只检查 canary 令牌。\n');
+  process.stdout.write(`canary：${specs.map((j) => j.id).join('、')}（评委以最高思考档位运行，可能要几分钟）…\n`);
+  const run = await runCanary(specs.map((j) => judge(j, local)), {
+    dir: join(ROOT, '.sealed', 'canary'),
+    protocolText: readText(join(ROOT, 'PROTOCOL.md')),
+    privatePhrases: local.privatePhrases,
+    timeoutMs: cfg.judgeTimeoutMs,
+    log: (m) => process.stdout.write(`${m}\n`),
+    onOutput: (id, r) => writeText(join(ROOT, '.runs', 'canary', `${id}.txt`), `${r.raw}\n\n=== text ===\n${r.text}\n`),
+  });
+  const resultsPath = join(ROOT, 'canary', 'results.json');
+  writeJson(resultsPath, mergeCanaryResults(readJson(resultsPath), run, new Date().toISOString()));
+  process.stdout.write(`${run.pass ? '全部通过' : '有适配器未通过'}，结果写入 canary/results.json；原始输出在 .runs/canary/\n`);
+  if (!run.pass) process.exitCode = 1;
+}
+
 async function main(): Promise<void> {
   const [cmd, sub, ...rest] = process.argv.slice(2);
   if (cmd === 'doctor') return doctor();
+  if (cmd === 'canary') return canary([sub, ...rest].filter((s): s is string => s !== undefined));
   if (cmd === 'round' && sub === 'run') return roundRun(rest);
   if (cmd === 'round' && sub === 'status') return roundStatus(rest);
   if (cmd === 'protocol' && sub === 'hash') return protocolHash();
@@ -312,6 +349,7 @@ async function main(): Promise<void> {
     [
       'usage:',
       '  forge doctor',
+      '  forge canary [--only <id,...>]',
       '  forge round run <ID> --cell <file> [--seed <seed>] [--benchmark <file>]',
       '  forge round status <ID>',
       '  forge protocol hash',

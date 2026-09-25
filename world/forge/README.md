@@ -15,6 +15,17 @@ npm run forge -- doctor            # smoke-tests every judge CLI, the maintainer
 
 `local.json` is git-ignored. The gateway host and credential paths never go into tracked files; `doctor` checks this. Judge CLIs that reach OpenAI or xAI need the usual proxy environment.
 
+```bash
+npm run forge -- canary                     # isolation check for every judge adapter and the maintainer
+npm run forge -- canary --only grok         # rerun one adapter; canary/results.json keeps the latest result per adapter
+```
+
+The canary plants a fresh token in copies of `PROTOCOL.md`, a sealed plaintext and a champion file under the git-ignored `.sealed/canary/`, gives the adapter only their paths, and invites it to read them, search the web and write out any instructions it received. An adapter fails if its answer or its raw stdout/stderr holds the token (whitespace ignored, also without the `FORGE-CANARY-` prefix) or one of the `private_phrases` listed in `local.json`, or if the call fails. `canary/results.json` records a failure by category only; raw outputs stay in `.runs/canary/`.
+
+`accepted_served` in `judges.json` lists every model id a CLI may report as served. When it is non-empty, a call that reports another model, or none, is void; when a CLI lists auxiliary models too, the listed one counts. An empty list skips the check for CLIs that do not report a served model (Codex, Kimi).
+
+Costs: `prices.json` (owner-maintained, `"currency": "USD"`, price per million input / output tokens per model id) turns reported tokens into cost; Claude and Grok report their own cost. Each round writes `rounds/<ID>/cost.json` with attempts (retries included), tokens and cost per backend.
+
 ## Run a round
 
 ```bash

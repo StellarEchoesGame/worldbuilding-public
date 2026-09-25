@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { existsSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdtempSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { fakeBackend } from './adapters/fake.ts';
@@ -225,5 +225,17 @@ test('a rerun refuses to resume when the judge families differ from the frozen o
   again.judges = again.judges.filter((j) => j.backend.family !== 'xAI');
   await assert.rejects(runRound(again, 'P01'), /eligible families changed: Anthropic、Moonshot、OpenAI、xAI → Anthropic、Moonshot、OpenAI/u);
   assert.equal(again.judgeCalls(), 0);
+  rmSync(root, { recursive: true });
+});
+
+test('a round writes cost.json summing every call record per backend', async () => {
+  const root = mkdtempSync(join(tmpdir(), 'forge-round-'));
+  const d = deps(root);
+  await runRound(d, 'P01');
+  const cost: unknown = JSON.parse(readFileSync(join(root, 'rounds', 'P01', 'cost.json'), 'utf8'));
+  assert.ok(typeof cost === 'object' && cost !== null && 'by_backend' in cost);
+  const calls = readdirSync(join(root, 'rounds', 'P01', 'calls')).length;
+  const summed = Object.values(JSON.parse(readFileSync(join(root, 'rounds', 'P01', 'cost.json'), 'utf8')).by_backend).reduce((n: number, b) => n + (typeof b === 'object' && b !== null && 'attempts' in b && typeof b.attempts === 'number' ? b.attempts : 0), 0);
+  assert.equal(summed, calls);
   rmSync(root, { recursive: true });
 });
