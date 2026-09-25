@@ -1,4 +1,4 @@
-import type { Backend, CallResult } from './types.ts';
+import type { CallResult } from './types.ts';
 
 /**
  * Voids a call whose served model is outside `accepted`. An empty list means the CLI does not report a served
@@ -10,8 +10,4 @@ export function checkServed(r: CallResult, accepted: readonly string[]): CallRes
   if (r.servedModel === null) return { ...r, ok: false, error: 'served model not reported' };
   if (!accepted.includes(r.servedModel)) return { ...r, ok: false, error: `served model ${r.servedModel} is not in accepted_served` };
   return r;
-}
-
-export function withServedCheck(backend: Backend, accepted: readonly string[]): Backend {
-  return { ...backend, call: async (prompt, opts) => checkServed(await backend.call(prompt, opts), accepted) };
 }

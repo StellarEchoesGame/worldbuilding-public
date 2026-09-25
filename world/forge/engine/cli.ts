@@ -11,7 +11,7 @@ import { parseCell, type Canon } from './brief.ts';
 import { familyOf, loadConfig, type ForgeConfig, type JudgeSpec, type LocalConfig, type WriterSlot } from './config.ts';
 import { isRecord, readString } from './json.ts';
 import { validateBenchmark } from './bench-validate.ts';
-import { mergeCanaryResults, runCanary } from './canary.ts';
+import { canarySummary, mergeCanaryResults, runCanary, type CanaryRun } from './canary.ts';
 import { parsePrices, withPrices, type Prices } from './cost.ts';
 import { canonFiles, factRowsFrom, parseMergeDecision, parseRegister07, sourcesFromRound } from './inputs.ts';
 import { mergecheck } from './mergecheck.ts';
@@ -320,17 +320,23 @@ async function canary(args: readonly string[]): Promise<void> {
   if (specs.length === 0) fail(`no adapter matches --only ${only ?? ''}`);
   if (local.privatePhrases.length === 0) process.stderr.write('注意：local.json 的 private_phrases 为空，只检查 canary 令牌。\n');
   process.stdout.write(`canary：${specs.map((j) => j.id).join('、')}（评委以最高思考档位运行，可能要几分钟）…\n`);
-  const run = await runCanary(specs.map((j) => judge(j, local)), {
-    dir: join(ROOT, '.sealed', 'canary'),
-    protocolText: readText(join(ROOT, 'PROTOCOL.md')),
-    privatePhrases: local.privatePhrases,
-    timeoutMs: cfg.judgeTimeoutMs,
-    log: (m) => process.stdout.write(`${m}\n`),
-    onOutput: (id, r) => writeText(join(ROOT, '.runs', 'canary', `${id}.txt`), `${r.raw}\n\n=== text ===\n${r.text}\n`),
-  });
+  let run: CanaryRun;
+  try {
+    run = await runCanary(specs.map((j) => judge(j, local)), {
+      dir: join(ROOT, '.sealed', 'canary'),
+      protocolText: readText(join(ROOT, 'PROTOCOL.md')),
+      privatePhrases: local.privatePhrases,
+      timeoutMs: cfg.judgeTimeoutMs,
+      log: (m) => process.stdout.write(`${m}\n`),
+      onOutput: (id, r) => writeText(join(ROOT, '.runs', 'canary', `${id}.txt`), `${r.raw}\n\n=== text ===\n${r.text}\n`),
+    });
+  } catch (e) {
+    fail(`canary could not run: ${e instanceof Error ? e.message : String(e)}`);
+  }
   const resultsPath = join(ROOT, 'canary', 'results.json');
-  writeJson(resultsPath, mergeCanaryResults(readJson(resultsPath), run, new Date().toISOString()));
-  process.stdout.write(`${run.pass ? '全部通过' : '有适配器未通过'}，结果写入 canary/results.json；原始输出在 .runs/canary/\n`);
+  const merged = mergeCanaryResults(readJson(resultsPath), run, new Date().toISOString());
+  writeJson(resultsPath, merged);
+  process.stdout.write(`${canarySummary(run, merged)}；原始输出在 .runs/canary/\n`);
   if (!run.pass) process.exitCode = 1;
 }
 
