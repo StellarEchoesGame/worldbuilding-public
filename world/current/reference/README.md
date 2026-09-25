@@ -2,7 +2,7 @@
 
 这是当前世界设定的主要查阅入口，承接[revision 8总稿](../BOOK.md)已经确定的宇宙、战争开场与母舰主线。这里按照世界的运作方式组织内容；总稿作为概览保留，不用人物按章经历的事情替代世界本身。
 
-也可阅读[八篇合订本](REFERENCE.md)。修改编号源条目后，用 `python3 world/current/reference/assemble_reference.py` 同步合订本与哈希；此脚本只整编文档。
+也可阅读[八篇合订本](REFERENCE.md)。修改编号源条目后，用 `python3 world/current/reference/assemble_reference.py --revision <版本>` 同步合订本与哈希；条目顺序、版本号与合订本抬头写在 [manifest.json](manifest.json)，版本号不符时脚本拒绝写入。此脚本只整编文档，`test_assemble_reference.py` 验证它能逐字节复现已提交的合订本。
 
 执行与完整交付：[WB-D1 · #31](https://github.com/StellarEchoesGame/worldbuilding/issues/31)。本文所列是创作设定及验证，不表示游戏、图稿或线上Wiki已经实现。
 
