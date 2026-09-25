@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { existsSync, mkdtempSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdirSync, mkdtempSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { fakeBackend } from './adapters/fake.ts';
@@ -9,7 +9,7 @@ import type { Cell } from './brief.ts';
 import type { Family } from './config.ts';
 import { parseFreeze } from './freeze.ts';
 import { LIMITS } from './gate.ts';
-import { runRound, type RoundDeps } from './round.ts';
+import { prototypeRoundRefusal, runPrototypeRound, type PrototypeDeps } from './prototype.ts';
 import { sha256 } from './store.ts';
 import type { Benchmark } from './taste.ts';
 
@@ -35,7 +35,7 @@ function judgeReply(prompt: string): string {
   return JSON.stringify({ q1: { pick, quote: section(prompt, pick).slice(0, 12) } });
 }
 
-function deps(root: string): RoundDeps & { judgeCalls: () => number; judgePrompts: () => string[] } {
+function deps(root: string): PrototypeDeps & { judgeCalls: () => number; judgePrompts: () => string[] } {
   const families: Family[] = ['OpenAI', 'Anthropic', 'Moonshot', 'xAI'];
   const judges = families.map((family, i) => ({ backend: fakeBackend(`j${i}`, family, judgeReply), concurrency: 2 }));
   return {
@@ -65,7 +65,7 @@ function deps(root: string): RoundDeps & { judgeCalls: () => number; judgePrompt
 test('a fake round writes, gates, judges, tallies and prepares the audit', async () => {
   const root = mkdtempSync(join(tmpdir(), 'forge-round-'));
   const d = deps(root);
-  const tallies = await runRound(d, 'P01');
+  const tallies = await runPrototypeRound(d, 'P01');
   const dir = join(root, 'rounds', 'P01');
   for (const f of ['brief.json', 'gate.json', 'labels.json', 'tally.json', 'audit-set.json', 'progress.jsonl', 'submissions/W3.json']) assert.ok(existsSync(join(dir, f)), f);
   assert.equal(tallies.length, 2);
@@ -82,10 +82,10 @@ test('a fake round writes, gates, judges, tallies and prepares the audit', async
 
 test('a rerun resumes: only the deleted taste call is repeated', async () => {
   const root = mkdtempSync(join(tmpdir(), 'forge-round-'));
-  await runRound(deps(root), 'P01');
+  await runPrototypeRound(deps(root), 'P01');
   rmSync(join(root, 'rounds', 'P01', 'taste', 'W1', 'j2-s1-rev.json'));
   const again = deps(root);
-  await runRound(again, 'P01');
+  await runPrototypeRound(again, 'P01');
   assert.equal(again.judgeCalls(), 1);
   rmSync(root, { recursive: true });
 });
@@ -96,10 +96,10 @@ test('a rerun retries recorded voids but not recorded successes', async () => {
   const flaky = first.judges[3];
   assert.ok(flaky !== undefined);
   flaky.backend = fakeBackend('j3', 'xAI', () => ({ error: 'rate limited' }));
-  const tallies = await runRound(first, 'P01');
+  const tallies = await runPrototypeRound(first, 'P01');
   assert.deepEqual(tallies.find((t) => t.submission === 'W1')?.tally.dropped, ['xAI']);
   const again = deps(root);
-  const rerun = await runRound(again, 'P01');
+  const rerun = await runPrototypeRound(again, 'P01');
   assert.equal(again.judgeCalls(), 2 * 2 * 2);
   assert.deepEqual(rerun.find((t) => t.submission === 'W1')?.tally.dropped, []);
   rmSync(root, { recursive: true });
@@ -107,7 +107,7 @@ test('a rerun retries recorded voids but not recorded successes', async () => {
 
 test('a new round pins its inputs by content hash in freeze.json', async () => {
   const root = mkdtempSync(join(tmpdir(), 'forge-round-'));
-  await runRound(deps(root), 'P01');
+  await runPrototypeRound(deps(root), 'P01');
   const dir = join(root, 'rounds', 'P01');
   const freeze = parseFreeze(JSON.parse(readFileSync(join(dir, 'freeze.json'), 'utf8')));
   assert.ok(freeze.ok);
@@ -124,33 +124,33 @@ test('a new round pins its inputs by content hash in freeze.json', async () => {
 
 test('a rerun refuses to resume when a pinned input changed', async () => {
   const root = mkdtempSync(join(tmpdir(), 'forge-round-'));
-  await runRound(deps(root), 'P01');
+  await runPrototypeRound(deps(root), 'P01');
   rmSync(join(root, 'rounds', 'P01', 'taste', 'W1', 'j2-s1-rev.json'));
   const again = deps(root);
   again.pins = { ...again.pins, benchmarkText: '{"version":"v0","edited":true}' };
-  await assert.rejects(runRound(again, 'P01'), /frozen file changed: benchmark/u);
+  await assert.rejects(runPrototypeRound(again, 'P01'), /frozen file changed: benchmark/u);
   assert.equal(again.judgeCalls(), 0);
   rmSync(root, { recursive: true });
 });
 
 test('a rerun refuses to resume when the protocol bundle changed', async () => {
   const root = mkdtempSync(join(tmpdir(), 'forge-round-'));
-  await runRound(deps(root), 'P01');
+  await runPrototypeRound(deps(root), 'P01');
   const again = deps(root);
   again.pins = { ...again.pins, protocolBundleSha256: sha256('bundle-2') };
-  await assert.rejects(runRound(again, 'P01'), (e: unknown) => e instanceof Error && e.message.split('protocol bundle changed').length === 2);
+  await assert.rejects(runPrototypeRound(again, 'P01'), (e: unknown) => e instanceof Error && e.message.split('protocol bundle changed').length === 2);
   rmSync(root, { recursive: true });
 });
 
 test('a legacy round without freeze.json resumes unpinned and says so', async () => {
   const root = mkdtempSync(join(tmpdir(), 'forge-round-'));
-  await runRound(deps(root), 'P01');
+  await runPrototypeRound(deps(root), 'P01');
   const dir = join(root, 'rounds', 'P01');
   rmSync(join(dir, 'freeze.json'));
   const again = deps(root);
   const messages: string[] = [];
   again.log = (m) => messages.push(m);
-  await runRound(again, 'P01');
+  await runPrototypeRound(again, 'P01');
   assert.equal(existsSync(join(dir, 'freeze.json')), false);
   assert.ok(messages.some((m) => m.includes('freeze.json')));
   rmSync(root, { recursive: true });
@@ -160,7 +160,7 @@ test('protocol forbidden words fail a candidate before judging', async () => {
   const root = mkdtempSync(join(tmpdir(), 'forge-round-'));
   const d = deps(root);
   d.rules = { ...d.rules, forbidden: [{ term: '水壶', protects: '测试' }] };
-  const tallies = await runRound(d, 'P01');
+  const tallies = await runPrototypeRound(d, 'P01');
   assert.deepEqual(tallies.map((t) => t.submission), ['W2']);
   const gate: unknown = JSON.parse(readFileSync(join(root, 'rounds', 'P01', 'gate.json'), 'utf8'));
   assert.match(JSON.stringify(gate), /forbidden_words/u);
@@ -169,14 +169,14 @@ test('protocol forbidden words fail a candidate before judging', async () => {
 
 test('labels come from assignLabels and an existing labels file for the same candidates is kept', async () => {
   const root = mkdtempSync(join(tmpdir(), 'forge-round-'));
-  await runRound(deps(root), 'P01');
+  await runPrototypeRound(deps(root), 'P01');
   const file = join(root, 'rounds', 'P01', 'labels.json');
   const assigned = assignLabels(['W1', 'W2'], 'seed-1');
   const expected = Object.fromEntries(Object.entries(assigned).map(([id, label]) => [label, id]));
   assert.deepEqual(JSON.parse(readFileSync(file, 'utf8')), expected);
   const swapped = Object.fromEntries(Object.entries(expected).map(([label, id]) => [label, id === 'W1' ? 'W2' : 'W1']));
   writeFileSync(file, JSON.stringify(swapped));
-  const rerun = await runRound(deps(root), 'P01');
+  const rerun = await runPrototypeRound(deps(root), 'P01');
   assert.deepEqual(JSON.parse(readFileSync(file, 'utf8')), swapped);
   assert.deepEqual(Object.fromEntries(rerun.map((t) => [t.label, t.submission])), swapped);
   rmSync(root, { recursive: true });
@@ -186,7 +186,7 @@ test('judges see anonymized text: curly quotes become corner quotes', async () =
   const root = mkdtempSync(join(tmpdir(), 'forge-round-'));
   const d = deps(root);
   d.writers = [fakeBackend('W1', 'DeepSeek', () => writerText('温芮说：“把旧水壶放回架上。”炉子还热着，邻里的人陆续醒来。', true))];
-  await runRound(d, 'P01');
+  await runPrototypeRound(d, 'P01');
   const prompts = d.judgePrompts();
   assert.ok(prompts.length > 0);
   assert.ok(prompts.every((p) => p.includes('「把旧水壶放回架上。」') && !p.includes('“')));
@@ -197,7 +197,7 @@ test('the four-family bar from the rules reaches the tally', async () => {
   const root = mkdtempSync(join(tmpdir(), 'forge-round-'));
   const d = deps(root);
   d.rules = { ...d.rules, barFourFamilies: 8 };
-  const tallies = await runRound(d, 'P01');
+  const tallies = await runPrototypeRound(d, 'P01');
   assert.equal(tallies.find((t) => t.submission === 'W1')?.tally.needed, 8);
   rmSync(root, { recursive: true });
 });
@@ -210,7 +210,7 @@ test('negation exceptions from the rules decide whether a forbidden term is nega
     const d = deps(root);
     d.writers = [fakeBackend('W1', 'DeepSeek', () => text), d.writers[1] ?? fakeBackend('W2', 'DeepSeek', () => text)];
     d.rules = { ...d.rules, forbidden: [{ term: '水壶', protects: '测试' }], negationExceptions: exceptions };
-    const tallies = await runRound(d, 'P01');
+    const tallies = await runPrototypeRound(d, 'P01');
     rmSync(root, { recursive: true });
     return tallies.map((t) => t.submission).sort();
   };
@@ -220,10 +220,10 @@ test('negation exceptions from the rules decide whether a forbidden term is nega
 
 test('a rerun refuses to resume when the judge families differ from the frozen ones', async () => {
   const root = mkdtempSync(join(tmpdir(), 'forge-round-'));
-  await runRound(deps(root), 'P01');
+  await runPrototypeRound(deps(root), 'P01');
   const again = deps(root);
   again.judges = again.judges.filter((j) => j.backend.family !== 'xAI');
-  await assert.rejects(runRound(again, 'P01'), /eligible families changed: Anthropic、Moonshot、OpenAI、xAI → Anthropic、Moonshot、OpenAI/u);
+  await assert.rejects(runPrototypeRound(again, 'P01'), /eligible families changed: Anthropic、Moonshot、OpenAI、xAI → Anthropic、Moonshot、OpenAI/u);
   assert.equal(again.judgeCalls(), 0);
   rmSync(root, { recursive: true });
 });
@@ -231,11 +231,27 @@ test('a rerun refuses to resume when the judge families differ from the frozen o
 test('a round writes cost.json summing every call record per backend', async () => {
   const root = mkdtempSync(join(tmpdir(), 'forge-round-'));
   const d = deps(root);
-  await runRound(d, 'P01');
+  await runPrototypeRound(d, 'P01');
   const cost: unknown = JSON.parse(readFileSync(join(root, 'rounds', 'P01', 'cost.json'), 'utf8'));
   assert.ok(typeof cost === 'object' && cost !== null && 'by_backend' in cost);
   const calls = readdirSync(join(root, 'rounds', 'P01', 'calls')).length;
   const summed = Object.values(JSON.parse(readFileSync(join(root, 'rounds', 'P01', 'cost.json'), 'utf8')).by_backend).reduce((n: number, b) => n + (typeof b === 'object' && b !== null && 'attempts' in b && typeof b.attempts === 'number' ? b.attempts : 0), 0);
   assert.equal(summed, calls);
   rmSync(root, { recursive: true });
+});
+
+test('the prototype runner refuses R rounds (they run on the step machine)', async () => {
+  const root = mkdtempSync(join(tmpdir(), 'forge-proto-'));
+  await assert.rejects(runPrototypeRound(deps(root), 'R01'), /only runs P rounds/u);
+  assert.equal(existsSync(join(root, 'rounds', 'R01')), false);
+  rmSync(root, { recursive: true });
+});
+
+test('the CLI resumes only existing P rounds: P01 with its brief passes, a new P id is refused', () => {
+  const dir = mkdtempSync(join(tmpdir(), 'forge-proto-refusal-'));
+  mkdirSync(join(dir, 'rounds', 'P01'), { recursive: true });
+  writeFileSync(join(dir, 'rounds', 'P01', 'brief.json'), '{}\n');
+  assert.equal(prototypeRoundRefusal(dir, 'P01'), null);
+  assert.match(prototypeRoundRefusal(dir, 'P02') ?? '', /new P rounds are refused/u);
+  rmSync(dir, { recursive: true });
 });

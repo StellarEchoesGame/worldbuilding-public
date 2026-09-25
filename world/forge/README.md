@@ -1,6 +1,6 @@
 # Echo Forge (WB-F1)
 
-Local system that grows the Stellar Echoes canon one scene at a time: gateway writers draft scenes, a mechanical fact gate checks them, four judge CLIs (Codex, Claude Code, Kimi Code, Grok) compare each draft blind against the row champion, and the owner decides in a local UI. Design: epic [#1](https://github.com/StellarEchoesGame/worldbuilding-public/issues/1). Slices so far: prototype [#2](https://github.com/StellarEchoesGame/worldbuilding-public/issues/2), protocol and offline engine core [#4](https://github.com/StellarEchoesGame/worldbuilding-public/issues/4).
+Local system that grows the Stellar Echoes canon one scene at a time: gateway writers draft scenes, a mechanical fact gate checks them, four judge CLIs (Codex, Claude Code, Kimi Code, Grok) compare each draft blind against the row champion, and the owner decides in a local UI. Design: epic [#1](https://github.com/StellarEchoesGame/worldbuilding-public/issues/1). Slices so far: prototype [#2](https://github.com/StellarEchoesGame/worldbuilding-public/issues/2), protocol and offline engine core [#4](https://github.com/StellarEchoesGame/worldbuilding-public/issues/4), round orchestrator [#6](https://github.com/StellarEchoesGame/worldbuilding-public/issues/6) (in progress).
 
 The executable rules live in [`PROTOCOL.md`](PROTOCOL.md) (Chinese). Its fenced `json protocol:<name>` blocks are what the engine reads: gate limits, forbidden words, negations, merge constants, maintainer activation classes and bars, calibration and agreement numbers. `judges.json` also names the maintainer and the merge editor (`merge_editor`, a fresh `claude -p` Opus session). `PROTOCOL.md`, `families.json` and `judges.json` form the protocol bundle; `forge protocol hash` prints its hash.
 
@@ -27,14 +27,34 @@ The canary plants a fresh token in copies of `PROTOCOL.md`, a sealed plaintext a
 
 Costs: `prices.json` (owner-maintained, `"currency": "USD"`, price per million input / output tokens per model id) turns reported tokens into cost; Claude and Grok report their own cost. Each round writes `rounds/<ID>/cost.json` with attempts (retries included), tokens and cost per backend.
 
-## Run a round
+## Run a prototype round (P rounds)
 
 ```bash
 npm run forge -- round run P01 --cell cells/R1-mothership.json
 npm run forge -- round status P01
 ```
 
-A new round writes `freeze.json`, which pins the canon, brief, benchmark file and writer config by content hash together with the protocol bundle hash. A rerun of the same command resumes: finished writer and judge calls are skipped, and the rerun refuses to continue if any pinned input changed. `--benchmark <file>` picks the benchmark version (default `benchmark/v0.json`). Per-call provenance is committed under `rounds/<ID>/calls/`; raw CLI transcripts stay in git-ignored `.runs/`.
+P01 is frozen: the command only resumes a P round that already has its `brief.json` and refuses new P ids (the prototype runner does not redact adapter errors); new rounds are R rounds. P01's `freeze.json` pins the canon, brief, benchmark file and writer config by content hash together with the protocol bundle hash. A rerun of the same command resumes: finished writer and judge calls are skipped, and the rerun refuses to continue if any pinned input changed. `--benchmark <file>` picks the benchmark version (default `benchmark/v0.json`). Per-call provenance is committed under `rounds/<ID>/calls/`; raw CLI transcripts stay in git-ignored `.runs/`.
+
+## Round orchestrator (F1-03, in progress)
+
+R rounds (`R01`, …) run on the step machine (`engine/runner.ts`, steps in `engine/steps/`). This build registers steps 00-start … 05a-gate-mech (start, topic, brief, baseline, freeze, sealed forecasts, seal, probe mirror, writers, mechanical gate); later slices append the rest.
+
+```bash
+npm run forge -- round start R01 --cell cells/R1-mothership.json   # 00-start + 01-topic; without --cell the owner picks in the UI (engine default after 24 h)
+npm run forge -- round run R01              # resume at the first unmarked step; --until / --from / --redo-from <step>, --quota-budget-min <n>
+npm run forge -- round status R01 --verify  # status.json, plus a check of the marker chain (--json for the raw file)
+npm run forge -- freeze --check R01         # drift of the freeze pins (bundle, benchmark, skills, marker inputs) against the tree
+```
+
+- One round at a time: `round start` refuses while an earlier `forge/rNN` or any local `forge/calib-<set>` branch is not merged into `main`. PRs are squash-merged, so a round counts as merged once local `main` holds its `rounds/RNN/start.json`: pull `main` after merging.
+- 00-start waits until the owner approved the current protocol bundle (owner-log `protocol_approved`), runs `doctor`, branches `forge/rNN` from `main` and opens the round sub-issue under the epic named in `github.json`.
+- Exit codes: 0 done · 1 usage (config, a live engine lock, another round open, wrong branch with a dirty tree, refused redo) · 2 waiting for the owner (`status.json` names what) · 3 integrity (marker, output or pinned-input drift, an owner file whose hash differs from its owner-log entry) · 4 blocked (probe mirror, public-content scan, quota, calibration, GitHub) · 5 failed (doctor red, void baseline, missing precondition).
+- Files: `rounds/RNN/` holds `start.json`, `topic-offer.json`, `topic.json`, `brief.json`, `freeze.json`, `probes.sha256`, `probe.json`, `submissions/`, `gate/`, `tasks/` and `calls/` (per-call provenance; errors redacted), `markers/<step>.json` (done-markers chained by hash; `markers/stale/<n>/` after a rewind or `--redo-from`), and `status.json` + `progress.jsonl` for the UI. Sealed forecasts and the nonce stay in `.sealed/RNN/`, raw transcripts in `.runs/`; the local mirror log `rounds/RNN/mirror.jsonl` and the engine lock `.forge.lock` are git-ignored too.
+- The engine commits on `forge/rNN` only at 03c (start, topic, brief, freeze, `probes.sha256`), after a public-content scan of every committed byte, and posts the forecast probe on the round issue before any writer runs. The repository is public, so the engine only accepts marked issues and probe comments whose author is an OWNER, MEMBER or COLLABORATOR of the repository; anyone else's are ignored.
+- `--redo-from` a step up to 03c is allowed until `probe.json` exists; 03b then reseals with a fresh nonce. A crash between 03c's `freeze.json.probe_created_at` amendment and its marker resumes normally.
+- Writers get tracked skill snapshots from `skills/*.md` (`systemic-worldbuilding`, `metabolic-cultures`); 02c pins their hashes in `freeze.json.skills`.
+- The engine never writes owner files (`owner-log.jsonl`, `rounds/*/audit.json`, `rounds/*/decision*.json`, `calibration/owner-answers.json`); only the UI does.
 
 ## Review in the UI
 

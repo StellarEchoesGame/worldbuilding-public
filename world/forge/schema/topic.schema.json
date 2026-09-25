@@ -1,0 +1,17 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "topic.schema.json",
+  "title": "WB-F1 round topic",
+  "description": "rounds/RNN/topic.json, created exclusively (first writer wins): by the UI (source ui, with an owner-log topic entry) or by the engine at 01-topic (auto_default after 24 h, fixed for round start --cell; no owner-log entry).",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["round", "row_id", "layer", "cell", "source", "chosen_at"],
+  "properties": {
+    "round": { "type": "string", "pattern": "^[A-Z]\\d{2}$" },
+    "row_id": { "type": "string", "minLength": 1 },
+    "layer": { "enum": ["mechanism", "sensory_scene", "character_want", "object", "quest_hook", "paintable_shot", "play_interface"] },
+    "cell": { "type": ["string", "null"], "minLength": 1 },
+    "source": { "enum": ["ui", "auto_default", "fixed"] },
+    "chosen_at": { "type": "string", "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(\\.\\d+)?Z$" }
+  }
+}

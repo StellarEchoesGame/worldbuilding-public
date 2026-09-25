@@ -2,6 +2,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { createHash } from 'node:crypto';
 import { readFileSync } from 'node:fs';
+import type { Resolution } from './bench-active.ts';
 import { buildFreeze, diffFreeze, parseFreeze, type FreezeInput } from './freeze.ts';
 import { isRecord, type JsonRecord } from './json.ts';
 import { loadSchema, validate, type Schema } from './schema.ts';
@@ -154,6 +155,78 @@ test('parseFreeze rejects values that are not freeze records', () => {
   ];
   for (const [value, pattern] of bad) {
     const r = parseFreeze(value);
+    assert.equal(r.ok, false);
+    if (!r.ok) assert.match(r.error, pattern);
+  }
+});
+
+const RESOLUTION: Resolution = { version: 'v1', sha256: utf8Hex('v1 body'), path: 'benchmark/v1.json', via: 'activate', since: '2026-09-02T00:00:00.000Z' };
+
+function roundInput(over: Partial<FreezeInput>): FreezeInput {
+  return input({
+    seed: '0123456789abcdef',
+    stepsSha256: utf8Hex('00-start\n01-topic'),
+    benchmarkResolution: RESOLUTION,
+    gateFamilies: ['Anthropic', 'OpenAI'],
+    trustStatusSha256: utf8Hex('status'),
+    skills: { 'metabolic-cultures': utf8Hex('m'), 'systemic-worldbuilding': utf8Hex('s') },
+    ...over,
+  });
+}
+
+test('a round freeze carries every pin, validates against the schema and round-trips through parseFreeze', () => {
+  const record = buildFreeze(roundInput({}));
+  assert.equal(record.seed, '0123456789abcdef');
+  assert.equal(record.steps_sha256, utf8Hex('00-start\n01-topic'));
+  assert.deepEqual(record.benchmark_resolution, RESOLUTION);
+  assert.deepEqual(record.gate_families, ['Anthropic', 'OpenAI']);
+  assert.equal(record.trust_status_sha256, utf8Hex('status'));
+  assert.deepEqual(validate(freezeSchema(), jsonCopy(record)), []);
+  const parsed = parseFreeze(jsonCopy(record));
+  assert.ok(parsed.ok);
+  assert.deepEqual(parsed.value, record);
+});
+
+test('a prototype freeze without round pins still parses, with the defaults', () => {
+  const good = jsonCopy(buildFreeze(input({})));
+  for (const key of ['seed', 'steps_sha256', 'benchmark_resolution', 'gate_families', 'trust_status_sha256', 'skills']) delete good[key];
+  assert.deepEqual(validate(freezeSchema(), good), []);
+  const parsed = parseFreeze(good);
+  assert.ok(parsed.ok);
+  assert.deepEqual([parsed.value.seed, parsed.value.steps_sha256, parsed.value.benchmark_resolution, parsed.value.gate_families, parsed.value.trust_status_sha256, parsed.value.skills], [null, null, null, [], null, {}]);
+});
+
+test('diffFreeze reports skill snapshot and step-list drift but never the trust status hash, seed or gate families', () => {
+  const pinned = buildFreeze(roundInput({}));
+  assert.deepEqual(diffFreeze(pinned, buildFreeze(roundInput({ trustStatusSha256: utf8Hex('rewritten at 11e'), seed: 'other', gateFamilies: ['xAI'] }))), []);
+  assert.deepEqual(diffFreeze(pinned, buildFreeze(roundInput({ skills: { 'metabolic-cultures': utf8Hex('edited'), 'new-skill': utf8Hex('n') } }))), [
+    'frozen skill changed: metabolic-cultures',
+    'skill not in freeze: new-skill',
+    'frozen skill missing: systemic-worldbuilding',
+  ]);
+  assert.deepEqual(diffFreeze(pinned, buildFreeze(roundInput({ stepsSha256: utf8Hex('longer pipeline') }))), ['step list changed']);
+  assert.deepEqual(diffFreeze(pinned, buildFreeze(roundInput({ benchmarkResolution: { ...RESOLUTION, sha256: utf8Hex('edited v1') } }))), ['benchmark file changed']);
+});
+
+test('the schema and parseFreeze reject malformed round pins', () => {
+  const schema = freezeSchema();
+  const good = jsonCopy(buildFreeze(roundInput({})));
+  const errorsFor = (patch: Record<string, unknown>): string[] => validate(schema, { ...good, ...patch });
+  assert.ok(errorsFor({ steps_sha256: 'short' }).some((e) => e.startsWith('$.steps_sha256:')));
+  assert.ok(errorsFor({ trust_status_sha256: 'ABC' }).some((e) => e.startsWith('$.trust_status_sha256:')));
+  assert.ok(errorsFor({ benchmark_resolution: { ...RESOLUTION, via: 'guess' } }).some((e) => e.startsWith('$.benchmark_resolution.via:')));
+  assert.ok(errorsFor({ benchmark_resolution: { ...RESOLUTION, extra: 1 } }).includes('$.benchmark_resolution: unexpected property extra'));
+  assert.ok(errorsFor({ seed: '' }).some((e) => e.startsWith('$.seed:')));
+  const bad: Array<[Record<string, unknown>, RegExp]> = [
+    [{ steps_sha256: 'x' }, /steps_sha256/u],
+    [{ trust_status_sha256: 7 }, /trust_status_sha256/u],
+    [{ seed: '' }, /seed/u],
+    [{ gate_families: ['OpenAI', ''] }, /gate_families/u],
+    [{ skills: { a: 'nothex' } }, /skills\.a/u],
+    [{ benchmark_resolution: { ...RESOLUTION, via: 'guess' } }, /via/u],
+  ];
+  for (const [patch, pattern] of bad) {
+    const r = parseFreeze({ ...good, ...patch });
     assert.equal(r.ok, false);
     if (!r.ok) assert.match(r.error, pattern);
   }

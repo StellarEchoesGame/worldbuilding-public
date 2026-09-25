@@ -5,3 +5,8 @@ local.json
 .homes/
 ui/dist/
 ui/.astro/
+# Engine lock (one mutating forge process per root) and the local mirror log (re-recorded from GitHub markers on a fresh clone).
+.forge.lock
+.forge.lock.*.tmp
+.forge.lock.*.stale
+rounds/*/mirror.jsonl

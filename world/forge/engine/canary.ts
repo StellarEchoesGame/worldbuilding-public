@@ -122,7 +122,7 @@ export async function runCanary(backends: readonly Backend[], opts: CanaryOption
       const started = Date.now();
       let r: CallResult;
       try {
-        r = await b.call(prompt, { role, timeoutMs: opts.timeoutMs });
+        r = await b.call(prompt, { role, timeoutMs: opts.timeoutMs, taskId: `canary-${b.id}`, attempt: 1 });
       } catch (e) {
         r = { ok: false, text: '', servedModel: null, version: null, ms: Date.now() - started, tokensIn: null, tokensOut: null, costUsd: null, error: `backend threw: ${e instanceof Error ? e.message : String(e)}`, raw: '' };
       }

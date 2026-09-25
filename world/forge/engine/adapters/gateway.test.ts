@@ -39,7 +39,7 @@ test('a missing env file becomes a failed call, not a thrown error', async () =>
     gatewayBaseUrl: 'https://gateway.example.invalid', gatewayEnvFile: '/nonexistent/forge.env', gatewayKeyVar: 'API_KEY',
     binaries: { codex: 'codex', claude: 'claude', kimi: 'kimi', grok: 'grok' }, codexAuth: '', kimiHome: '', privatePhrases: [],
   });
-  const r = await backend.call('p', { role: 'r', timeoutMs: 1000 });
+  const r = await backend.call('p', { role: 'r', timeoutMs: 1000, taskId: 't', attempt: 1 });
   assert.equal(r.ok, false);
   assert.match(r.error ?? '', /env file/);
 });

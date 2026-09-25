@@ -1,0 +1,292 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "calib-status.schema.json",
+  "title": "WB-F1 trust status",
+  "description": "calibration/status.json: current trust state per judge family, written only by engine/trust.ts (PR-C, which validates against this file) and read by engine/trust-status.ts for the freeze pins. families is keyed by family name; the schema subset has no $ref, so the per-family schema is repeated for every family of engine/config.ts FAMILIES (trust-status.test.ts keeps the copies identical). parseTrustStatus also checks what the subset cannot express: k <= n, alpha = 1 + k, beta = 1 + n - k (Beta(1,1) prior), ci90 ordered, qualified implies qualified_by, gate_judge implies gate_by, state suspended implies suspended_at.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema", "updated_after", "labels_sha256", "families"],
+  "properties": {
+    "schema": { "const": "trust-status/1" },
+    "updated_after": { "type": "string", "pattern": "^[A-Z]\\d{2}$" },
+    "labels_sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+    "families": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "DeepSeek": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["qualified", "qualified_by", "requal_used", "gate_judge", "gate_by", "agreement", "suspended_at"],
+            "properties": {
+              "qualified": { "type": "boolean" },
+              "qualified_by": { "type": ["string", "null"], "pattern": "^[A-Z]\\d{2}$" },
+              "requal_used": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": ["calibration_fail", "suspension"],
+                "properties": { "calibration_fail": { "type": "boolean" }, "suspension": { "type": "boolean" } }
+              },
+              "gate_judge": { "type": "boolean" },
+              "gate_by": { "type": ["string", "null"], "pattern": "^[A-Z]\\d{2}$" },
+              "agreement": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": ["epoch", "n", "k", "alpha", "beta", "mean", "ci90", "p_below", "state"],
+                "properties": {
+                  "epoch": { "type": "string", "pattern": "^[A-Z]\\d{2}$" },
+                  "n": { "type": "integer", "minimum": 0 },
+                  "k": { "type": "integer", "minimum": 0 },
+                  "alpha": { "type": "integer", "minimum": 1 },
+                  "beta": { "type": "integer", "minimum": 1 },
+                  "mean": { "type": "number", "minimum": 0, "maximum": 1 },
+                  "ci90": { "type": "array", "minItems": 2, "maxItems": 2, "items": { "type": "number", "minimum": 0, "maximum": 1 } },
+                  "p_below": { "type": "number", "minimum": 0, "maximum": 1 },
+                  "state": { "enum": ["ok", "flagged", "suspended"] }
+                }
+              },
+              "suspended_at": { "type": ["string", "null"], "pattern": "^[A-Z]\\d{2}$" }
+            }
+          },
+        "Anthropic": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["qualified", "qualified_by", "requal_used", "gate_judge", "gate_by", "agreement", "suspended_at"],
+            "properties": {
+              "qualified": { "type": "boolean" },
+              "qualified_by": { "type": ["string", "null"], "pattern": "^[A-Z]\\d{2}$" },
+              "requal_used": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": ["calibration_fail", "suspension"],
+                "properties": { "calibration_fail": { "type": "boolean" }, "suspension": { "type": "boolean" } }
+              },
+              "gate_judge": { "type": "boolean" },
+              "gate_by": { "type": ["string", "null"], "pattern": "^[A-Z]\\d{2}$" },
+              "agreement": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": ["epoch", "n", "k", "alpha", "beta", "mean", "ci90", "p_below", "state"],
+                "properties": {
+                  "epoch": { "type": "string", "pattern": "^[A-Z]\\d{2}$" },
+                  "n": { "type": "integer", "minimum": 0 },
+                  "k": { "type": "integer", "minimum": 0 },
+                  "alpha": { "type": "integer", "minimum": 1 },
+                  "beta": { "type": "integer", "minimum": 1 },
+                  "mean": { "type": "number", "minimum": 0, "maximum": 1 },
+                  "ci90": { "type": "array", "minItems": 2, "maxItems": 2, "items": { "type": "number", "minimum": 0, "maximum": 1 } },
+                  "p_below": { "type": "number", "minimum": 0, "maximum": 1 },
+                  "state": { "enum": ["ok", "flagged", "suspended"] }
+                }
+              },
+              "suspended_at": { "type": ["string", "null"], "pattern": "^[A-Z]\\d{2}$" }
+            }
+          },
+        "OpenAI": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["qualified", "qualified_by", "requal_used", "gate_judge", "gate_by", "agreement", "suspended_at"],
+            "properties": {
+              "qualified": { "type": "boolean" },
+              "qualified_by": { "type": ["string", "null"], "pattern": "^[A-Z]\\d{2}$" },
+              "requal_used": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": ["calibration_fail", "suspension"],
+                "properties": { "calibration_fail": { "type": "boolean" }, "suspension": { "type": "boolean" } }
+              },
+              "gate_judge": { "type": "boolean" },
+              "gate_by": { "type": ["string", "null"], "pattern": "^[A-Z]\\d{2}$" },
+              "agreement": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": ["epoch", "n", "k", "alpha", "beta", "mean", "ci90", "p_below", "state"],
+                "properties": {
+                  "epoch": { "type": "string", "pattern": "^[A-Z]\\d{2}$" },
+                  "n": { "type": "integer", "minimum": 0 },
+                  "k": { "type": "integer", "minimum": 0 },
+                  "alpha": { "type": "integer", "minimum": 1 },
+                  "beta": { "type": "integer", "minimum": 1 },
+                  "mean": { "type": "number", "minimum": 0, "maximum": 1 },
+                  "ci90": { "type": "array", "minItems": 2, "maxItems": 2, "items": { "type": "number", "minimum": 0, "maximum": 1 } },
+                  "p_below": { "type": "number", "minimum": 0, "maximum": 1 },
+                  "state": { "enum": ["ok", "flagged", "suspended"] }
+                }
+              },
+              "suspended_at": { "type": ["string", "null"], "pattern": "^[A-Z]\\d{2}$" }
+            }
+          },
+        "Moonshot": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["qualified", "qualified_by", "requal_used", "gate_judge", "gate_by", "agreement", "suspended_at"],
+            "properties": {
+              "qualified": { "type": "boolean" },
+              "qualified_by": { "type": ["string", "null"], "pattern": "^[A-Z]\\d{2}$" },
+              "requal_used": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": ["calibration_fail", "suspension"],
+                "properties": { "calibration_fail": { "type": "boolean" }, "suspension": { "type": "boolean" } }
+              },
+              "gate_judge": { "type": "boolean" },
+              "gate_by": { "type": ["string", "null"], "pattern": "^[A-Z]\\d{2}$" },
+              "agreement": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": ["epoch", "n", "k", "alpha", "beta", "mean", "ci90", "p_below", "state"],
+                "properties": {
+                  "epoch": { "type": "string", "pattern": "^[A-Z]\\d{2}$" },
+                  "n": { "type": "integer", "minimum": 0 },
+                  "k": { "type": "integer", "minimum": 0 },
+                  "alpha": { "type": "integer", "minimum": 1 },
+                  "beta": { "type": "integer", "minimum": 1 },
+                  "mean": { "type": "number", "minimum": 0, "maximum": 1 },
+                  "ci90": { "type": "array", "minItems": 2, "maxItems": 2, "items": { "type": "number", "minimum": 0, "maximum": 1 } },
+                  "p_below": { "type": "number", "minimum": 0, "maximum": 1 },
+                  "state": { "enum": ["ok", "flagged", "suspended"] }
+                }
+              },
+              "suspended_at": { "type": ["string", "null"], "pattern": "^[A-Z]\\d{2}$" }
+            }
+          },
+        "xAI": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["qualified", "qualified_by", "requal_used", "gate_judge", "gate_by", "agreement", "suspended_at"],
+            "properties": {
+              "qualified": { "type": "boolean" },
+              "qualified_by": { "type": ["string", "null"], "pattern": "^[A-Z]\\d{2}$" },
+              "requal_used": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": ["calibration_fail", "suspension"],
+                "properties": { "calibration_fail": { "type": "boolean" }, "suspension": { "type": "boolean" } }
+              },
+              "gate_judge": { "type": "boolean" },
+              "gate_by": { "type": ["string", "null"], "pattern": "^[A-Z]\\d{2}$" },
+              "agreement": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": ["epoch", "n", "k", "alpha", "beta", "mean", "ci90", "p_below", "state"],
+                "properties": {
+                  "epoch": { "type": "string", "pattern": "^[A-Z]\\d{2}$" },
+                  "n": { "type": "integer", "minimum": 0 },
+                  "k": { "type": "integer", "minimum": 0 },
+                  "alpha": { "type": "integer", "minimum": 1 },
+                  "beta": { "type": "integer", "minimum": 1 },
+                  "mean": { "type": "number", "minimum": 0, "maximum": 1 },
+                  "ci90": { "type": "array", "minItems": 2, "maxItems": 2, "items": { "type": "number", "minimum": 0, "maximum": 1 } },
+                  "p_below": { "type": "number", "minimum": 0, "maximum": 1 },
+                  "state": { "enum": ["ok", "flagged", "suspended"] }
+                }
+              },
+              "suspended_at": { "type": ["string", "null"], "pattern": "^[A-Z]\\d{2}$" }
+            }
+          },
+        "Alibaba": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["qualified", "qualified_by", "requal_used", "gate_judge", "gate_by", "agreement", "suspended_at"],
+            "properties": {
+              "qualified": { "type": "boolean" },
+              "qualified_by": { "type": ["string", "null"], "pattern": "^[A-Z]\\d{2}$" },
+              "requal_used": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": ["calibration_fail", "suspension"],
+                "properties": { "calibration_fail": { "type": "boolean" }, "suspension": { "type": "boolean" } }
+              },
+              "gate_judge": { "type": "boolean" },
+              "gate_by": { "type": ["string", "null"], "pattern": "^[A-Z]\\d{2}$" },
+              "agreement": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": ["epoch", "n", "k", "alpha", "beta", "mean", "ci90", "p_below", "state"],
+                "properties": {
+                  "epoch": { "type": "string", "pattern": "^[A-Z]\\d{2}$" },
+                  "n": { "type": "integer", "minimum": 0 },
+                  "k": { "type": "integer", "minimum": 0 },
+                  "alpha": { "type": "integer", "minimum": 1 },
+                  "beta": { "type": "integer", "minimum": 1 },
+                  "mean": { "type": "number", "minimum": 0, "maximum": 1 },
+                  "ci90": { "type": "array", "minItems": 2, "maxItems": 2, "items": { "type": "number", "minimum": 0, "maximum": 1 } },
+                  "p_below": { "type": "number", "minimum": 0, "maximum": 1 },
+                  "state": { "enum": ["ok", "flagged", "suspended"] }
+                }
+              },
+              "suspended_at": { "type": ["string", "null"], "pattern": "^[A-Z]\\d{2}$" }
+            }
+          },
+        "Zhipu": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["qualified", "qualified_by", "requal_used", "gate_judge", "gate_by", "agreement", "suspended_at"],
+            "properties": {
+              "qualified": { "type": "boolean" },
+              "qualified_by": { "type": ["string", "null"], "pattern": "^[A-Z]\\d{2}$" },
+              "requal_used": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": ["calibration_fail", "suspension"],
+                "properties": { "calibration_fail": { "type": "boolean" }, "suspension": { "type": "boolean" } }
+              },
+              "gate_judge": { "type": "boolean" },
+              "gate_by": { "type": ["string", "null"], "pattern": "^[A-Z]\\d{2}$" },
+              "agreement": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": ["epoch", "n", "k", "alpha", "beta", "mean", "ci90", "p_below", "state"],
+                "properties": {
+                  "epoch": { "type": "string", "pattern": "^[A-Z]\\d{2}$" },
+                  "n": { "type": "integer", "minimum": 0 },
+                  "k": { "type": "integer", "minimum": 0 },
+                  "alpha": { "type": "integer", "minimum": 1 },
+                  "beta": { "type": "integer", "minimum": 1 },
+                  "mean": { "type": "number", "minimum": 0, "maximum": 1 },
+                  "ci90": { "type": "array", "minItems": 2, "maxItems": 2, "items": { "type": "number", "minimum": 0, "maximum": 1 } },
+                  "p_below": { "type": "number", "minimum": 0, "maximum": 1 },
+                  "state": { "enum": ["ok", "flagged", "suspended"] }
+                }
+              },
+              "suspended_at": { "type": ["string", "null"], "pattern": "^[A-Z]\\d{2}$" }
+            }
+          },
+        "MiniMax": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["qualified", "qualified_by", "requal_used", "gate_judge", "gate_by", "agreement", "suspended_at"],
+            "properties": {
+              "qualified": { "type": "boolean" },
+              "qualified_by": { "type": ["string", "null"], "pattern": "^[A-Z]\\d{2}$" },
+              "requal_used": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": ["calibration_fail", "suspension"],
+                "properties": { "calibration_fail": { "type": "boolean" }, "suspension": { "type": "boolean" } }
+              },
+              "gate_judge": { "type": "boolean" },
+              "gate_by": { "type": ["string", "null"], "pattern": "^[A-Z]\\d{2}$" },
+              "agreement": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": ["epoch", "n", "k", "alpha", "beta", "mean", "ci90", "p_below", "state"],
+                "properties": {
+                  "epoch": { "type": "string", "pattern": "^[A-Z]\\d{2}$" },
+                  "n": { "type": "integer", "minimum": 0 },
+                  "k": { "type": "integer", "minimum": 0 },
+                  "alpha": { "type": "integer", "minimum": 1 },
+                  "beta": { "type": "integer", "minimum": 1 },
+                  "mean": { "type": "number", "minimum": 0, "maximum": 1 },
+                  "ci90": { "type": "array", "minItems": 2, "maxItems": 2, "items": { "type": "number", "minimum": 0, "maximum": 1 } },
+                  "p_below": { "type": "number", "minimum": 0, "maximum": 1 },
+                  "state": { "enum": ["ok", "flagged", "suspended"] }
+                }
+              },
+              "suspended_at": { "type": ["string", "null"], "pattern": "^[A-Z]\\d{2}$" }
+            }
+          }
+      }
+    }
+  }
+}
