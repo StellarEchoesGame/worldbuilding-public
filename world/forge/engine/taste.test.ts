@@ -9,10 +9,18 @@ const bench: Benchmark = {
 const t1 = '温芮把旧水壶放回架上，炉子还热着。';
 const t2 = '林澈在走廊尽头停下，听见循环泵换了节拍。';
 
-test('parseBenchmark reads the committed v0 shape', () => {
-  const r = parseBenchmark({ version: 'v0', decisive: 'q1', minQuoteChars: 8, role: 'r', instructions: 'i', questions: [{ id: 'q1', text: 't' }] });
+test('parseBenchmark reads the taste section and the committed v0 file validates against the schema', async () => {
+  const { readFileSync } = await import('node:fs');
+  const { loadSchema, validate } = await import('./schema.ts');
+  const file: unknown = JSON.parse(readFileSync(new URL('../benchmark/v0.json', import.meta.url), 'utf8'));
+  const schema = loadSchema(JSON.parse(readFileSync(new URL('../schema/benchmark.schema.json', import.meta.url), 'utf8')));
+  assert.ok(schema.ok);
+  if (schema.ok) assert.deepEqual(validate(schema.value, file), []);
+  const r = parseBenchmark(file);
   assert.equal(r.ok, true);
-  assert.equal(parseBenchmark({ version: 'v0', decisive: 'q9', role: 'r', instructions: 'i', questions: [{ id: 'q1', text: 't' }] }).ok, false);
+  if (r.ok) assert.equal(r.value.minQuoteChars, 8);
+  const bad = parseBenchmark({ version: 'v0', taste: { decisive: 'q9', role: 'r', instructions: 'i', min_quote_chars: 8, questions: [{ id: 'q1', text: 't' }] } });
+  assert.equal(bad.ok, false);
 });
 
 test('tastePrompt shows both texts with numbered labels and the questions', () => {

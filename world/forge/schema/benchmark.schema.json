@@ -1,0 +1,83 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "benchmark.schema.json",
+  "title": "WB-F1 benchmark version",
+  "description": "Only maintainer-owned keys plus metadata. Any other top-level key is a protected key and is rejected (additionalProperties false).",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["version", "parent", "author", "reasons", "taste", "measures", "cliche_list", "interface_checklist_extra", "decoy_recipe", "baseline_rebuilds", "bars"],
+  "properties": {
+    "version": { "type": "string", "pattern": "^v[0-9]+(\\.[0-9]+)?(-[a-z]+)?$" },
+    "parent": { "type": ["string", "null"] },
+    "created_at": { "type": "string" },
+    "author": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind"],
+      "properties": {
+        "kind": { "type": "string", "enum": ["prototype", "maintainer", "owner"] },
+        "model": { "type": ["string", "null"] }
+      }
+    },
+    "reasons": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["change", "evidence_ids", "expected_effect"],
+        "properties": {
+          "change": { "type": "string", "minLength": 1, "maxLength": 300 },
+          "evidence_ids": { "type": "array", "items": { "type": "string", "pattern": "^E-[A-Za-z0-9-]+$" } },
+          "expected_effect": { "type": "string", "maxLength": 300 }
+        }
+      }
+    },
+    "taste": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["role", "instructions", "questions", "decisive", "min_quote_chars"],
+      "properties": {
+        "role": { "type": "string", "minLength": 1, "maxLength": 600 },
+        "instructions": { "type": "string", "minLength": 1, "maxLength": 1200 },
+        "questions": {
+          "type": "array",
+          "minItems": 2,
+          "maxItems": 3,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["id", "text"],
+            "properties": { "id": { "type": "string", "pattern": "^q[1-3]$" }, "text": { "type": "string", "minLength": 1, "maxLength": 120 } }
+          }
+        },
+        "decisive": { "type": "string", "pattern": "^q[1-3]$" },
+        "min_quote_chars": { "type": "integer", "minimum": 4, "maximum": 40 }
+      }
+    },
+    "measures": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "hook": { "type": "object", "additionalProperties": false, "required": ["active"], "properties": { "active": { "type": "boolean" }, "prompt": { "type": "string", "maxLength": 1200 } } },
+        "skin_swap": { "type": "object", "additionalProperties": false, "required": ["active"], "properties": { "active": { "type": "boolean" }, "prompt": { "type": "string", "maxLength": 1200 } } },
+        "cold_reader": { "type": "object", "additionalProperties": false, "required": ["active"], "properties": { "active": { "type": "boolean" }, "prompt": { "type": "string", "maxLength": 1200 } } },
+        "surprise": { "type": "object", "additionalProperties": false, "required": ["active"], "properties": { "active": { "type": "boolean" }, "prompt": { "type": "string", "maxLength": 1200 } } }
+      }
+    },
+    "cliche_list": { "type": "array", "maxItems": 200, "items": { "type": "string", "minLength": 1, "maxLength": 30 } },
+    "interface_checklist_extra": { "type": "array", "maxItems": 20, "items": { "type": "string", "minLength": 1, "maxLength": 80 } },
+    "decoy_recipe": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["details", "instructions"],
+      "properties": { "details": { "type": "integer", "minimum": 1, "maximum": 10 }, "instructions": { "type": "string", "maxLength": 800 } }
+    },
+    "baseline_rebuilds": { "type": "array", "items": { "type": "string" } },
+    "bars": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["beats_champion_four_families"],
+      "properties": { "beats_champion_four_families": { "type": "integer", "enum": [7, 8] } }
+    }
+  }
+}

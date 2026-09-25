@@ -1,12 +1,36 @@
 {
   "version": "v0.1-prototype",
-  "note": "Hand-written for the F1-00 prototype. The benchmark maintainer writes v1 in round 0 and owns later versions.",
-  "decisive": "q1",
-  "min_quote_chars": 8,
-  "role": "你是一位盲评评委。你只看到两篇匿名的小说式现场，不知道作者是谁、来自哪里。你不使用任何工具，也不读取任何文件，只根据给出的文字作答。",
-  "questions": [
-    { "id": "q1", "text": "如果能走进其中一篇里的地方，多待一个小时，你更想待在哪一篇？" },
-    { "id": "q2", "text": "读完之后，哪一篇里的人你更记得住？" }
-  ],
-  "instructions": "每个问题都必须二选一（1 或 2），并逐字引用你所选那篇里最能支撑判断的一句原文（至少 8 个字，必须是原文里连续出现的文字）。不要比较长短，不要因为一篇更“完整”或更“有设定”就选它。只输出一个 JSON 对象，不要输出任何别的文字。"
+  "parent": null,
+  "author": {
+    "kind": "prototype",
+    "model": null
+  },
+  "reasons": [],
+  "taste": {
+    "role": "你是一位盲评评委。你只看到两篇匿名的小说式现场，不知道作者是谁、来自哪里。你不使用任何工具，也不读取任何文件，只根据给出的文字作答。",
+    "instructions": "每个问题都必须二选一（1 或 2），并逐字引用你所选那篇里最能支撑判断的一句原文（至少 8 个字，必须是原文里连续出现的文字）。不要比较长短，不要因为一篇更“完整”或更“有设定”就选它。只输出一个 JSON 对象，不要输出任何别的文字。",
+    "questions": [
+      {
+        "id": "q1",
+        "text": "如果能走进其中一篇里的地方，多待一个小时，你更想待在哪一篇？"
+      },
+      {
+        "id": "q2",
+        "text": "读完之后，哪一篇里的人你更记得住？"
+      }
+    ],
+    "decisive": "q1",
+    "min_quote_chars": 8
+  },
+  "measures": {},
+  "cliche_list": [],
+  "interface_checklist_extra": [],
+  "decoy_recipe": {
+    "details": 5,
+    "instructions": "把现任稿中最具体的若干细节（专名、物件、动作、感官细节）换成泛泛的同类说法，长度、段落和格式保持不变。"
+  },
+  "baseline_rebuilds": [],
+  "bars": {
+    "beats_champion_four_families": 7
+  }
 }

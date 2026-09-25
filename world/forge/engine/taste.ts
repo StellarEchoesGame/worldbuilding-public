@@ -23,14 +23,17 @@ export interface Verdict {
   quotes: Record<string, string>;
 }
 
+/** Reads the taste section of a benchmark version file (see schema/benchmark.schema.json). */
 export function parseBenchmark(value: unknown): Result<Benchmark> {
   const version = readString(value, 'version');
-  const decisive = readString(value, 'decisive');
-  const role = readString(value, 'role');
-  const instructions = readString(value, 'instructions');
-  const list = readArray(value, 'questions');
-  if (version === null || decisive === null || role === null || instructions === null || list === null) {
-    return err('benchmark: version, decisive, role, instructions and questions are required');
+  const taste = readRecord(value, 'taste');
+  const decisive = readString(taste, 'decisive');
+  const role = readString(taste, 'role');
+  const instructions = readString(taste, 'instructions');
+  const list = readArray(taste, 'questions');
+  const minQuoteChars = readNumber(taste, 'min_quote_chars');
+  if (version === null || decisive === null || role === null || instructions === null || list === null || minQuoteChars === null) {
+    return err('benchmark: version and taste.{role, instructions, questions, decisive, min_quote_chars} are required');
   }
   const questions: Question[] = [];
   for (const q of list) {
@@ -40,7 +43,6 @@ export function parseBenchmark(value: unknown): Result<Benchmark> {
     questions.push({ id, text });
   }
   if (!questions.some((q) => q.id === decisive)) return err(`benchmark: decisive question ${decisive} is not defined`);
-  const minQuoteChars = readNumber(value, 'min_quote_chars') ?? 8;
   return ok({ version, decisive, minQuoteChars, role, instructions, questions });
 }
 
