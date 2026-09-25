@@ -1,7 +1,9 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { binomialTailP, bradleyTerry, familySigns, tallyChampionPair, type SessionPair } from './tally.ts';
+import { binomialTailP, bradleyTerry, buildRoundTally, familySigns, tallyChampionPair, type RoundTallyInput, type SessionPair } from './tally.ts';
 import type { Family } from './config.ts';
+import type { FamilySessions, SessionCall } from './pairs.ts';
+import { IntegrityError } from './task.ts';
 
 function sp(family: Family, index: number, fwd: 1 | 2 | null, rev: 1 | 2 | null): SessionPair {
   return { family, index, forward: fwd, reverse: rev };
@@ -180,4 +182,45 @@ test('Bradley-Terry requires positive pseudo-counts, since a zero-win item would
   assert.throws(() => bradleyTerry(['a', 'b'], [], 0), RangeError);
   const r = bradleyTerry(['a', 'b'], [{ a: 'a', b: 'b', winsA: 3, winsB: 0 }], 1e-6);
   assert.ok(Object.values(r).every(Number.isFinite), JSON.stringify(r));
+});
+
+/** One champion-pair family: `picks[k]` = [fwd, rev] text ids picked in session k ('DECOY' = preferred the decoy). */
+function fam(family: Family, picks: ReadonlyArray<readonly [string, string]>, opts: { shadow?: boolean; dropped?: boolean } = {}): FamilySessions {
+  const call = (pick: string, order: 'fwd' | 'rev', k: number): SessionCall => ({
+    taskId: `taste-W1-${family}-s${k}-${order}`, order, status: 'ok', decisive: pick === 'DECOY' ? 'W1' : pick, preferredDecoy: pick === 'DECOY',
+  });
+  return {
+    family, shadow: opts.shadow === true, sessions: picks.map(([f, r], k): [SessionCall, SessionCall] => [call(f, 'fwd', k), call(r, 'rev', k)]),
+    reruns: opts.dropped === true ? [1] : [], dropped: opts.dropped === true ? 'void_after_rerun' : null,
+  };
+}
+
+function roundInput(pairs: RoundTallyInput['championPairs'], bar: 7 | 8 = 7): RoundTallyInput {
+  return {
+    round: 'R01', benchmark: 'v1', champion: 'owner_pick', sessionPairs: 2, barFourFamilies: bar, labels: { W1: 'B', W2: 'A', W3: 'C' },
+    championPairs: pairs, auxPairs: [], gate: { W1: 'pass', W2: 'pass', W3: 'split' }, measures: {},
+    voids: { calls: 0, void_tasks: 0, retried_tasks: 0, session_reruns: 0, dropped_families: 0 },
+  };
+}
+
+test('buildRoundTally: decoy-preferred sessions void the family (|E| 4 → 3, bar 6/6); shadow never counts; ≤ 2 → trial; 8/8 only tightens', () => {
+  const win = (sub: string): ReadonlyArray<readonly [string, string]> => [[sub, sub], [sub, sub]];
+  const w1 = { pair: 'W1', submission: 'W1', sessions: [fam('Anthropic', win('W1')), fam('OpenAI', win('W1')), fam('xAI', win('W1')), fam('Moonshot', [['W1', 'W1'], ['DECOY', 'W1']], { dropped: true })] };
+  const w2 = { pair: 'W2', submission: 'W2', sessions: [fam('Anthropic', win('W2')), fam('OpenAI', win('W2')), fam('xAI', win('W2')), fam('Moonshot', [['W2', 'W2'], ['BASE', 'W2']])] };
+  const w3 = { pair: 'W3', submission: 'W3', sessions: [fam('Anthropic', [['BASE', 'W3'], ['W3', 'BASE']]), fam('OpenAI', win('W3')), fam('xAI', win('W3'), { shadow: true })] };
+  const seven = buildRoundTally(roundInput([w1, w2, w3]));
+  assert.deepEqual(seven.champion_pairs.map((p) => [p.pair, p.label, p.e.length, p.bar, p.total_wins, p.beats_champion, p.trial]), [
+    ['W2', 'A', 4, '7/8', 7, true, false],
+    ['W1', 'B', 3, '6/6', 6, true, false],
+    ['W3', 'C', 2, 'trial', 2, false, true],
+  ]);
+  const p1 = seven.champion_pairs[1];
+  assert.deepEqual([p1?.dropped, p1?.e], [['Moonshot'], ['Anthropic', 'OpenAI', 'xAI']]);
+  assert.deepEqual(seven.champion_pairs[2]?.shadow, ['xAI']);
+  assert.equal(buildRoundTally(roundInput([w1, w2, w3], 8)).champion_pairs[0]?.beats_champion, false, '8/8 needs every session');
+});
+
+test('buildRoundTally refuses bars.session_pairs other than 2 (the 7/8 and 6/6 bars are defined for 2 session-pairs)', () => {
+  assert.throws(() => buildRoundTally({ ...roundInput([]), sessionPairs: 3 }), (e: unknown) => e instanceof IntegrityError && /session_pairs must be 2, got 3/u.test(e.message));
+  assert.equal(buildRoundTally(roundInput([])).session_pairs, 2);
 });

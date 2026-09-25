@@ -1,0 +1,106 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "measures.schema.json",
+  "title": "WB-F1 round measures (06d)",
+  "description": "One schema for the four engine-written files rounds/RNN/measures/{recall,skin-swap,cold-reader,producer}/<sub>.json (engine/steps/measures.ts RecallFile, SkinSwapFile, ColdReaderFile, ProducerFile). recall: calls, details, hook. skin-swap: status ok|void|inactive, family, task, lineup, answer, verdict. cold-reader: status, family, task, read. producer: status pass|fail|unjudged, mechanical, calls, items.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["round", "submission"],
+  "properties": {
+    "round": { "type": "string", "pattern": "^[A-Z]\\d{2}$" },
+    "submission": { "type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9-]*$" },
+    "status": { "enum": ["ok", "void", "inactive", "pass", "fail", "unjudged"] },
+    "family": { "type": ["string", "null"], "minLength": 1 },
+    "task": { "type": ["string", "null"], "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,150}$" },
+    "calls": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["family", "task", "status"],
+        "properties": {
+          "family": { "type": "string", "minLength": 1 },
+          "task": { "type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,150}$" },
+          "status": { "enum": ["ok", "void"] },
+          "image": { "type": ["string", "null"], "maxLength": 30 },
+          "quote": { "type": ["string", "null"] },
+          "error": { "type": ["string", "null"] }
+        }
+      }
+    },
+    "details": {
+      "type": "array",
+      "maxItems": 6,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "submission", "image", "quote", "families"],
+        "properties": {
+          "id": { "type": "string", "pattern": "^D[1-6]$" },
+          "submission": { "type": "string", "minLength": 1 },
+          "image": { "type": "string", "minLength": 2, "maxLength": 30 },
+          "quote": { "type": "string", "minLength": 1 },
+          "families": { "type": "array", "minItems": 1, "items": { "type": "string", "minLength": 1 } }
+        }
+      }
+    },
+    "hook": { "type": ["number", "null"], "minimum": 0, "maximum": 1 },
+    "lineup": {
+      "type": "array",
+      "maxItems": 4,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["label", "row_id"],
+        "properties": { "label": { "enum": ["甲", "乙", "丙", "丁"] }, "row_id": { "type": "string", "minLength": 1 } }
+      }
+    },
+    "answer": { "enum": ["甲", "乙", "丙", "丁", null] },
+    "verdict": {
+      "type": ["object", "null"],
+      "additionalProperties": false,
+      "required": ["pick", "quote", "reason", "recognised"],
+      "properties": {
+        "pick": { "enum": ["甲", "乙", "丙", "丁"] },
+        "quote": { "type": "string", "minLength": 1 },
+        "reason": { "type": "string", "minLength": 1, "maxLength": 60 },
+        "recognised": { "type": "boolean" }
+      }
+    },
+    "read": {
+      "type": ["object", "null"],
+      "additionalProperties": false,
+      "required": ["where", "who", "go", "clarity"],
+      "properties": {
+        "where": {
+          "type": "object", "additionalProperties": false, "required": ["answer", "quote"],
+          "properties": { "answer": { "type": "string", "minLength": 1, "maxLength": 40 }, "quote": { "type": "string", "minLength": 1 } }
+        },
+        "who": {
+          "type": "object", "additionalProperties": false, "required": ["name", "wants", "cost", "quote"],
+          "properties": {
+            "name": { "type": "string", "minLength": 1, "maxLength": 12 },
+            "wants": { "type": "string", "minLength": 1, "maxLength": 40 },
+            "cost": { "type": ["string", "null"], "maxLength": 40 },
+            "quote": { "type": "string", "minLength": 1 }
+          }
+        },
+        "go": {
+          "type": "object", "additionalProperties": false, "required": ["answer", "quote"],
+          "properties": { "answer": { "type": ["string", "null"], "maxLength": 40 }, "quote": { "type": ["string", "null"] } }
+        },
+        "clarity": { "type": "integer", "minimum": 0, "maximum": 3 }
+      }
+    },
+    "mechanical": { "type": "array", "items": { "type": "string", "minLength": 1 } },
+    "items": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "ok", "missing"],
+        "properties": { "id": { "type": "string", "minLength": 1 }, "ok": { "type": "boolean" }, "missing": { "type": ["string", "null"], "maxLength": 40 } }
+      }
+    }
+  }
+}

@@ -4,7 +4,7 @@ import { DEFAULT_STANCES, type BriefJson, type FactRow } from '../steps/brief.ts
 import type { TaskSpec } from '../task.ts';
 import { charCount, sentenceKey, splitSentences, stripMarkdown } from '../text.ts';
 import { parseWriterOutput, type WriterOutput } from '../writer-output.ts';
-import { wrapText } from './fenced.ts';
+import { mustWrap } from './fenced.ts';
 import { ROLE_BASELINE } from './roles.ts';
 
 /** A skill snapshot inlined into the writer prompt (skills/<name>.md, SHA-256 pinned in freeze.json.skills). */
@@ -47,13 +47,6 @@ function list(items: readonly string[]): string {
   return items.length === 0 ? '- （无）' : items.map((s) => `- ${s}`).join('\n');
 }
 
-/** `wrapText`, or a crash: material that already holds its seed-derived delimiter could forge the block boundary. */
-function wrapped(label: string, text: string, seed: string, key: string): string {
-  const r = wrapText(label, text, seed, key);
-  if (!r.ok) throw new Error(`writing: cannot wrap ${label}: ${r.error}`);
-  return r.value;
-}
-
 function canonMaterial(brief: BriefJson): string {
   return brief.canon_passages.map((p) => `【${p.file}】\n${p.text}`).join('\n\n');
 }
@@ -85,7 +78,7 @@ function skillBlock(skill: SkillSnapshot, seed: string): string {
   return [
     `# 构思方法（技能快照：${skill.name}）`,
     '下面是一份构思方法，只用来帮助你想清楚这个现场；成稿里不要提到它，也不要输出它要求的文件、表格或报告。它举的例子不是本世界的事实，一切以上面的正典和事实表为准。',
-    wrapped('技能', skill.text, seed, `write:skill:${skill.name}`),
+    mustWrap('writing', '技能', skill.text, seed, `write:skill:${skill.name}`),
   ].join('\n');
 }
 
@@ -105,7 +98,7 @@ export interface BriefSections {
 
 export function briefSections(brief: BriefJson): BriefSections {
   return {
-    canon: ['# 正典摘录（不得违背；下面的正典原文和事实表是唯一依据）', wrapped('正典', canonMaterial(brief), brief.seed, 'write:canon')].join('\n'),
+    canon: ['# 正典摘录（不得违背；下面的正典原文和事实表是唯一依据）', mustWrap('writing', '正典', canonMaterial(brief), brief.seed, 'write:canon')].join('\n'),
     facts: [
       '# 事实表（07 §2 核心事实与本行已登记事实，按括号里的地位理解；状态与路径实例只是一次实例，不能当成普遍规律）',
       brief.facts.length === 0 ? '- （无）' : brief.facts.map(factLine).join('\n'),
@@ -207,7 +200,7 @@ function baselinePrompt(brief: BriefJson, sentences: readonly string[], connecti
   const c = brief.cell;
   return [
     '# 带编号的正典句子（唯一的材料）',
-    wrapped('正典句', numbered, brief.seed, 'baseline:sentences'),
+    mustWrap('writing', '正典句', numbered, brief.seed, 'baseline:sentences'),
     '',
     taskBlock(brief),
     '',

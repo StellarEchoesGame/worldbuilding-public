@@ -1,4 +1,5 @@
 import { createHash } from 'node:crypto';
+import { IntegrityError } from '../calls.ts';
 import { isRecord, type JsonRecord } from '../json.ts';
 import { err, ok, type Result } from '../result.ts';
 import { normalizeForQuote, quoteIn, sentenceKey } from '../text.ts';
@@ -126,6 +127,16 @@ export function wrapText(label: string, text: string, seed: string, key: string)
   const tag = wrapTag(seed, key);
   if (text.includes(`·${tag}〕`)) return err('text contains its delimiter token');
   return ok(`〔${label}·${tag}〕\n${text}\n〔${label}完·${tag}〕`);
+}
+
+/**
+ * `wrapText`, or an IntegrityError (exit 3): material that already holds its seed-derived delimiter could forge the
+ * block boundary, so the round stops instead of sending the prompt. `scope` names the task family in the message.
+ */
+export function mustWrap(scope: string, label: string, text: string, seed: string, key: string): string {
+  const r = wrapText(label, text, seed, key);
+  if (!r.ok) throw new IntegrityError(`${scope}: cannot wrap ${label}: ${r.error}`);
+  return r.value;
 }
 
 /** The material wrapped under `label` by wrapText (first occurrence), or null; the only way fakes read prompt material. */

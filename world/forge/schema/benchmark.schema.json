@@ -55,7 +55,12 @@
           }
         },
         "decisive": { "type": "string", "pattern": "^q[1-3]$" },
-        "min_quote_chars": { "type": "integer", "minimum": 4, "maximum": 40 }
+        "min_quote_chars": { "type": "integer", "minimum": 4, "maximum": 40 },
+        "template": {
+          "type": ["string", "null"],
+          "maxLength": 2000,
+          "description": "Optional prompt template (replay class): each of {TEXT_1} {TEXT_2} {DECOY_PAIR} {QUESTIONS} exactly once, no other {NAME} slot, no ``` fence (engine/tasks/taste-pair.ts renderTasteTemplate). Absent or null = the engine default template."
+        }
       }
     },
     "measures": {

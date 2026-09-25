@@ -3,7 +3,7 @@ import { err, ok, type Result } from '../result.ts';
 import type { BriefJson } from '../steps/brief.ts';
 import { TASK_ID, type TaskSpec } from '../task.ts';
 import { normalizeForQuote } from '../text.ts';
-import { isOneOf, outputBlock, parseFencedJson, readCapped, wrapText } from './fenced.ts';
+import { isOneOf, mustWrap, outputBlock, parseFencedJson, readCapped } from './fenced.ts';
 import { ROLE_FORECAST } from './roles.ts';
 import { briefSections } from './writing.ts';
 
@@ -77,11 +77,10 @@ const TASK_LINES: readonly string[] = [
 export function forecastTask(brief: BriefJson, forecaster: Forecaster): TaskSpec<Forecast[]> {
   const id = `forecast-${forecaster.backendId}`;
   if (!TASK_ID.test(id)) throw new Error(`forecastTask: ${JSON.stringify(id)} is not a task id`);
-  const wrapped = wrapText('简报', renderBrief(brief), brief.seed, 'forecast:brief');
-  if (!wrapped.ok) throw new Error(`forecastTask: the brief ${wrapped.error}`);
+  const wrapped = mustWrap('forecastTask', '简报', renderBrief(brief), brief.seed, 'forecast:brief');
   const prompt = [
     '# 写作简报（与写手看到的相同，不含写法立场、技能、格式规则与输出格式）',
-    wrapped.value,
+    wrapped,
     '',
     ...TASK_LINES,
     '',

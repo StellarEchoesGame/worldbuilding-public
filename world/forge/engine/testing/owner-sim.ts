@@ -1,5 +1,5 @@
-import { existsSync, readFileSync } from 'node:fs';
-import { join, relative, sep } from 'node:path';
+import { existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { dirname, join, relative, sep } from 'node:path';
 import { readArray, readNumber, readRecord, readString } from '../json.ts';
 import { OWNER_ANSWERS, OWNER_LOG, calibSet, ownerInputs, parseOwnerLogEntry, sha256Bytes, validateOwnerFile, type OwnerSchemaName } from '../owner-inputs.ts';
 import { CHAMPION_ID, displayText, submissionFor } from '../round.ts';
@@ -40,6 +40,12 @@ export interface OwnerSim {
   /** Approves the approval diff recorded in rounds/<round>/final.json. */
   approveDiff(round: string): void;
   /** Forge-root-relative owner file → SHA-256 of what the sim last wrote. */
+  /** A round owner file (`rounds/RNN/audit.json`, `decision*.json`) written by hand without its owner-log line. */
+  writeUnlogged(rel: string, value: unknown): void;
+  /** A hand edit of a round owner file after the UI logged it. */
+  tamper(rel: string, edit: (text: string) => string): void;
+  /** Deletes a round owner file (a test resetting the owner's state). */
+  removeOwnerFile(rel: string): void;
   expected(): ReadonlyMap<string, string>;
 }
 
@@ -47,9 +53,16 @@ function fileSha(path: string): string {
   return sha256Bytes(readFileSync(path));
 }
 
+/** The round owner files the hand-edit helpers may touch (a subset of context.ts OWNER_ONLY). */
+const ROUND_OWNER_FILE = /^rounds\/[A-Z]\d{2}\/(?:audit|decision[^/]*)\.json$/u;
+
 export function ownerSim(root: string, clock: FakeClock): OwnerSim {
   const expected = new Map<string, string>();
   const rel = (path: string): string => relative(root, path).split(sep).join('/');
+  const ownerPath = (what: string, file: string): string => {
+    if (!ROUND_OWNER_FILE.test(file)) throw new Error(`owner-sim ${what}: ${file} is not a round owner file`);
+    return join(root, file);
+  };
 
   /** Throws on a UI refusal; validates the written file and the new owner-log line; then advances the clock. */
   function done(what: string, r: OwnerResult, schema: OwnerSchemaName | null): void {
@@ -142,6 +155,21 @@ export function ownerSim(root: string, clock: FakeClock): OwnerSim {
       const sha = readString(readJson(join(root, 'rounds', round, 'final.json')), 'approval_diff_sha256');
       if (sha === null) throw new Error(`owner-sim approveDiff: rounds/${round}/final.json has no approval_diff_sha256`);
       done('approveDiff', submitDiffApproval(root, round, sha, clock.now()), null);
+    },
+    writeUnlogged(file, value) {
+      const path = ownerPath('writeUnlogged', file);
+      mkdirSync(dirname(path), { recursive: true });
+      writeFileSync(path, `${JSON.stringify(value, null, 2)}\n`);
+      expected.set(file, fileSha(path));
+    },
+    tamper(file, edit) {
+      const path = ownerPath('tamper', file);
+      writeFileSync(path, edit(readFileSync(path, 'utf8')));
+      expected.set(file, fileSha(path));
+    },
+    removeOwnerFile(file) {
+      rmSync(ownerPath('removeOwnerFile', file));
+      expected.delete(file);
     },
     expected: () => new Map(expected),
   };

@@ -1,0 +1,82 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "tally.schema.json",
+  "title": "WB-F1 round tally (v2)",
+  "description": "rounds/RNN/tally.json, written by engine/steps/aggregate.ts (08) through engine/tally.ts buildRoundTally. Champion pairs: E after void drops (shadow families never count), bars by |E| (4 → 7/8 or 8/8, 3 → 6/6, ≤ 2 → trial), family sign counts, descriptive session-level binomial p. Aux pairs order only (Bradley–Terry, 0.5 pseudo-counts). Map values (wins_by_family, ordering, gate, measures) are keyed by family or text id; the schema subset cannot constrain dynamic keys.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["v", "round", "benchmark", "champion", "session_pairs", "champion_pairs", "aux_pairs", "ordering", "gate", "measures", "voids"],
+  "properties": {
+    "v": { "const": 2 },
+    "round": { "type": "string", "pattern": "^[A-Z]\\d{2}$" },
+    "benchmark": { "type": "string", "minLength": 1 },
+    "champion": { "enum": ["baseline", "owner_pick", "golden"] },
+    "session_pairs": { "type": "integer", "minimum": 1 },
+    "champion_pairs": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["pair", "submission", "label", "e", "shadow", "dropped", "wins_by_family", "total_wins", "needed", "bar", "beats_champion", "trial", "signs", "p_value"],
+        "properties": {
+          "pair": { "type": "string", "minLength": 1 },
+          "submission": { "type": "string", "minLength": 1 },
+          "label": { "type": "string", "minLength": 1 },
+          "e": { "type": "array", "items": { "type": "string", "minLength": 1 } },
+          "shadow": { "type": "array", "items": { "type": "string", "minLength": 1 } },
+          "dropped": { "type": "array", "items": { "type": "string", "minLength": 1 } },
+          "wins_by_family": { "type": "object" },
+          "total_wins": { "type": "integer", "minimum": 0 },
+          "needed": { "type": "integer", "minimum": 0 },
+          "bar": { "type": "string", "pattern": "^(\\d+/\\d+|trial)$" },
+          "beats_champion": { "type": "boolean" },
+          "trial": { "type": "boolean" },
+          "signs": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["plus", "minus", "tie"],
+            "properties": {
+              "plus": { "type": "integer", "minimum": 0 },
+              "minus": { "type": "integer", "minimum": 0 },
+              "tie": { "type": "integer", "minimum": 0 }
+            }
+          },
+          "p_value": { "type": "number", "minimum": 0, "maximum": 1 }
+        }
+      }
+    },
+    "aux_pairs": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["pair", "kind", "left", "right", "wins_left", "wins_right", "families", "void_calls"],
+        "properties": {
+          "pair": { "type": "string", "minLength": 1 },
+          "kind": { "enum": ["sub_sub", "anchor"] },
+          "left": { "type": "string", "minLength": 1 },
+          "right": { "type": "string", "minLength": 1 },
+          "wins_left": { "type": "integer", "minimum": 0 },
+          "wins_right": { "type": "integer", "minimum": 0 },
+          "families": { "type": "array", "items": { "type": "string", "minLength": 1 } },
+          "void_calls": { "type": "integer", "minimum": 0 }
+        }
+      }
+    },
+    "ordering": { "type": "object" },
+    "gate": { "type": "object" },
+    "measures": { "type": "object" },
+    "voids": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["calls", "void_tasks", "retried_tasks", "session_reruns", "dropped_families"],
+      "properties": {
+        "calls": { "type": "integer", "minimum": 0 },
+        "void_tasks": { "type": "integer", "minimum": 0 },
+        "retried_tasks": { "type": "integer", "minimum": 0 },
+        "session_reruns": { "type": "integer", "minimum": 0 },
+        "dropped_families": { "type": "integer", "minimum": 0 }
+      }
+    }
+  }
+}

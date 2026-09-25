@@ -1,0 +1,32 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "pairs.schema.json",
+  "title": "WB-F1 round taste pairs (rounds/RNN/pairs.json from 06b, rounds/RNN/taste/aux/pairs.json from 06c)",
+  "description": "Engine-written index of the pairs judged in a round. texts maps a text id (W1, W1-r2, BASE, DECOY, AN1, AN2) to {id, kind, file, sha256, authors}; the schema subset cannot type map values, so engine/pairs.ts parsePairsFile checks every entry (id equals its key, kind, forge-root-relative file, SHA-256 of the display text judges saw, author families).",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["round", "champion", "texts", "pairs"],
+  "properties": {
+    "round": { "type": "string", "pattern": "^[A-Z][0-9]{2}$" },
+    "champion": { "type": "string", "minLength": 1, "description": "Text id of the round's champion (BASE)." },
+    "texts": { "type": "object" },
+    "pairs": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "kind", "left", "right", "families", "shadow", "effective", "dropped"],
+        "properties": {
+          "id": { "type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9.-]*$", "description": "Champion pair: the submission id; aux pair: tasks/ids.ts auxPairId (W1.W3, W1.AN1)." },
+          "kind": { "type": "string", "enum": ["champion", "sub_sub", "anchor"] },
+          "left": { "type": "string", "minLength": 1 },
+          "right": { "type": "string", "minLength": 1 },
+          "families": { "type": "array", "items": { "type": "string", "enum": ["DeepSeek", "Anthropic", "OpenAI", "Moonshot", "xAI", "Alibaba", "Zhipu", "MiniMax"] } },
+          "shadow": { "type": "array", "items": { "type": "string", "enum": ["DeepSeek", "Anthropic", "OpenAI", "Moonshot", "xAI", "Alibaba", "Zhipu", "MiniMax"] } },
+          "effective": { "type": "array", "items": { "type": "string", "enum": ["DeepSeek", "Anthropic", "OpenAI", "Moonshot", "xAI", "Alibaba", "Zhipu", "MiniMax"] } },
+          "dropped": { "type": "array", "items": { "type": "string", "enum": ["DeepSeek", "Anthropic", "OpenAI", "Moonshot", "xAI", "Alibaba", "Zhipu", "MiniMax"] } }
+        }
+      }
+    }
+  }
+}

@@ -90,6 +90,16 @@ test('benchmark/v0.json is valid as a first version', () => {
   assert.equal(verdict.ok, true);
 });
 
+test('bench validate applies the engine parse rules: a taste.template breaking the slot rules is an error', () => {
+  const candidate = v0();
+  const taste = readRecord(candidate, 'taste');
+  assert.ok(taste !== null);
+  candidate['taste'] = { ...taste, template: '{TEXT_1}{TEXT_2}{QUESTIONS}' };
+  const verdict = validateBenchmark(candidate, null, ctx());
+  assert.equal(verdict.ok, false);
+  assert.ok(verdict.errors.includes('benchmark: taste.template: slot {DECOY_PAIR} must occur exactly once, found 0'), verdict.errors.join('\n'));
+});
+
 for (const key of PROTECTED_KEYS) {
   test(`protected key ${key} is rejected`, () => {
     const { parent, child } = family();

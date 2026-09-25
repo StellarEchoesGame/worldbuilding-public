@@ -1,0 +1,674 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "gate.schema.json",
+  "title": "WB-F1 LLM gate files",
+  "description": "Container of the four gate file schemas (the forge schema subset has no $defs or oneOf): validate gate/defect.json against properties.defect, gate/llm.json against properties.llm, gate/<sub>.json against properties.submission and gate/resubmit.json against properties.resubmit.",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "defect": {
+      "description": "gate/defect.json (05b): the round's one defect copy, of one seeded gate-bound submission.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "round",
+        "status",
+        "type",
+        "submission",
+        "task",
+        "against",
+        "sentence_no",
+        "original",
+        "injected",
+        "injected_span",
+        "copy",
+        "copy_sha256",
+        "error"
+      ],
+      "properties": {
+        "round": {
+          "type": "string",
+          "pattern": "^[A-Z]\\d{2}$"
+        },
+        "status": {
+          "enum": [
+            "ok",
+            "void",
+            "none"
+          ]
+        },
+        "type": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "submission": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "task": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "pattern": "^defect-"
+        },
+        "against": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "sentence_no": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 1
+        },
+        "original": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "injected": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "injected_span": {
+          "type": [
+            "object",
+            "null"
+          ],
+          "additionalProperties": false,
+          "required": [
+            "start",
+            "end"
+          ],
+          "properties": {
+            "start": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "end": {
+              "type": "integer",
+              "minimum": 0
+            }
+          }
+        },
+        "copy": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "copy_sha256": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "error": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      }
+    },
+    "llm": {
+      "description": "gate/llm.json (05c summary).",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "round",
+        "defect_submission",
+        "defect_status",
+        "voided_families",
+        "submissions",
+        "unverified"
+      ],
+      "properties": {
+        "round": {
+          "type": "string",
+          "pattern": "^[A-Z]\\d{2}$"
+        },
+        "defect_submission": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "defect_status": {
+          "enum": [
+            "ok",
+            "void",
+            "none"
+          ]
+        },
+        "voided_families": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "family",
+              "reason"
+            ],
+            "properties": {
+              "family": {
+                "enum": [
+                  "DeepSeek",
+                  "Anthropic",
+                  "OpenAI",
+                  "Moonshot",
+                  "xAI",
+                  "Alibaba",
+                  "Zhipu",
+                  "MiniMax"
+                ]
+              },
+              "reason": {
+                "enum": [
+                  "missed_copy",
+                  "void_call"
+                ]
+              }
+            }
+          }
+        },
+        "submissions": {
+          "type": "object",
+          "description": "Gate-bound submission id -> {outcome, defect_unverified}; keys are writer slots, validated by the engine reader.",
+          "additionalProperties": true
+        },
+        "unverified": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]*$"
+          }
+        }
+      }
+    },
+    "submission": {
+      "description": "gate/<sub>.json (05c for writer slots, 05d for <slot>-r2).",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "round",
+        "submission",
+        "resubmission",
+        "outcome",
+        "judges",
+        "counted",
+        "defect_unverified",
+        "path_instance_notes",
+        "negated_flags"
+      ],
+      "properties": {
+        "round": {
+          "type": "string",
+          "pattern": "^[A-Z]\\d{2}$"
+        },
+        "submission": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]*$"
+        },
+        "resubmission": {
+          "type": "boolean"
+        },
+        "outcome": {
+          "enum": [
+            "pass",
+            "fail",
+            "split",
+            "unverified"
+          ]
+        },
+        "judges": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "family",
+              "n",
+              "reserve",
+              "real",
+              "copy",
+              "caught",
+              "voided"
+            ],
+            "properties": {
+              "family": {
+                "enum": [
+                  "DeepSeek",
+                  "Anthropic",
+                  "OpenAI",
+                  "Moonshot",
+                  "xAI",
+                  "Alibaba",
+                  "Zhipu",
+                  "MiniMax"
+                ]
+              },
+              "n": {
+                "type": "integer",
+                "minimum": 1
+              },
+              "reserve": {
+                "type": "boolean"
+              },
+              "real": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "task",
+                  "status",
+                  "yes",
+                  "verdict",
+                  "error"
+                ],
+                "properties": {
+                  "task": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,150}$"
+                  },
+                  "status": {
+                    "enum": [
+                      "ok",
+                      "void"
+                    ]
+                  },
+                  "yes": {
+                    "type": [
+                      "boolean",
+                      "null"
+                    ]
+                  },
+                  "verdict": {
+                    "description": "GateVerdict; null when the call is void.",
+                    "type": [
+                      "object",
+                      "null"
+                    ],
+                    "additionalProperties": false,
+                    "required": [
+                      "contradiction",
+                      "findings",
+                      "yes"
+                    ],
+                    "properties": {
+                      "contradiction": {
+                        "type": "boolean"
+                      },
+                      "findings": {
+                        "type": "array",
+                        "maxItems": 8,
+                        "items": {
+                          "type": "object",
+                          "additionalProperties": false,
+                          "required": [
+                            "quote",
+                            "against",
+                            "reason",
+                            "class"
+                          ],
+                          "properties": {
+                            "quote": {
+                              "type": "string",
+                              "minLength": 1,
+                              "maxLength": 300
+                            },
+                            "against": {
+                              "type": "string",
+                              "minLength": 1,
+                              "maxLength": 40
+                            },
+                            "reason": {
+                              "type": "string",
+                              "minLength": 1,
+                              "maxLength": 80
+                            },
+                            "class": {
+                              "enum": [
+                                "binding",
+                                "path_instance"
+                              ]
+                            }
+                          }
+                        }
+                      },
+                      "yes": {
+                        "type": "boolean"
+                      }
+                    }
+                  },
+                  "error": {
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  }
+                }
+              },
+              "copy": {
+                "type": [
+                  "object",
+                  "null"
+                ],
+                "additionalProperties": false,
+                "required": [
+                  "task",
+                  "status",
+                  "yes",
+                  "verdict",
+                  "error"
+                ],
+                "properties": {
+                  "task": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,150}$"
+                  },
+                  "status": {
+                    "enum": [
+                      "ok",
+                      "void"
+                    ]
+                  },
+                  "yes": {
+                    "type": [
+                      "boolean",
+                      "null"
+                    ]
+                  },
+                  "verdict": {
+                    "description": "GateVerdict; null when the call is void.",
+                    "type": [
+                      "object",
+                      "null"
+                    ],
+                    "additionalProperties": false,
+                    "required": [
+                      "contradiction",
+                      "findings",
+                      "yes"
+                    ],
+                    "properties": {
+                      "contradiction": {
+                        "type": "boolean"
+                      },
+                      "findings": {
+                        "type": "array",
+                        "maxItems": 8,
+                        "items": {
+                          "type": "object",
+                          "additionalProperties": false,
+                          "required": [
+                            "quote",
+                            "against",
+                            "reason",
+                            "class"
+                          ],
+                          "properties": {
+                            "quote": {
+                              "type": "string",
+                              "minLength": 1,
+                              "maxLength": 300
+                            },
+                            "against": {
+                              "type": "string",
+                              "minLength": 1,
+                              "maxLength": 40
+                            },
+                            "reason": {
+                              "type": "string",
+                              "minLength": 1,
+                              "maxLength": 80
+                            },
+                            "class": {
+                              "enum": [
+                                "binding",
+                                "path_instance"
+                              ]
+                            }
+                          }
+                        }
+                      },
+                      "yes": {
+                        "type": "boolean"
+                      }
+                    }
+                  },
+                  "error": {
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  }
+                }
+              },
+              "caught": {
+                "type": [
+                  "boolean",
+                  "null"
+                ]
+              },
+              "voided": {
+                "type": "boolean"
+              }
+            }
+          }
+        },
+        "counted": {
+          "type": "array",
+          "maxItems": 2,
+          "items": {
+            "enum": [
+              "DeepSeek",
+              "Anthropic",
+              "OpenAI",
+              "Moonshot",
+              "xAI",
+              "Alibaba",
+              "Zhipu",
+              "MiniMax"
+            ]
+          }
+        },
+        "defect_unverified": {
+          "type": "boolean"
+        },
+        "path_instance_notes": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "family",
+              "quote",
+              "against",
+              "reason"
+            ],
+            "properties": {
+              "family": {
+                "enum": [
+                  "DeepSeek",
+                  "Anthropic",
+                  "OpenAI",
+                  "Moonshot",
+                  "xAI",
+                  "Alibaba",
+                  "Zhipu",
+                  "MiniMax"
+                ]
+              },
+              "quote": {
+                "type": "string"
+              },
+              "against": {
+                "type": "string"
+              },
+              "reason": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "negated_flags": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "resubmit": {
+      "description": "gate/resubmit.json (05d).",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "round",
+        "entries",
+        "passing",
+        "voided_families"
+      ],
+      "properties": {
+        "round": {
+          "type": "string",
+          "pattern": "^[A-Z]\\d{2}$"
+        },
+        "entries": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "slot",
+              "submission",
+              "reason",
+              "writer",
+              "mechanical",
+              "checks",
+              "outcome"
+            ],
+            "properties": {
+              "slot": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]*$"
+              },
+              "submission": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]*$"
+              },
+              "reason": {
+                "enum": [
+                  "mechanical_fail",
+                  "gate_fail"
+                ]
+              },
+              "writer": {
+                "enum": [
+                  "ok",
+                  "void"
+                ]
+              },
+              "mechanical": {
+                "enum": [
+                  "pass",
+                  "fail",
+                  "missing"
+                ]
+              },
+              "checks": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "name",
+                    "ok",
+                    "detail"
+                  ],
+                  "properties": {
+                    "name": {
+                      "type": "string"
+                    },
+                    "ok": {
+                      "type": "boolean"
+                    },
+                    "detail": {
+                      "type": "string"
+                    },
+                    "flags": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                }
+              },
+              "outcome": {
+                "enum": [
+                  "pass",
+                  "fail",
+                  "split",
+                  "unverified",
+                  null
+                ]
+              }
+            }
+          }
+        },
+        "passing": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]*$"
+          }
+        },
+        "voided_families": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "family",
+              "reason"
+            ],
+            "properties": {
+              "family": {
+                "enum": [
+                  "DeepSeek",
+                  "Anthropic",
+                  "OpenAI",
+                  "Moonshot",
+                  "xAI",
+                  "Alibaba",
+                  "Zhipu",
+                  "MiniMax"
+                ]
+              },
+              "reason": {
+                "enum": [
+                  "missed_copy",
+                  "void_call"
+                ]
+              }
+            }
+          },
+          "description": "Every family voided this round after 05d: the 05c list plus families that voided a call in the 05d pass (a voided family never re-gates, 10a)."
+        }
+      }
+    }
+  }
+}

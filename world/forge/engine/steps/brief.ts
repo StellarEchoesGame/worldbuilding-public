@@ -37,6 +37,18 @@ export interface RegressionRow {
   quote: string;
 }
 
+/** A brief forbidden move as the gate judges and the defect writer see it (`X01｜出现未登记的第三方势力`). */
+export interface ForbiddenRow {
+  /** X01… in brief order. */
+  id: string;
+  text: string;
+}
+
+/** The brief's forbidden moves with pack-visible ids X01, X02, … (brief order; the brief is frozen, so ids are stable within a round). */
+export function forbiddenRows(brief: Pick<BriefJson, 'forbidden'>): ForbiddenRow[] {
+  return brief.forbidden.map((text, i) => ({ id: `X${String(i + 1).padStart(2, '0')}`, text }));
+}
+
 export interface CanonPassage {
   /** world/current-relative file. */
   file: string;

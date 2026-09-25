@@ -169,6 +169,7 @@ test('malformed block shapes are reported naming the block', () => {
     ['activation', '["taste"]', /protocol:activation: block must be an object/u],
     ['bars', '{"beats_champion_four_families": 7, "session_pairs": 2, "hold_rounds": -1}', /protocol:bars: hold_rounds must be a non-negative integer/u],
     ['bars', '{"beats_champion_four_families": 7.5, "session_pairs": 2, "hold_rounds": 3}', /protocol:bars: beats_champion_four_families must be a non-negative integer/u],
+    ['bars', '{"beats_champion_four_families": 7, "session_pairs": 3, "hold_rounds": 3}', /protocol:bars: session_pairs must be 2 \(the pair schedule and tally assume two session pairs per family\)/u],
     ['limits', '{"max_chars": 2500, "max_new_proper_nouns": 3, "max_registered": 6, "max_without_extends": 3}', /protocol:limits: missing key max_rule_ratio/u],
     ['limits', '{"max_chars": 2500, "max_new_proper_nouns": 3, "max_registered": 6, "max_without_extends": 3, "max_rule_ratio": 0.15, "max_char": 1}', /protocol:limits: unknown key max_char/u],
     ['limits', '{"max_chars": 2500, "max_new_proper_nouns": 3, "max_registered": 6, "max_without_extends": 3, "max_rule_ratio": 1.5}', /protocol:limits: max_rule_ratio must be a number between 0 and 1/u],
