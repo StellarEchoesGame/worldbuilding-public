@@ -1,0 +1,52 @@
+---
+import Base from '../../../layouts/Base.astro';
+import { dataDir, loadRound } from '../../../lib/data.ts';
+import { REASONS } from '../../../lib/owner.ts';
+
+const id = Astro.params.id ?? '';
+const view = /^[A-Z]\d{2}$/u.test(id) ? loadRound(dataDir(), id) : null;
+if (view === null) return new Response('没有这一轮', { status: 404 });
+if (view.audit === null) return Astro.redirect(`/rounds/${id}/audit`, 303);
+if (view.decision !== null) return Astro.redirect(`/rounds/${id}`, 303);
+const error = Astro.url.searchParams.get('error');
+const glossary: Record<string, string> = { 平: '可信但记不住', 假: '违和，不像这个世界', 乱: '信息过载或与正典冲突', 偏: '没写出选题要的东西' };
+---
+<Base title={`${view.id} 决策`}>
+  <p class="muted">轮次 {view.id} · 决策 · <a href={`/rounds/${view.id}`}>返回结果</a></p>
+  <h1>决策</h1>
+  {error !== null && <p class="error">{error}</p>}
+  <form method="post" action={`/api/rounds/${view.id}/decision`}>
+    <div class="card">
+      <h3>选哪一篇</h3>
+      {view.candidates.map((c) => (
+        <label class="choice"><input type="radio" name="pick" value={c.label} required /> 候选 {c.label}　<span class="muted">{c.totalWins ?? '—'}/{c.needed ?? '—'} {c.trial ? '试验对' : c.beats ? '胜擂' : '未胜擂'}</span></label>
+      ))}
+      <label class="choice"><input type="radio" name="pick" value="none" /> 都不选（本轮不产出）</label>
+    </div>
+    <div class="card">
+      <h3>登记哪些事实（最多 6 条，可跨稿）</h3>
+      {view.candidates.map((c) => (
+        <div style="margin-bottom:.6rem">
+          <b>候选 {c.label}</b>
+          {c.facts.length === 0 && <span class="muted"> 无作者事实</span>}
+          {c.facts.map((f) => (
+            <label class="choice"><input type="checkbox" name="facts" value={`${c.label}:${f.id}`} checked={f.register} /> {f.id} {f.claim}<span class="muted">（{f.status}；延伸自 {f.extends || '无'}）</span></label>
+          ))}
+        </div>
+      ))}
+    </div>
+    <div class="card">
+      <h3>没选的稿子主要差在哪</h3>
+      {REASONS.map((r) => <label class="choice"><input type="radio" name="reason" value={r} required /> {r}：{glossary[r]}</label>)}
+    </div>
+    <div class="card">
+      <h3>个人最喜欢</h3>
+      <select name="fav">{view.candidates.map((c) => <option value={c.label}>候选 {c.label}</option>)}<option value="none">都不</option></select>
+      <h3 style="margin-top:1rem">其他</h3>
+      <label class="choice"><input type="checkbox" name="happened" /> 这是已发生事件（默认只是示例现场）</label>
+      <label class="choice"><input type="radio" name="publish" value="no" checked /> 暂不同步 Wiki</label>
+      <label class="choice"><input type="radio" name="publish" value="yes" /> 同步 Wiki</label>
+    </div>
+    <button class="btn" type="submit">提交决策（不能修改）</button>
+  </form>
+</Base>

@@ -1,4 +1,4 @@
-import { spawn } from 'node:child_process';
+import { spawn, spawnSync } from 'node:child_process';
 import { randomBytes } from 'node:crypto';
 import { resolve } from 'node:path';
 
@@ -21,20 +21,29 @@ export async function launchUi(root: string, args: readonly string[]): Promise<v
   }
   const token = randomBytes(24).toString('hex');
   const astro = resolve(root, 'node_modules/.bin/astro');
-  const child = spawn(astro, ['dev', '--root', 'ui', '--host', '127.0.0.1', '--port', String(UI_PORT)], {
+  process.stdout.write('forge ui: 构建界面…\n');
+  const build = spawnSync(astro, ['build', '--root', 'ui'], { cwd: root, stdio: ['ignore', 'ignore', 'inherit'] });
+  if (build.status !== 0) {
+    process.stderr.write('forge ui: 构建失败。\n');
+    process.exit(1);
+  }
+  const child = spawn(process.execPath, [resolve(root, 'ui/dist/server/entry.mjs')], {
     cwd: root,
-    env: { ...process.env, FORGE_DATA_DIR: dataDir, FORGE_UI_TOKEN: token },
+    env: { ...process.env, FORGE_DATA_DIR: dataDir, FORGE_UI_TOKEN: token, HOST: '127.0.0.1', PORT: String(UI_PORT) },
     stdio: ['ignore', 'pipe', 'inherit'],
   });
   let opened = false;
   child.stdout.on('data', (chunk: Buffer) => {
     const text = chunk.toString('utf8');
     process.stdout.write(text.replaceAll(token, '<token>'));
-    if (!opened && /127\.0\.0\.1:\d+/u.test(text)) {
+    if (!opened && /listening/iu.test(text)) {
       opened = true;
       const url = `http://127.0.0.1:${UI_PORT}/login?t=${token}`;
       if (args.includes('--no-open')) process.stdout.write('forge ui: 未自动打开浏览器（--no-open）。\n');
-      else spawn('open', [url], { stdio: 'ignore' }).unref();
+      else {
+        process.stdout.write(`forge ui: 已在浏览器中打开 http://127.0.0.1:${UI_PORT}/（按 Ctrl+C 停止）\n`);
+        spawn('open', [url], { stdio: 'ignore' }).unref();
+      }
     }
   });
   await new Promise<void>((done) => child.on('close', () => done()));

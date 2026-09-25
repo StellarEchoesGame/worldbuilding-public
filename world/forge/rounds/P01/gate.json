@@ -1,0 +1,167 @@
+{
+  "W1": {
+    "pass": true,
+    "checks": [
+      {
+        "name": "length",
+        "ok": true,
+        "detail": "1144 / 2500 字"
+      },
+      {
+        "name": "new_proper_nouns",
+        "ok": true,
+        "detail": "2 个：灰边邻里、压边锤"
+      },
+      {
+        "name": "registered_facts",
+        "ok": true,
+        "detail": "3 条登记"
+      },
+      {
+        "name": "source_quotes",
+        "ok": true,
+        "detail": "全部逐字出自正文"
+      },
+      {
+        "name": "facts_without_extends",
+        "ok": true,
+        "detail": "0 条无延伸依据"
+      },
+      {
+        "name": "rule_sentences",
+        "ok": true,
+        "detail": "规则句占比 0.0%"
+      },
+      {
+        "name": "interface",
+        "ok": true,
+        "detail": "3 个镜头，物件有，钩子有"
+      }
+    ]
+  },
+  "W2": {
+    "pass": true,
+    "checks": [
+      {
+        "name": "length",
+        "ok": true,
+        "detail": "1349 / 2500 字"
+      },
+      {
+        "name": "new_proper_nouns",
+        "ok": true,
+        "detail": "2 个：折角廊、缝口角"
+      },
+      {
+        "name": "registered_facts",
+        "ok": true,
+        "detail": "3 条登记"
+      },
+      {
+        "name": "source_quotes",
+        "ok": true,
+        "detail": "全部逐字出自正文"
+      },
+      {
+        "name": "facts_without_extends",
+        "ok": true,
+        "detail": "0 条无延伸依据"
+      },
+      {
+        "name": "rule_sentences",
+        "ok": true,
+        "detail": "规则句占比 0.0%"
+      },
+      {
+        "name": "interface",
+        "ok": true,
+        "detail": "3 个镜头，物件有，钩子有"
+      }
+    ]
+  },
+  "W3": {
+    "pass": true,
+    "checks": [
+      {
+        "name": "length",
+        "ok": true,
+        "detail": "1287 / 2500 字"
+      },
+      {
+        "name": "new_proper_nouns",
+        "ok": true,
+        "detail": "2 个：菱脊、补边台"
+      },
+      {
+        "name": "registered_facts",
+        "ok": true,
+        "detail": "5 条登记"
+      },
+      {
+        "name": "source_quotes",
+        "ok": true,
+        "detail": "全部逐字出自正文"
+      },
+      {
+        "name": "facts_without_extends",
+        "ok": true,
+        "detail": "1 条无延伸依据"
+      },
+      {
+        "name": "rule_sentences",
+        "ok": true,
+        "detail": "规则句占比 0.0%"
+      },
+      {
+        "name": "interface",
+        "ok": true,
+        "detail": "3 个镜头，物件有，钩子有"
+      }
+    ]
+  },
+  "BASE": {
+    "pass": true,
+    "checks": [
+      {
+        "name": "length",
+        "ok": true,
+        "detail": "1703 / 2500 字"
+      },
+      {
+        "name": "new_proper_nouns",
+        "ok": true,
+        "detail": "0 个：无"
+      },
+      {
+        "name": "registered_facts",
+        "ok": true,
+        "detail": "0 条登记"
+      },
+      {
+        "name": "source_quotes",
+        "ok": true,
+        "detail": "全部逐字出自正文"
+      },
+      {
+        "name": "facts_without_extends",
+        "ok": true,
+        "detail": "0 条无延伸依据"
+      },
+      {
+        "name": "rule_sentences",
+        "ok": true,
+        "detail": "规则句占比 0.0%"
+      },
+      {
+        "name": "interface",
+        "ok": true,
+        "detail": "3 个镜头，物件有，钩子有"
+      },
+      {
+        "name": "baseline_no_new_facts",
+        "ok": true,
+        "detail": "0 条作者事实"
+      }
+    ]
+  }
+}

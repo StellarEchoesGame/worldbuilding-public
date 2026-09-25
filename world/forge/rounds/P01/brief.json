@@ -1,0 +1,109 @@
+{
+  "round": "P01",
+  "kind": "prototype",
+  "cell": {
+    "id": "R1-mothership",
+    "row_id": "SHIP",
+    "title": "母舰 · 邻里常态日",
+    "entity": "远航号（母舰）上的一个邻里",
+    "time": "息壤停留期（D10 抵达息壤外层之后、D58 驶往砧港之前）中的任一常态日",
+    "layers": [
+      "物件",
+      "任务钩子"
+    ],
+    "setting_notes": [
+      "D4 之后舰上共 864 人，所有人持续清醒生活",
+      "写一个邻里的普通一天，不要照搬既有邻里概念图的布局"
+    ],
+    "protagonists": [
+      "温芮",
+      "林澈",
+      "陈颂",
+      "孟遥"
+    ],
+    "forbidden": [
+      "决定任何失散者的结局",
+      "出现早于先遣队的人工痕迹",
+      "出现未登记的第三方势力",
+      "把舰队编成、舰体尺寸、载具数量、武器性能、生态产率等数字写成作者事实"
+    ],
+    "stances": [
+      {
+        "id": "resident-day",
+        "text": "居民的一天：跟着主角过完这一天里最普通、也最要紧的几个时刻。"
+      },
+      {
+        "id": "object-history",
+        "text": "物件的来历：从一件舰上物件写起，让它的来历和用法把人和邻里带出来。"
+      },
+      {
+        "id": "outsider-first-visit",
+        "text": "外来者初访：透过一位 D4 新接应者第一次走进这个邻里的眼睛来写。"
+      }
+    ]
+  },
+  "canon": {
+    "book_sha256": "438c4e31b2e6bd7446d9e162aef4efe89d0154b2446bc28cfbbfff9d954e2898",
+    "reference_sha256": "16b693573402c93aa35ad74efea51da3eecc33b1b5a87a8f63e72a03721bd61c"
+  },
+  "benchmark": {
+    "version": "v0-prototype",
+    "questions": [
+      {
+        "id": "q1",
+        "text": "如果能走进其中一篇里的地方，多待一个小时，你更想待在哪一篇？"
+      },
+      {
+        "id": "q2",
+        "text": "读完之后，哪一篇里的人你更记得住？"
+      }
+    ],
+    "decisive": "q1"
+  },
+  "writers": [
+    {
+      "id": "W1",
+      "model": "deepseek/deepseek-v4.1-flash",
+      "stance": "resident-day"
+    },
+    {
+      "id": "W2",
+      "model": "deepseek/deepseek-v4.1-flash",
+      "stance": "object-history"
+    },
+    {
+      "id": "W3",
+      "model": "deepseek/deepseek-v4.1-flash",
+      "stance": "outsider-first-visit"
+    }
+  ],
+  "baseline": {
+    "id": "BASE",
+    "model": "deepseek/deepseek-v4.1-flash"
+  },
+  "judges": [
+    {
+      "id": "codex",
+      "family": "OpenAI",
+      "model": "gpt-6-astra"
+    },
+    {
+      "id": "claude",
+      "family": "Anthropic",
+      "model": "opus"
+    },
+    {
+      "id": "kimi",
+      "family": "Moonshot",
+      "model": "kimi-code/k3"
+    },
+    {
+      "id": "grok",
+      "family": "xAI",
+      "model": "grok-4.7"
+    }
+  ],
+  "seed": "f7c0c64a529a2d41",
+  "session_pairs": 2,
+  "created_at": "2026-09-25T06:01:56.649Z"
+}
