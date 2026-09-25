@@ -83,3 +83,14 @@ test('parseGrokJson reads text and served model', () => {
 test('stripKimiBullet removes the leading bullet only', () => {
   assert.equal(stripKimiBullet('• {"a":"• b"}\n'), '{"a":"• b"}');
 });
+
+test('with several modelUsage entries the served model is the accepted one, so an auxiliary model does not void the call', () => {
+  const accepted = ['claude-code/claude-opus-5-5[1M]'];
+  const out = JSON.stringify({ result: 'OK', usage: {}, modelUsage: { 'claude-haiku-4-5': {}, 'claude-code/claude-opus-5-5[1M]': {} } });
+  assert.equal(parseClaudeJson(out, accepted).servedModel, 'claude-code/claude-opus-5-5[1M]');
+  assert.equal(parseClaudeJson(out).servedModel, 'claude-haiku-4-5', 'without a list the first entry is recorded');
+  const aux = JSON.stringify({ result: 'OK', usage: {}, modelUsage: { 'claude-haiku-4-5': {} } });
+  assert.equal(parseClaudeJson(aux, accepted).servedModel, 'claude-haiku-4-5', 'no accepted entry: the first one is kept so the check voids the call');
+  const grok = JSON.stringify({ text: 'OK', modelUsage: { 'grok-mini': {}, 'grok-4.7-build': {} } });
+  assert.equal(parseGrokJson(grok, ['grok-4.7-build']).servedModel, 'grok-4.7-build');
+});

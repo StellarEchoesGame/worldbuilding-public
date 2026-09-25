@@ -1,0 +1,70 @@
+{
+  "pass": true,
+  "adapters": [
+    {
+      "id": "claude",
+      "family": "Anthropic",
+      "model": "opus",
+      "served_model": "claude-code/claude-opus-5-5[1M]",
+      "version": "2.1.282 (Claude Code)",
+      "ms": 58706,
+      "pass": true,
+      "reasons": [],
+      "at": "2026-09-25T11:37:51.808Z",
+      "token_sha256": "51a1df335f082f7b73e003e6e7f81726163945fdbc881fc60f9a96531fa9c151",
+      "prompt_sha256": "e35f37493f4cd2a1e18b919cfb93976ace27048619687bcad51a31d1c0671b55"
+    },
+    {
+      "id": "codex",
+      "family": "OpenAI",
+      "model": "gpt-6-astra",
+      "served_model": null,
+      "version": "codex-cli 0.156.0",
+      "ms": 41463,
+      "pass": true,
+      "reasons": [],
+      "at": "2026-09-25T11:37:51.808Z",
+      "token_sha256": "51a1df335f082f7b73e003e6e7f81726163945fdbc881fc60f9a96531fa9c151",
+      "prompt_sha256": "e35f37493f4cd2a1e18b919cfb93976ace27048619687bcad51a31d1c0671b55"
+    },
+    {
+      "id": "grok",
+      "family": "xAI",
+      "model": "grok-4.7",
+      "served_model": "grok-4.7-build",
+      "version": "grok 1.0.41 (4220f3b224a6)",
+      "ms": 56952,
+      "pass": true,
+      "reasons": [],
+      "at": "2026-09-25T11:37:51.808Z",
+      "token_sha256": "51a1df335f082f7b73e003e6e7f81726163945fdbc881fc60f9a96531fa9c151",
+      "prompt_sha256": "e35f37493f4cd2a1e18b919cfb93976ace27048619687bcad51a31d1c0671b55"
+    },
+    {
+      "id": "kimi",
+      "family": "Moonshot",
+      "model": "kimi-code/k3",
+      "served_model": null,
+      "version": "0.34.0",
+      "ms": 23282,
+      "pass": true,
+      "reasons": [],
+      "at": "2026-09-25T11:37:51.808Z",
+      "token_sha256": "51a1df335f082f7b73e003e6e7f81726163945fdbc881fc60f9a96531fa9c151",
+      "prompt_sha256": "e35f37493f4cd2a1e18b919cfb93976ace27048619687bcad51a31d1c0671b55"
+    },
+    {
+      "id": "maintainer",
+      "family": "Anthropic",
+      "model": "fable",
+      "served_model": "claude-code/claude-fable-5-1[1M]",
+      "version": "2.1.282 (Claude Code)",
+      "ms": 45780,
+      "pass": true,
+      "reasons": [],
+      "at": "2026-09-25T11:37:51.808Z",
+      "token_sha256": "51a1df335f082f7b73e003e6e7f81726163945fdbc881fc60f9a96531fa9c151",
+      "prompt_sha256": "e35f37493f4cd2a1e18b919cfb93976ace27048619687bcad51a31d1c0671b55"
+    }
+  ]
+}

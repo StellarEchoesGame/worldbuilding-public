@@ -7,6 +7,7 @@ import { buildFreeze, diffFreeze, parseFreeze, type FreezeRecord } from './freez
 import { mechanicalGate, type ForbiddenWord, type GateLimits, type GateResult } from './gate.ts';
 import { isRecord, readBoolean, readNumber, readString } from './json.ts';
 import { callWithRetry, limiter } from './calls.ts';
+import { roundCost } from './cost.ts';
 import { err, ok } from './result.ts';
 import { progress, readJson, roundPaths, seeded, seededShuffle, writeJson, type RoundPaths } from './store.ts';
 import { tallyChampionPair, type PairTally, type SessionPair } from './tally.ts';
@@ -337,6 +338,9 @@ export async function runRound(deps: RoundDeps, roundId: string): Promise<Candid
   await tasteStep(deps, paths, candidates, champion);
   const tallies = tallyStep(deps, paths, candidates, champion);
   auditStep(deps, paths, tallies);
+  const cost = roundCost(paths);
+  writeJson(`${paths.dir}/cost.json`, cost);
+  progress(paths, 'cost', 'done', `${cost.total_usd} USD，未定价调用 ${cost.unpriced_calls}`);
   progress(paths, 'round', 'done', '可以在 UI 中盲审和决策');
   return tallies;
 }

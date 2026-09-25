@@ -4,6 +4,7 @@ import { join } from 'node:path';
 import type { JudgeSpec, LocalConfig } from '../config.ts';
 import { isRecord, readBoolean, readNumber, readRecord, readString } from '../json.ts';
 import { runProcess } from './process.ts';
+import { checkServed } from './served.ts';
 import { failure, type Backend, type CallOptions, type CallResult, type Invocation } from './types.ts';
 
 const CODEX_DISABLED_FEATURES = [
@@ -70,10 +71,14 @@ export interface ParsedOutput {
   error: string | null;
 }
 
-function firstKey(value: unknown): string | null {
-  if (!isRecord(value)) return null;
-  const keys = Object.keys(value);
-  return keys[0] ?? null;
+/**
+ * A CLI may list auxiliary models next to the one that answered. The accepted entry is the served model; without
+ * one the first entry is kept, so the served-model check voids the call and the record shows what answered.
+ */
+function servedFrom(modelUsage: unknown, accepted: readonly string[]): string | null {
+  if (!isRecord(modelUsage)) return null;
+  const keys = Object.keys(modelUsage);
+  return keys.find((k) => accepted.includes(k)) ?? keys[0] ?? null;
 }
 
 function parseJson(stdout: string): unknown {
@@ -85,7 +90,7 @@ function parseJson(stdout: string): unknown {
   }
 }
 
-export function parseClaudeJson(stdout: string): ParsedOutput {
+export function parseClaudeJson(stdout: string, accepted: readonly string[] = []): ParsedOutput {
   const v = parseJson(stdout);
   if (!isRecord(v)) return { text: '', servedModel: null, tokensIn: null, tokensOut: null, costUsd: null, error: 'claude output is not JSON' };
   const text = readString(v, 'result') ?? '';
@@ -93,7 +98,7 @@ export function parseClaudeJson(stdout: string): ParsedOutput {
   const isError = readBoolean(v, 'is_error') === true;
   return {
     text,
-    servedModel: firstKey(v['modelUsage']),
+    servedModel: servedFrom(v['modelUsage'], accepted),
     tokensIn: readNumber(usage, 'input_tokens'),
     tokensOut: readNumber(usage, 'output_tokens'),
     costUsd: readNumber(v, 'total_cost_usd'),
@@ -101,14 +106,14 @@ export function parseClaudeJson(stdout: string): ParsedOutput {
   };
 }
 
-export function parseGrokJson(stdout: string): ParsedOutput {
+export function parseGrokJson(stdout: string, accepted: readonly string[] = []): ParsedOutput {
   const v = parseJson(stdout);
   if (!isRecord(v)) return { text: '', servedModel: null, tokensIn: null, tokensOut: null, costUsd: null, error: 'grok output is not JSON' };
   const text = readString(v, 'text') ?? '';
   const usage = readRecord(v, 'usage');
   return {
     text,
-    servedModel: firstKey(v['modelUsage']),
+    servedModel: servedFrom(v['modelUsage'], accepted),
     tokensIn: readNumber(usage, 'input_tokens'),
     tokensOut: readNumber(usage, 'output_tokens'),
     costUsd: readNumber(v, 'total_cost_usd'),
@@ -184,18 +189,15 @@ async function runJudge(spec: JudgeSpec, local: LocalConfig, prompt: string, opt
       const text = existsSync(outFile) ? readFileSync(outFile, 'utf8').trim() : '';
       parsed = { text, servedModel: null, tokensIn: null, tokensOut: null, costUsd: null, error: text === '' ? 'empty output' : null };
     } else if (spec.cli === 'claude') {
-      parsed = parseClaudeJson(r.stdout);
+      parsed = parseClaudeJson(r.stdout, spec.acceptedServed);
     } else if (spec.cli === 'kimi') {
       const text = stripKimiBullet(r.stdout);
       parsed = { text, servedModel: null, tokensIn: null, tokensOut: null, costUsd: null, error: text === '' ? 'empty output' : null };
     } else {
-      parsed = parseGrokJson(r.stdout);
+      parsed = parseGrokJson(r.stdout, spec.acceptedServed);
     }
     if (parsed.error !== null) return failure(parsed.error, r.ms, raw, version);
-    if (spec.acceptedServed.length > 0 && parsed.servedModel !== null && !spec.acceptedServed.includes(parsed.servedModel)) {
-      return failure(`served model ${parsed.servedModel} is not in accepted_served`, r.ms, raw, version);
-    }
-    return {
+    return checkServed({
       ok: true,
       text: parsed.text,
       servedModel: parsed.servedModel,
@@ -206,7 +208,7 @@ async function runJudge(spec: JudgeSpec, local: LocalConfig, prompt: string, opt
       costUsd: parsed.costUsd,
       error: null,
       raw,
-    };
+    }, spec.acceptedServed);
   } finally {
     rmSync(base, { recursive: true, force: true });
   }
