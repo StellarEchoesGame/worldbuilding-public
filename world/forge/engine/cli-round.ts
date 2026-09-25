@@ -4,7 +4,8 @@ import { gatewayBackend } from './adapters/gateway.ts';
 import { judgeBackend } from './adapters/judges.ts';
 import { runProcess } from './adapters/process.ts';
 import type { Backend } from './adapters/types.ts';
-import { familyOf, loadConfig, type ForgeConfig, type WriterSlot } from './config.ts';
+import { BUILD_CONFIG, parseBuildConfig } from './calib-build.ts';
+import { familyOf, loadConfig, type Family, type ForgeConfig, type WriterSlot } from './config.ts';
 import { buildContext, readGithubConfig, type EngineDeps, type RoundBackends, type StartOptions, type StepContext } from './context.ts';
 import { parsePrices, withPrices, type Prices } from './cost.ts';
 import { latestFrozenRound, parseFreeze } from './freeze.ts';
@@ -26,7 +27,8 @@ export interface ForgeRoots {
 const ROUND_ID = /^R\d{2}$/u;
 const QUOTA_MAX_MIN = 7 * 24 * 60;
 
-interface Args {
+/** parseArgs result (also cli-calib.ts). */
+export interface Args {
   positional: string[];
   values: Map<string, string>;
   switches: Set<string>;
@@ -61,7 +63,8 @@ function stepFlag(args: Args, name: string): Result<StepId | null> {
   return isStepId(v) ? ok(v) : err(`${name} ${v}: not a step id`);
 }
 
-function quotaBudget(args: Args): Result<number | null> {
+/** `--quota-budget-min <n>` → ms (1 min … 7 days), null when absent. */
+export function quotaBudget(args: Args): Result<number | null> {
   const v = args.values.get('--quota-budget-min');
   if (v === undefined) return ok(null);
   const n = Number(v);
@@ -274,10 +277,31 @@ export function gatewayId(model: string): string {
 }
 
 /**
- * Round backends from judges.json / writers.json / local.json. Decoy and defect writers use the baseline slot's
- * gateway model until PR-B adds their own config; calibration gateway models arrive with PR-C (empty map).
+ * Distinct gateway models of `calibration/build.json` (primary, contrasts, degrade), validated by parseBuildConfig
+ * (every model has a family and none is a judge or maintainer family). A missing or invalid build.json → [] (c1-build
+ * then fails with the config error before any call).
  */
-export function productionBackends(config: ForgeConfig, prices: Prices): RoundBackends {
+export function calibModels(config: ForgeConfig): string[] {
+  const path = join(config.root, BUILD_CONFIG);
+  if (!existsSync(path)) return [];
+  let raw: unknown;
+  try {
+    raw = JSON.parse(readFileSync(path, 'utf8'));
+  } catch {
+    return [];
+  }
+  const judgeFamilies = new Set<Family>([...config.judges.map((j) => j.family), config.maintainer.family]);
+  const cfg = parseBuildConfig(raw, config.prefixes, judgeFamilies);
+  if (!cfg.ok) return [];
+  return [...new Set([cfg.value.primaryModel, ...cfg.value.contrastModels, cfg.value.degradeModel])];
+}
+
+/**
+ * Round backends from judges.json / writers.json / local.json. Decoy and defect writers use the baseline slot's
+ * gateway model until PR-B adds their own config. `calibGateway` has one gateway backend per `calibModels` entry
+ * (id gatewayId(model), the baseline slot's token and temperature settings), keyed by the build.json model id.
+ */
+export function productionBackends(config: ForgeConfig, prices: Prices, calib: readonly string[] = []): RoundBackends {
   const local = config.local;
   if (local === null) throw new Error('local.json is required');
   const gateway = (slot: WriterSlot): Backend => {
@@ -297,7 +321,7 @@ export function productionBackends(config: ForgeConfig, prices: Prices): RoundBa
     forecasters: [...judges.map((j) => j.backend), ...[...models.values()].map(gateway)],
     maintainer: withPrices(judgeBackend(config.maintainer, local), prices),
     mergeEditor: withPrices(judgeBackend(config.mergeEditor, local), prices),
-    calibGateway: new Map(),
+    calibGateway: new Map(calib.map((model) => [model, gateway({ ...config.baseline, id: gatewayId(model), model })])),
   };
 }
 
@@ -337,7 +361,7 @@ export function productionDeps(root: string, repo: string): Result<EngineDeps> {
       doctor: cliDoctor(root),
       assembler: pythonAssembler(repo, runProcess),
     },
-    backends: () => productionBackends(config.value, prices.value),
+    backends: (pipeline) => productionBackends(config.value, prices.value, pipeline === 'calibration' ? calibModels(config.value) : []),
     env: process.env,
     pid: process.pid,
     isAlive: processAlive,

@@ -1,0 +1,750 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "calib-report.schema.json",
+  "title": "WB-F1 calibration report",
+  "description": "calibration/round0.json (C00), requal-<Qnn>.json and gate-<Gnn>.json: one per set, written once by engine/calib-score.ts (c5-score) and reused on rerun. valid false (root benchmark version logged no earlier than the first C00 answer, or an owner answer failing the owner-log checks) qualifies nobody. families and gate_dryrun are keyed by family; the per-family schemas are repeated for every family of engine/config.ts FAMILIES (no $ref in the schema subset; calib-score.test.ts keeps the copies identical). parseCalibReport also checks what the subset cannot express: agree <= m, correct <= k, consistent <= n, caught <= of, qualified lists exactly the qualified families of a valid report.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "set",
+    "kind",
+    "family",
+    "reason",
+    "valid",
+    "invalid_reason",
+    "pin_sha256",
+    "after_round",
+    "families",
+    "qualified",
+    "canon_rounds_may_start",
+    "owner",
+    "writer_models",
+    "writer_recommendation",
+    "gate_dryrun"
+  ],
+  "properties": {
+    "set": { "type": "string", "pattern": "^[CQG]\\d{2}$" },
+    "kind": { "enum": ["round0", "requal", "gate"] },
+    "family": { "enum": ["DeepSeek", "Anthropic", "OpenAI", "Moonshot", "xAI", "Alibaba", "Zhipu", "MiniMax", null] },
+    "reason": { "enum": ["calibration_fail", "suspension", null] },
+    "valid": { "type": "boolean" },
+    "invalid_reason": { "type": ["string", "null"] },
+    "pin_sha256": { "type": ["string", "null"], "pattern": "^[0-9a-f]{64}$" },
+    "after_round": { "type": ["string", "null"], "pattern": "^R\\d{2}$" },
+    "families": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "DeepSeek": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["nonknown", "known", "by_category", "order_consistency", "void_calls", "qualified"],
+          "properties": {
+            "nonknown": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["m", "agree", "need", "wilson90"],
+              "properties": {
+                "m": { "type": "integer", "minimum": 0 },
+                "agree": { "type": "integer", "minimum": 0 },
+                "need": { "type": "integer", "minimum": 0 },
+                "wilson90": {
+                  "type": "array",
+                  "minItems": 2,
+                  "maxItems": 2,
+                  "items": { "type": "number", "minimum": 0, "maximum": 1 }
+                }
+              }
+            },
+            "known": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["k", "correct", "need"],
+              "properties": {
+                "k": { "type": "integer", "minimum": 0 },
+                "correct": { "type": "integer", "minimum": 0 },
+                "need": { "type": "integer", "minimum": 0 }
+              }
+            },
+            "by_category": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "canon_vs_rewrite": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": ["m", "agree"],
+                  "properties": { "m": { "type": "integer", "minimum": 0 }, "agree": { "type": "integer", "minimum": 0 } }
+                },
+                "cross_model": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": ["m", "agree"],
+                  "properties": { "m": { "type": "integer", "minimum": 0 }, "agree": { "type": "integer", "minimum": 0 } }
+                },
+                "stance": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": ["m", "agree"],
+                  "properties": { "m": { "type": "integer", "minimum": 0 }, "agree": { "type": "integer", "minimum": 0 } }
+                },
+                "known": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": ["m", "agree"],
+                  "properties": { "m": { "type": "integer", "minimum": 0 }, "agree": { "type": "integer", "minimum": 0 } }
+                }
+              }
+            },
+            "order_consistency": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["n", "consistent"],
+              "properties": { "n": { "type": "integer", "minimum": 0 }, "consistent": { "type": "integer", "minimum": 0 } }
+            },
+            "void_calls": { "type": "integer", "minimum": 0 },
+            "qualified": { "type": "boolean" }
+          }
+        },
+        "Anthropic": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["nonknown", "known", "by_category", "order_consistency", "void_calls", "qualified"],
+          "properties": {
+            "nonknown": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["m", "agree", "need", "wilson90"],
+              "properties": {
+                "m": { "type": "integer", "minimum": 0 },
+                "agree": { "type": "integer", "minimum": 0 },
+                "need": { "type": "integer", "minimum": 0 },
+                "wilson90": {
+                  "type": "array",
+                  "minItems": 2,
+                  "maxItems": 2,
+                  "items": { "type": "number", "minimum": 0, "maximum": 1 }
+                }
+              }
+            },
+            "known": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["k", "correct", "need"],
+              "properties": {
+                "k": { "type": "integer", "minimum": 0 },
+                "correct": { "type": "integer", "minimum": 0 },
+                "need": { "type": "integer", "minimum": 0 }
+              }
+            },
+            "by_category": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "canon_vs_rewrite": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": ["m", "agree"],
+                  "properties": { "m": { "type": "integer", "minimum": 0 }, "agree": { "type": "integer", "minimum": 0 } }
+                },
+                "cross_model": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": ["m", "agree"],
+                  "properties": { "m": { "type": "integer", "minimum": 0 }, "agree": { "type": "integer", "minimum": 0 } }
+                },
+                "stance": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": ["m", "agree"],
+                  "properties": { "m": { "type": "integer", "minimum": 0 }, "agree": { "type": "integer", "minimum": 0 } }
+                },
+                "known": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": ["m", "agree"],
+                  "properties": { "m": { "type": "integer", "minimum": 0 }, "agree": { "type": "integer", "minimum": 0 } }
+                }
+              }
+            },
+            "order_consistency": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["n", "consistent"],
+              "properties": { "n": { "type": "integer", "minimum": 0 }, "consistent": { "type": "integer", "minimum": 0 } }
+            },
+            "void_calls": { "type": "integer", "minimum": 0 },
+            "qualified": { "type": "boolean" }
+          }
+        },
+        "OpenAI": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["nonknown", "known", "by_category", "order_consistency", "void_calls", "qualified"],
+          "properties": {
+            "nonknown": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["m", "agree", "need", "wilson90"],
+              "properties": {
+                "m": { "type": "integer", "minimum": 0 },
+                "agree": { "type": "integer", "minimum": 0 },
+                "need": { "type": "integer", "minimum": 0 },
+                "wilson90": {
+                  "type": "array",
+                  "minItems": 2,
+                  "maxItems": 2,
+                  "items": { "type": "number", "minimum": 0, "maximum": 1 }
+                }
+              }
+            },
+            "known": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["k", "correct", "need"],
+              "properties": {
+                "k": { "type": "integer", "minimum": 0 },
+                "correct": { "type": "integer", "minimum": 0 },
+                "need": { "type": "integer", "minimum": 0 }
+              }
+            },
+            "by_category": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "canon_vs_rewrite": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": ["m", "agree"],
+                  "properties": { "m": { "type": "integer", "minimum": 0 }, "agree": { "type": "integer", "minimum": 0 } }
+                },
+                "cross_model": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": ["m", "agree"],
+                  "properties": { "m": { "type": "integer", "minimum": 0 }, "agree": { "type": "integer", "minimum": 0 } }
+                },
+                "stance": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": ["m", "agree"],
+                  "properties": { "m": { "type": "integer", "minimum": 0 }, "agree": { "type": "integer", "minimum": 0 } }
+                },
+                "known": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": ["m", "agree"],
+                  "properties": { "m": { "type": "integer", "minimum": 0 }, "agree": { "type": "integer", "minimum": 0 } }
+                }
+              }
+            },
+            "order_consistency": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["n", "consistent"],
+              "properties": { "n": { "type": "integer", "minimum": 0 }, "consistent": { "type": "integer", "minimum": 0 } }
+            },
+            "void_calls": { "type": "integer", "minimum": 0 },
+            "qualified": { "type": "boolean" }
+          }
+        },
+        "Moonshot": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["nonknown", "known", "by_category", "order_consistency", "void_calls", "qualified"],
+          "properties": {
+            "nonknown": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["m", "agree", "need", "wilson90"],
+              "properties": {
+                "m": { "type": "integer", "minimum": 0 },
+                "agree": { "type": "integer", "minimum": 0 },
+                "need": { "type": "integer", "minimum": 0 },
+                "wilson90": {
+                  "type": "array",
+                  "minItems": 2,
+                  "maxItems": 2,
+                  "items": { "type": "number", "minimum": 0, "maximum": 1 }
+                }
+              }
+            },
+            "known": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["k", "correct", "need"],
+              "properties": {
+                "k": { "type": "integer", "minimum": 0 },
+                "correct": { "type": "integer", "minimum": 0 },
+                "need": { "type": "integer", "minimum": 0 }
+              }
+            },
+            "by_category": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "canon_vs_rewrite": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": ["m", "agree"],
+                  "properties": { "m": { "type": "integer", "minimum": 0 }, "agree": { "type": "integer", "minimum": 0 } }
+                },
+                "cross_model": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": ["m", "agree"],
+                  "properties": { "m": { "type": "integer", "minimum": 0 }, "agree": { "type": "integer", "minimum": 0 } }
+                },
+                "stance": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": ["m", "agree"],
+                  "properties": { "m": { "type": "integer", "minimum": 0 }, "agree": { "type": "integer", "minimum": 0 } }
+                },
+                "known": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": ["m", "agree"],
+                  "properties": { "m": { "type": "integer", "minimum": 0 }, "agree": { "type": "integer", "minimum": 0 } }
+                }
+              }
+            },
+            "order_consistency": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["n", "consistent"],
+              "properties": { "n": { "type": "integer", "minimum": 0 }, "consistent": { "type": "integer", "minimum": 0 } }
+            },
+            "void_calls": { "type": "integer", "minimum": 0 },
+            "qualified": { "type": "boolean" }
+          }
+        },
+        "xAI": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["nonknown", "known", "by_category", "order_consistency", "void_calls", "qualified"],
+          "properties": {
+            "nonknown": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["m", "agree", "need", "wilson90"],
+              "properties": {
+                "m": { "type": "integer", "minimum": 0 },
+                "agree": { "type": "integer", "minimum": 0 },
+                "need": { "type": "integer", "minimum": 0 },
+                "wilson90": {
+                  "type": "array",
+                  "minItems": 2,
+                  "maxItems": 2,
+                  "items": { "type": "number", "minimum": 0, "maximum": 1 }
+                }
+              }
+            },
+            "known": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["k", "correct", "need"],
+              "properties": {
+                "k": { "type": "integer", "minimum": 0 },
+                "correct": { "type": "integer", "minimum": 0 },
+                "need": { "type": "integer", "minimum": 0 }
+              }
+            },
+            "by_category": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "canon_vs_rewrite": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": ["m", "agree"],
+                  "properties": { "m": { "type": "integer", "minimum": 0 }, "agree": { "type": "integer", "minimum": 0 } }
+                },
+                "cross_model": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": ["m", "agree"],
+                  "properties": { "m": { "type": "integer", "minimum": 0 }, "agree": { "type": "integer", "minimum": 0 } }
+                },
+                "stance": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": ["m", "agree"],
+                  "properties": { "m": { "type": "integer", "minimum": 0 }, "agree": { "type": "integer", "minimum": 0 } }
+                },
+                "known": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": ["m", "agree"],
+                  "properties": { "m": { "type": "integer", "minimum": 0 }, "agree": { "type": "integer", "minimum": 0 } }
+                }
+              }
+            },
+            "order_consistency": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["n", "consistent"],
+              "properties": { "n": { "type": "integer", "minimum": 0 }, "consistent": { "type": "integer", "minimum": 0 } }
+            },
+            "void_calls": { "type": "integer", "minimum": 0 },
+            "qualified": { "type": "boolean" }
+          }
+        },
+        "Alibaba": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["nonknown", "known", "by_category", "order_consistency", "void_calls", "qualified"],
+          "properties": {
+            "nonknown": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["m", "agree", "need", "wilson90"],
+              "properties": {
+                "m": { "type": "integer", "minimum": 0 },
+                "agree": { "type": "integer", "minimum": 0 },
+                "need": { "type": "integer", "minimum": 0 },
+                "wilson90": {
+                  "type": "array",
+                  "minItems": 2,
+                  "maxItems": 2,
+                  "items": { "type": "number", "minimum": 0, "maximum": 1 }
+                }
+              }
+            },
+            "known": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["k", "correct", "need"],
+              "properties": {
+                "k": { "type": "integer", "minimum": 0 },
+                "correct": { "type": "integer", "minimum": 0 },
+                "need": { "type": "integer", "minimum": 0 }
+              }
+            },
+            "by_category": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "canon_vs_rewrite": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": ["m", "agree"],
+                  "properties": { "m": { "type": "integer", "minimum": 0 }, "agree": { "type": "integer", "minimum": 0 } }
+                },
+                "cross_model": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": ["m", "agree"],
+                  "properties": { "m": { "type": "integer", "minimum": 0 }, "agree": { "type": "integer", "minimum": 0 } }
+                },
+                "stance": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": ["m", "agree"],
+                  "properties": { "m": { "type": "integer", "minimum": 0 }, "agree": { "type": "integer", "minimum": 0 } }
+                },
+                "known": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": ["m", "agree"],
+                  "properties": { "m": { "type": "integer", "minimum": 0 }, "agree": { "type": "integer", "minimum": 0 } }
+                }
+              }
+            },
+            "order_consistency": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["n", "consistent"],
+              "properties": { "n": { "type": "integer", "minimum": 0 }, "consistent": { "type": "integer", "minimum": 0 } }
+            },
+            "void_calls": { "type": "integer", "minimum": 0 },
+            "qualified": { "type": "boolean" }
+          }
+        },
+        "Zhipu": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["nonknown", "known", "by_category", "order_consistency", "void_calls", "qualified"],
+          "properties": {
+            "nonknown": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["m", "agree", "need", "wilson90"],
+              "properties": {
+                "m": { "type": "integer", "minimum": 0 },
+                "agree": { "type": "integer", "minimum": 0 },
+                "need": { "type": "integer", "minimum": 0 },
+                "wilson90": {
+                  "type": "array",
+                  "minItems": 2,
+                  "maxItems": 2,
+                  "items": { "type": "number", "minimum": 0, "maximum": 1 }
+                }
+              }
+            },
+            "known": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["k", "correct", "need"],
+              "properties": {
+                "k": { "type": "integer", "minimum": 0 },
+                "correct": { "type": "integer", "minimum": 0 },
+                "need": { "type": "integer", "minimum": 0 }
+              }
+            },
+            "by_category": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "canon_vs_rewrite": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": ["m", "agree"],
+                  "properties": { "m": { "type": "integer", "minimum": 0 }, "agree": { "type": "integer", "minimum": 0 } }
+                },
+                "cross_model": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": ["m", "agree"],
+                  "properties": { "m": { "type": "integer", "minimum": 0 }, "agree": { "type": "integer", "minimum": 0 } }
+                },
+                "stance": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": ["m", "agree"],
+                  "properties": { "m": { "type": "integer", "minimum": 0 }, "agree": { "type": "integer", "minimum": 0 } }
+                },
+                "known": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": ["m", "agree"],
+                  "properties": { "m": { "type": "integer", "minimum": 0 }, "agree": { "type": "integer", "minimum": 0 } }
+                }
+              }
+            },
+            "order_consistency": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["n", "consistent"],
+              "properties": { "n": { "type": "integer", "minimum": 0 }, "consistent": { "type": "integer", "minimum": 0 } }
+            },
+            "void_calls": { "type": "integer", "minimum": 0 },
+            "qualified": { "type": "boolean" }
+          }
+        },
+        "MiniMax": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["nonknown", "known", "by_category", "order_consistency", "void_calls", "qualified"],
+          "properties": {
+            "nonknown": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["m", "agree", "need", "wilson90"],
+              "properties": {
+                "m": { "type": "integer", "minimum": 0 },
+                "agree": { "type": "integer", "minimum": 0 },
+                "need": { "type": "integer", "minimum": 0 },
+                "wilson90": {
+                  "type": "array",
+                  "minItems": 2,
+                  "maxItems": 2,
+                  "items": { "type": "number", "minimum": 0, "maximum": 1 }
+                }
+              }
+            },
+            "known": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["k", "correct", "need"],
+              "properties": {
+                "k": { "type": "integer", "minimum": 0 },
+                "correct": { "type": "integer", "minimum": 0 },
+                "need": { "type": "integer", "minimum": 0 }
+              }
+            },
+            "by_category": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "canon_vs_rewrite": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": ["m", "agree"],
+                  "properties": { "m": { "type": "integer", "minimum": 0 }, "agree": { "type": "integer", "minimum": 0 } }
+                },
+                "cross_model": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": ["m", "agree"],
+                  "properties": { "m": { "type": "integer", "minimum": 0 }, "agree": { "type": "integer", "minimum": 0 } }
+                },
+                "stance": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": ["m", "agree"],
+                  "properties": { "m": { "type": "integer", "minimum": 0 }, "agree": { "type": "integer", "minimum": 0 } }
+                },
+                "known": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": ["m", "agree"],
+                  "properties": { "m": { "type": "integer", "minimum": 0 }, "agree": { "type": "integer", "minimum": 0 } }
+                }
+              }
+            },
+            "order_consistency": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["n", "consistent"],
+              "properties": { "n": { "type": "integer", "minimum": 0 }, "consistent": { "type": "integer", "minimum": 0 } }
+            },
+            "void_calls": { "type": "integer", "minimum": 0 },
+            "qualified": { "type": "boolean" }
+          }
+        }
+      }
+    },
+    "qualified": {
+      "type": "array",
+      "items": { "enum": ["DeepSeek", "Anthropic", "OpenAI", "Moonshot", "xAI", "Alibaba", "Zhipu", "MiniMax"] }
+    },
+    "canon_rounds_may_start": { "type": "boolean" },
+    "owner": {
+      "type": ["object", "null"],
+      "additionalProperties": false,
+      "required": ["retest", "known", "median_ms"],
+      "properties": {
+        "retest": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["n", "consistent", "wilson90"],
+          "properties": {
+            "n": { "type": "integer", "minimum": 0 },
+            "consistent": { "type": "integer", "minimum": 0 },
+            "wilson90": {
+              "type": "array",
+              "minItems": 2,
+              "maxItems": 2,
+              "items": { "type": "number", "minimum": 0, "maximum": 1 }
+            }
+          }
+        },
+        "known": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["n", "correct"],
+          "properties": { "n": { "type": "integer", "minimum": 0 }, "correct": { "type": "integer", "minimum": 0 } }
+        },
+        "median_ms": { "type": ["number", "null"], "minimum": 0 }
+      }
+    },
+    "writer_models": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["model", "owner_wins", "owner_n", "panel_wins", "panel_n"],
+        "properties": {
+          "model": { "type": "string", "minLength": 1 },
+          "owner_wins": { "type": "integer", "minimum": 0 },
+          "owner_n": { "type": "integer", "minimum": 0 },
+          "panel_wins": { "type": "integer", "minimum": 0 },
+          "panel_n": { "type": "integer", "minimum": 0 }
+        }
+      }
+    },
+    "writer_recommendation": {
+      "type": ["object", "null"],
+      "additionalProperties": false,
+      "required": ["model", "basis"],
+      "properties": { "model": { "type": "string", "minLength": 1 }, "basis": { "type": "string", "minLength": 1 } }
+    },
+    "gate_dryrun": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "DeepSeek": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["caught", "of", "gate_judge"],
+          "properties": {
+            "caught": { "type": "integer", "minimum": 0 },
+            "of": { "type": "integer", "minimum": 0 },
+            "gate_judge": { "type": "boolean" }
+          }
+        },
+        "Anthropic": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["caught", "of", "gate_judge"],
+          "properties": {
+            "caught": { "type": "integer", "minimum": 0 },
+            "of": { "type": "integer", "minimum": 0 },
+            "gate_judge": { "type": "boolean" }
+          }
+        },
+        "OpenAI": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["caught", "of", "gate_judge"],
+          "properties": {
+            "caught": { "type": "integer", "minimum": 0 },
+            "of": { "type": "integer", "minimum": 0 },
+            "gate_judge": { "type": "boolean" }
+          }
+        },
+        "Moonshot": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["caught", "of", "gate_judge"],
+          "properties": {
+            "caught": { "type": "integer", "minimum": 0 },
+            "of": { "type": "integer", "minimum": 0 },
+            "gate_judge": { "type": "boolean" }
+          }
+        },
+        "xAI": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["caught", "of", "gate_judge"],
+          "properties": {
+            "caught": { "type": "integer", "minimum": 0 },
+            "of": { "type": "integer", "minimum": 0 },
+            "gate_judge": { "type": "boolean" }
+          }
+        },
+        "Alibaba": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["caught", "of", "gate_judge"],
+          "properties": {
+            "caught": { "type": "integer", "minimum": 0 },
+            "of": { "type": "integer", "minimum": 0 },
+            "gate_judge": { "type": "boolean" }
+          }
+        },
+        "Zhipu": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["caught", "of", "gate_judge"],
+          "properties": {
+            "caught": { "type": "integer", "minimum": 0 },
+            "of": { "type": "integer", "minimum": 0 },
+            "gate_judge": { "type": "boolean" }
+          }
+        },
+        "MiniMax": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["caught", "of", "gate_judge"],
+          "properties": {
+            "caught": { "type": "integer", "minimum": 0 },
+            "of": { "type": "integer", "minimum": 0 },
+            "gate_judge": { "type": "boolean" }
+          }
+        }
+      }
+    }
+  }
+}

@@ -16,6 +16,7 @@ import { parsePrices, withPrices, type Prices } from './cost.ts';
 import { canonFiles, factRowsFrom, parseMergeDecision, parseRegister07, sourcesFromRound } from './inputs.ts';
 import { mergecheck } from './mergecheck.ts';
 import { prototypeRoundRefusal, runPrototypeRound } from './prototype.ts';
+import { calibCommand } from './cli-calib.ts';
 import { freezeCommand, productionDeps, roundCommand, type ForgeRoots } from './cli-round.ts';
 import type { EngineDeps } from './context.ts';
 import { benchContext, findBenchmark, loadProtocolBundle, parseRollbacks, roundRules, type ProtocolBundle } from './rules.ts';
@@ -369,6 +370,7 @@ async function main(): Promise<void> {
   if (cmd === 'round' && sub === 'status' && isPrototypeRound(rest[0])) return roundStatus(rest);
   if (cmd === 'round') return engineCommand((deps) => roundCommand(args, deps, ROOTS));
   if (cmd === 'freeze') return engineCommand((deps) => freezeCommand(args, deps, ROOTS));
+  if (cmd === 'calib') return engineCommand((deps) => calibCommand(args, deps, ROOTS));
   if (cmd === 'protocol' && sub === 'hash') return protocolHash();
   if (cmd === 'bench' && sub === 'validate') return benchValidate(rest);
   if (cmd === 'thinmap') return thinmap(args);
@@ -385,6 +387,9 @@ async function main(): Promise<void> {
       '  forge round run <P-ID> --cell <file> [--seed <seed>] [--benchmark <file>]   (prototype runner)',
       '  forge round status <P-ID>',
       '  forge freeze --check [RNN]',
+      '  forge calib build [--requal <Family> --reason calibration_fail|suspension | --gate <Family>] [--quota-budget-min <n>]',
+      '  forge calib run [--set <id>] [--only <c2-gate-dryrun|c3-owner-answers|c4-judge>] [--quota-budget-min <n>]',
+      '  forge calib score [--set <id>]',
       '  forge protocol hash',
       '  forge bench validate <candidate.json> [--parent <parent.json>] [--round <n>] [--rollbacks <file>]',
       '  forge thinmap [--top <n>] [--aliases <file>] [--tags <file>] [--game-need <file>]',
