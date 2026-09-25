@@ -42,9 +42,9 @@ export interface OwnerSim {
   /** Forge-root-relative owner file → SHA-256 of what the sim last wrote. */
   /** A round owner file (`rounds/RNN/audit.json`, `decision*.json`) written by hand without its owner-log line. */
   writeUnlogged(rel: string, value: unknown): void;
-  /** A hand edit of a round owner file after the UI logged it. */
+  /** A hand edit of an owner file (round audit / decision, calibration answers) after the UI logged it. */
   tamper(rel: string, edit: (text: string) => string): void;
-  /** Deletes a round owner file (a test resetting the owner's state). */
+  /** Deletes an owner file (a test resetting the owner's state). */
   removeOwnerFile(rel: string): void;
   expected(): ReadonlyMap<string, string>;
 }
@@ -53,14 +53,14 @@ function fileSha(path: string): string {
   return sha256Bytes(readFileSync(path));
 }
 
-/** The round owner files the hand-edit helpers may touch (a subset of context.ts OWNER_ONLY). */
-const ROUND_OWNER_FILE = /^rounds\/[A-Z]\d{2}\/(?:audit|decision[^/]*)\.json$/u;
+/** The owner files the hand-edit helpers may touch (a subset of context.ts OWNER_ONLY). */
+const EDITABLE_OWNER_FILE = /^(?:rounds\/[A-Z]\d{2}\/(?:audit|decision[^/]*)\.json|calibration\/owner-answers\.json)$/u;
 
 export function ownerSim(root: string, clock: FakeClock): OwnerSim {
   const expected = new Map<string, string>();
   const rel = (path: string): string => relative(root, path).split(sep).join('/');
   const ownerPath = (what: string, file: string): string => {
-    if (!ROUND_OWNER_FILE.test(file)) throw new Error(`owner-sim ${what}: ${file} is not a round owner file`);
+    if (!EDITABLE_OWNER_FILE.test(file)) throw new Error(`owner-sim ${what}: ${file} is not a hand-editable owner file`);
     return join(root, file);
   };
 

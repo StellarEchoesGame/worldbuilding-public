@@ -1,0 +1,24 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "calib-verdict.schema.json",
+  "title": "WB-F1 calibration verdict",
+  "description": "calibration/<set>/verdicts/<family>/<pairId>-<ab|ba>.json: one taste call on a calibration pair, written once by engine/calib-run.ts (c4-judge). ab = pair text a shown first. picks and quotes are keyed by benchmark question id (the schema subset cannot type dynamic keys; parseVerdictRecord checks that every pick names text1 or text2). A void verdict is final: decisive null, picks and quotes empty, error set.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["pair", "family", "judge", "order", "text1", "text2", "status", "decisive", "picks", "quotes", "error", "call", "benchmark_version"],
+  "properties": {
+    "pair": { "type": "string", "pattern": "^[CQG]\\d{2}-P\\d{2,}$" },
+    "family": { "enum": ["DeepSeek", "Anthropic", "OpenAI", "Moonshot", "xAI", "Alibaba", "Zhipu", "MiniMax"] },
+    "judge": { "type": "string", "minLength": 1 },
+    "order": { "enum": ["ab", "ba"] },
+    "text1": { "type": "string", "pattern": "^[CQG]\\d{2}-T\\d{2,}$" },
+    "text2": { "type": "string", "pattern": "^[CQG]\\d{2}-T\\d{2,}$" },
+    "status": { "enum": ["ok", "void"] },
+    "decisive": { "type": ["string", "null"] },
+    "picks": { "type": "object" },
+    "quotes": { "type": "object" },
+    "error": { "type": ["string", "null"] },
+    "call": { "type": "string", "pattern": "^calib-[CQG]\\d{2}-" },
+    "benchmark_version": { "type": "string", "pattern": "^v[1-9]\\d*$" }
+  }
+}

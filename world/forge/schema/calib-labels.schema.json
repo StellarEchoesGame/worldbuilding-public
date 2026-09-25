@@ -1,0 +1,337 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "calib-labels.schema.json",
+  "title": "WB-F1 blind-label ledger",
+  "description": "calibration/labels.json: every blind owner label (round-0 pairs, re-qualification pairs, per-round blind audit pairs), rebuilt deterministically by engine/trust.ts rebuildTrust (c5-score and step 11e) and validated against this file by parseLabelLedger. texts[].path is forge-root-relative. trials is keyed by family; the schema subset has no $ref, so the trial schema is repeated for every family of engine/config.ts FAMILIES (trust.test.ts keeps the copies identical). parseLabelLedger also checks what the subset cannot express: unique label ids, owner_chosen names one of the two texts, void <= sessions, agree implies consistent, source / use / split agree (round0: qualification, visible|reserve; requal: requal, none; audit: agreement, visible|reserve).",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "labels"
+  ],
+  "properties": {
+    "schema": {
+      "const": "calib-labels/1"
+    },
+    "labels": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "source",
+          "round",
+          "seq",
+          "texts",
+          "owner_chosen",
+          "answered_at",
+          "split",
+          "use",
+          "trials"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[A-Z]\\d{2}-(?:P\\d{2,}|audit-[1-9]\\d*)$"
+          },
+          "source": {
+            "enum": [
+              "round0",
+              "audit",
+              "requal"
+            ]
+          },
+          "round": {
+            "type": "string",
+            "pattern": "^[A-Z]\\d{2}$"
+          },
+          "seq": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "texts": {
+            "type": "array",
+            "minItems": 2,
+            "maxItems": 2,
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "id",
+                "path",
+                "sha256",
+                "authors"
+              ],
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "path": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "sha256": {
+                  "type": "string",
+                  "pattern": "^[0-9a-f]{64}$"
+                },
+                "authors": {
+                  "type": "array",
+                  "items": {
+                    "enum": [
+                      "DeepSeek",
+                      "Anthropic",
+                      "OpenAI",
+                      "Moonshot",
+                      "xAI",
+                      "Alibaba",
+                      "Zhipu",
+                      "MiniMax"
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          "owner_chosen": {
+            "type": "string",
+            "minLength": 1
+          },
+          "answered_at": {
+            "type": "string",
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(\\.\\d+)?Z$"
+          },
+          "split": {
+            "enum": [
+              "visible",
+              "reserve",
+              "none"
+            ]
+          },
+          "use": {
+            "enum": [
+              "qualification",
+              "agreement",
+              "requal"
+            ]
+          },
+          "trials": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "DeepSeek": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "sessions",
+                  "consistent",
+                  "agree",
+                  "void"
+                ],
+                "properties": {
+                  "sessions": {
+                    "type": "integer",
+                    "minimum": 1
+                  },
+                  "consistent": {
+                    "type": "boolean"
+                  },
+                  "agree": {
+                    "type": "boolean"
+                  },
+                  "void": {
+                    "type": "integer",
+                    "minimum": 0
+                  }
+                }
+              },
+              "Anthropic": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "sessions",
+                  "consistent",
+                  "agree",
+                  "void"
+                ],
+                "properties": {
+                  "sessions": {
+                    "type": "integer",
+                    "minimum": 1
+                  },
+                  "consistent": {
+                    "type": "boolean"
+                  },
+                  "agree": {
+                    "type": "boolean"
+                  },
+                  "void": {
+                    "type": "integer",
+                    "minimum": 0
+                  }
+                }
+              },
+              "OpenAI": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "sessions",
+                  "consistent",
+                  "agree",
+                  "void"
+                ],
+                "properties": {
+                  "sessions": {
+                    "type": "integer",
+                    "minimum": 1
+                  },
+                  "consistent": {
+                    "type": "boolean"
+                  },
+                  "agree": {
+                    "type": "boolean"
+                  },
+                  "void": {
+                    "type": "integer",
+                    "minimum": 0
+                  }
+                }
+              },
+              "Moonshot": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "sessions",
+                  "consistent",
+                  "agree",
+                  "void"
+                ],
+                "properties": {
+                  "sessions": {
+                    "type": "integer",
+                    "minimum": 1
+                  },
+                  "consistent": {
+                    "type": "boolean"
+                  },
+                  "agree": {
+                    "type": "boolean"
+                  },
+                  "void": {
+                    "type": "integer",
+                    "minimum": 0
+                  }
+                }
+              },
+              "xAI": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "sessions",
+                  "consistent",
+                  "agree",
+                  "void"
+                ],
+                "properties": {
+                  "sessions": {
+                    "type": "integer",
+                    "minimum": 1
+                  },
+                  "consistent": {
+                    "type": "boolean"
+                  },
+                  "agree": {
+                    "type": "boolean"
+                  },
+                  "void": {
+                    "type": "integer",
+                    "minimum": 0
+                  }
+                }
+              },
+              "Alibaba": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "sessions",
+                  "consistent",
+                  "agree",
+                  "void"
+                ],
+                "properties": {
+                  "sessions": {
+                    "type": "integer",
+                    "minimum": 1
+                  },
+                  "consistent": {
+                    "type": "boolean"
+                  },
+                  "agree": {
+                    "type": "boolean"
+                  },
+                  "void": {
+                    "type": "integer",
+                    "minimum": 0
+                  }
+                }
+              },
+              "Zhipu": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "sessions",
+                  "consistent",
+                  "agree",
+                  "void"
+                ],
+                "properties": {
+                  "sessions": {
+                    "type": "integer",
+                    "minimum": 1
+                  },
+                  "consistent": {
+                    "type": "boolean"
+                  },
+                  "agree": {
+                    "type": "boolean"
+                  },
+                  "void": {
+                    "type": "integer",
+                    "minimum": 0
+                  }
+                }
+              },
+              "MiniMax": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "sessions",
+                  "consistent",
+                  "agree",
+                  "void"
+                ],
+                "properties": {
+                  "sessions": {
+                    "type": "integer",
+                    "minimum": 1
+                  },
+                  "consistent": {
+                    "type": "boolean"
+                  },
+                  "agree": {
+                    "type": "boolean"
+                  },
+                  "void": {
+                    "type": "integer",
+                    "minimum": 0
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

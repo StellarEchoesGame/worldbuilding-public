@@ -1,3 +1,4 @@
+import type { Family } from '../config.ts';
 import { existsSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { activeBenchmark } from '../bench-active.ts';
@@ -18,6 +19,9 @@ export type FactStatus = '共同事实' | '已选地方事实' | '状态与路�
 export const FACT_STATUSES: readonly FactStatus[] = ['共同事实', '已选地方事实', '状态与路径实例', '有边界的未知'];
 
 /** A frozen fact: 07 §2 F-ID joined with fact-status.json, or a 07 §8 Rxx touching the row. */
+/** Author family of every canon passage (reference 8.1 counts as OpenAI's, PROTOCOL §1): excluded from judging pairs that quote canon. */
+export const CANON_AUTHOR: Family = 'OpenAI';
+
 export interface FactRow {
   /** F01…F15 or Rnn-nn. */
   id: string;

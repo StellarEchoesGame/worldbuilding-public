@@ -59,6 +59,20 @@ npm run forge -- freeze --check R01         # drift of the freeze pins (bundle, 
 - 09a writes `audit-set.json` (4 pairs seeded from every pair judged this round, split 2 visible / 2 reserve by seed, before any answer) and waits for the owner's `audit.json` (exit 2, `waiting_for: "audit"`); 09b waits for `decision.json` (`waiting_for: "decision"`, again when the decision is superseded). Once `audit.json` exists `--redo-from` refuses steps up to 09b, and once 07a is marked it refuses steps up to 06d.
 - The engine never writes owner files (`owner-log.jsonl`, `rounds/*/audit.json`, `rounds/*/decision*.json`, `calibration/owner-answers.json`); only the UI does.
 
+### Calibration (forge calib)
+
+Judge families qualify on round-0 calibration set `C00` (24 owner-answered pairs, 4 retests, 180 blind taste calls) before any R round; later sets are re-qualifications `Qnn` and gate re-tests `Gnn`. Each command is a range of the calibration pipeline (`c1-build` … `c5-score`, markers under `calibration/<set>/markers/`) with the round runner's exit codes; the engine never commits calibration files, the set's PR does.
+
+```bash
+npm run forge -- calib build                 # C00 on forge/r00: request.json (seed), rewrites / degrades via calibration/build.json models, dry-run defect copies, pairs.json set
+npm run forge -- calib run                   # c2 gate dry-run, c3 wait for the owner's answers in the UI (exit 2), c4 pin.json + taste calls; --set <id>, --only <step>
+npm run forge -- calib score                 # round0.json / requal-Qnn.json / gate-Gnn.json, then labels.json and status.json (trust pins for R rounds)
+npm run forge -- calib build --requal xAI --reason calibration_fail   # Qnn on forge/calib-qnn (also --reason suspension; --gate <Family> builds a Gnn)
+```
+
+- `calib build` resumes a killed build with the same request and refuses a second C00; `--requal` needs an unqualified (`calibration_fail`) or suspended (`suspension`) family whose re-qualification for that reason is unused, read from `calibration/status.json`. Requal and gate sets are built between rounds only: every `forge/rNN` / `forge/calib-*` branch must be merged first.
+- Gateway models come only from `calibration/build.json` (non-judge families; the fixture ships the only copy until F1-06); `calibration/owner-answers.json` is written by the UI only, and no taste verdict exists before the set is fully answered.
+
 ## Review in the UI
 
 Run from your own terminal (the launcher refuses to serve the real data directory from inside an agent session):

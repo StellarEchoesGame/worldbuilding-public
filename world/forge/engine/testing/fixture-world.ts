@@ -1,5 +1,5 @@
 import { createHash } from 'node:crypto';
-import { existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { appendFileSync, existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import type { Family } from '../config.ts';
 import { isRecord, readArray, readString, stringArray } from '../json.ts';
@@ -494,4 +494,21 @@ export function fixtureWorld(dir: string, opts: FixtureOptions): FixtureWorld {
     main['world/forge/owner-log.jsonl'] = readFileSync(join(root, 'owner-log.jsonl'), 'utf8');
   }
   return { repo, root, main, cells: CELLS.map((c) => `cells/${c.id}.json`), gatewayHost: FIXTURE_GATEWAY_HOST };
+}
+
+/** Places of the extra calibration blocks (one per block; distinct places keep every block distinct). */
+const CALIB_PLACES: readonly string[] = ['北侧的储水舱', '旧货栈的二层', '轮值室的门口', '菌毯培养架旁'];
+
+/**
+ * Appends four more 250–600 character prose blocks to every passage file (01–06, 08) of a fixture world and records
+ * them in `w.main` (so fakeGit keeps them): the base canon has 2 passage-grade blocks per file, a C00 build needs 24
+ * distinct passages plus spares with at most 5 per file. Call before fakePorts / fakeGit reads `w.main`.
+ */
+export function addCalibrationPassages(w: FixtureWorld): void {
+  FIXTURE_REFERENCE_FILES.filter((name) => !name.startsWith('07-')).forEach((name, i) => {
+    const rel = `world/current/reference/${name}`;
+    const blocks = CALIB_PLACES.map((place, k) => paragraph(`${name.slice(0, 2)}号篇的${place}`, i * 4 + k).join(''));
+    appendFileSync(join(w.repo, rel), `\n${blocks.join('\n\n')}\n`);
+    w.main[rel] = readFileSync(join(w.repo, rel), 'utf8');
+  });
 }

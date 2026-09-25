@@ -2,7 +2,7 @@ import type { Family } from '../config.ts';
 import { isRecord } from '../json.ts';
 import type { SealedForecasts } from '../probe.ts';
 import { err, ok, type Result } from '../result.ts';
-import type { CanonPassage } from '../steps/brief.ts';
+import { CANON_AUTHOR, type CanonPassage } from '../steps/brief.ts';
 import type { MeasureBlock } from '../taste.ts';
 import type { TaskSpec } from '../task.ts';
 import { normalizeForQuote, splitSentences } from '../text.ts';
@@ -17,8 +17,7 @@ import { ROLE_ACCEPT, ROLE_CHAIN, ROLE_MATCH } from './roles.ts';
  * (canon passages count as CANON_AUTHOR = OpenAI). Forecasts reach prompts only here, after a valid unseal.
  */
 
-/** Author family of every canon passage of the brief (8.1 / revision-8 text). */
-export const CANON_AUTHOR: Family = 'OpenAI';
+export { CANON_AUTHOR };
 
 /** A sealed forecast under an opaque id (`P01`…, sealed order); forecaster and model never reach a prompt. */
 export interface OpaqueForecast {

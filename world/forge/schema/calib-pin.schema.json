@@ -1,0 +1,79 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "calib-pin.schema.json",
+  "title": "WB-F1 calibration pin",
+  "description": "calibration/<set>/pin.json: written once by engine/calib-run.ts (c4-judge) before the first taste call and compared on every rerun (any differing field refuses, like freeze.ts diffFreeze). context.ts reads benchmark_version / benchmark_sha256 for ctx.benchmark(). pairs_sha256 = sha256(canonicalJson(pairs.json sets[set])); answers_sha256 = sha256(canonicalJson(owner-answers.json sets[set])) of the complete set; judges = the judge backend of every family that judges the set. The per-family judge schema is repeated for every family of engine/config.ts FAMILIES (no $ref in the schema subset).",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "set",
+    "benchmark_version",
+    "benchmark_sha256",
+    "protocol_bundle_sha256",
+    "pairs_sha256",
+    "answers_sha256",
+    "judges"
+  ],
+  "properties": {
+    "set": { "type": "string", "pattern": "^[CQ]\\d{2}$" },
+    "benchmark_version": { "type": "string", "pattern": "^v[1-9]\\d*$" },
+    "benchmark_sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+    "protocol_bundle_sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+    "pairs_sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+    "answers_sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+    "judges": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "DeepSeek": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["id", "model"],
+          "properties": { "id": { "type": "string", "minLength": 1 }, "model": { "type": "string", "minLength": 1 } }
+        },
+        "Anthropic": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["id", "model"],
+          "properties": { "id": { "type": "string", "minLength": 1 }, "model": { "type": "string", "minLength": 1 } }
+        },
+        "OpenAI": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["id", "model"],
+          "properties": { "id": { "type": "string", "minLength": 1 }, "model": { "type": "string", "minLength": 1 } }
+        },
+        "Moonshot": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["id", "model"],
+          "properties": { "id": { "type": "string", "minLength": 1 }, "model": { "type": "string", "minLength": 1 } }
+        },
+        "xAI": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["id", "model"],
+          "properties": { "id": { "type": "string", "minLength": 1 }, "model": { "type": "string", "minLength": 1 } }
+        },
+        "Alibaba": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["id", "model"],
+          "properties": { "id": { "type": "string", "minLength": 1 }, "model": { "type": "string", "minLength": 1 } }
+        },
+        "Zhipu": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["id", "model"],
+          "properties": { "id": { "type": "string", "minLength": 1 }, "model": { "type": "string", "minLength": 1 } }
+        },
+        "MiniMax": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["id", "model"],
+          "properties": { "id": { "type": "string", "minLength": 1 }, "model": { "type": "string", "minLength": 1 } }
+        }
+      }
+    }
+  }
+}
