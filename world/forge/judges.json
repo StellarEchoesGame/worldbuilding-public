@@ -1,0 +1,10 @@
+{
+  "timeout_ms": 1800000,
+  "judges": [
+    { "id": "codex", "family": "OpenAI", "cli": "codex", "model": "gpt-6-astra", "effort": "max", "concurrency": 3, "accepted_served": [] },
+    { "id": "claude", "family": "Anthropic", "cli": "claude", "model": "opus", "effort": "max", "concurrency": 3, "accepted_served": ["claude-code/claude-opus-5-5[1M]", "claude-code/claude-opus-5-5", "claude-opus-5-5"] },
+    { "id": "kimi", "family": "Moonshot", "cli": "kimi", "model": "kimi-code/k3", "effort": "max", "concurrency": 3, "accepted_served": [] },
+    { "id": "grok", "family": "xAI", "cli": "grok", "model": "grok-4.7", "effort": "xhigh", "concurrency": 3, "accepted_served": ["grok-4.7-build", "grok-4.7"] }
+  ],
+  "maintainer": { "id": "maintainer", "family": "Anthropic", "cli": "claude", "model": "fable", "effort": "max", "concurrency": 1, "accepted_served": ["claude-code/claude-fable-5-1[1M]", "claude-code/claude-fable-5-1", "claude-fable-5-1"] }
+}

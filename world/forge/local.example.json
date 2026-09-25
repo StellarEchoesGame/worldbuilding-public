@@ -1,0 +1,11 @@
+{
+  "gateway": {
+    "base_url": "https://gateway.example.invalid",
+    "env_file": "~/.secret/<service>/<context>.env",
+    "key_var": "API_KEY"
+  },
+  "binaries": { "codex": "codex", "claude": "claude", "kimi": "kimi", "grok": "grok" },
+  "codex_auth": "~/.codex/auth.json",
+  "kimi_home": "~/.kimi-code",
+  "private_phrases": []
+}

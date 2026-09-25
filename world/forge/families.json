@@ -1,0 +1,16 @@
+{
+  "prefixes": [
+    { "prefix": "deepseek", "family": "DeepSeek" },
+    { "prefix": "claude", "family": "Anthropic" },
+    { "prefix": "anthropic-api/", "family": "Anthropic" },
+    { "prefix": "opus", "family": "Anthropic" },
+    { "prefix": "fable", "family": "Anthropic" },
+    { "prefix": "gpt-", "family": "OpenAI" },
+    { "prefix": "kimi-code/", "family": "Moonshot" },
+    { "prefix": "moonshot/", "family": "Moonshot" },
+    { "prefix": "grok-", "family": "xAI" },
+    { "prefix": "qwen/", "family": "Alibaba" },
+    { "prefix": "zhipu/", "family": "Zhipu" },
+    { "prefix": "minimax/", "family": "MiniMax" }
+  ]
+}
