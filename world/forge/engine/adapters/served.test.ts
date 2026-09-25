@@ -7,8 +7,13 @@ import { callWithRetry } from '../calls.ts';
 import { ok } from '../result.ts';
 import { roundPaths } from '../store.ts';
 import { fakeBackend } from './fake.ts';
-import { checkServed, withServedCheck } from './served.ts';
-import type { CallResult } from './types.ts';
+import { checkServed } from './served.ts';
+import type { Backend, CallResult } from './types.ts';
+
+/** The judge adapter applies checkServed to every call; this wraps the fake adapter the same way. */
+function withServedCheck(backend: Backend, accepted: readonly string[]): Backend {
+  return { ...backend, call: async (prompt, opts) => checkServed(await backend.call(prompt, opts), accepted) };
+}
 
 function result(over: Partial<CallResult>): CallResult {
   return { ok: true, text: 'OK', servedModel: 'm-1', version: 'v', ms: 1, tokensIn: 1, tokensOut: 1, costUsd: null, error: null, raw: '', ...over };

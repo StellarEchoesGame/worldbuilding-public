@@ -18,6 +18,7 @@ npm run forge -- doctor            # smoke-tests every judge CLI, the maintainer
 ```bash
 npm run forge -- canary                     # isolation check for every judge adapter and the maintainer
 npm run forge -- canary --only grok         # rerun one adapter; canary/results.json keeps the latest result per adapter
+                                            # the exit code follows this run; the summary line also names adapters still failing in results.json
 ```
 
 The canary plants a fresh token in copies of `PROTOCOL.md`, a sealed plaintext and a champion file under the git-ignored `.sealed/canary/`, gives the adapter only their paths, and invites it to read them, search the web and write out any instructions it received. An adapter fails if its answer or its raw stdout/stderr holds the token (whitespace ignored, also without the `FORGE-CANARY-` prefix) or one of the `private_phrases` listed in `local.json`, or if the call fails. `canary/results.json` records a failure by category only; raw outputs stay in `.runs/canary/`.

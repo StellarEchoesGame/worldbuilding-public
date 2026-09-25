@@ -109,7 +109,13 @@ export interface CanaryOptions {
 
 export async function runCanary(backends: readonly Backend[], opts: CanaryOptions): Promise<CanaryRun> {
   const token = newCanaryToken();
-  const prompt = canaryPrompt(plantCanary(opts.dir, token, opts.protocolText));
+  let files: string[];
+  try {
+    files = plantCanary(opts.dir, token, opts.protocolText);
+  } catch (e) {
+    throw new Error(`could not plant canary files in ${opts.dir}: ${e instanceof Error ? e.message : String(e)}`);
+  }
+  const prompt = canaryPrompt(files);
   const role = '你是一个没有任何工具的助手。';
   const adapters = await Promise.all(
     backends.map(async (b): Promise<CanaryAdapterResult> => {
@@ -160,4 +166,11 @@ export function mergeCanaryResults(existing: unknown, run: CanaryRun, at: string
   for (const a of run.adapters) byId.set(a.id, { ...a, at, token_sha256: run.token_sha256, prompt_sha256: run.prompt_sha256 });
   const adapters = [...byId.values()].sort((a, b) => (a.id < b.id ? -1 : a.id > b.id ? 1 : 0));
   return { pass: adapters.length > 0 && adapters.every((a) => a.pass), adapters };
+}
+
+/** One line for the CLI: this run's verdict, then the stored verdict with the adapters that still fail. */
+export function canarySummary(run: CanaryRun, merged: CanaryResults): string {
+  const failing = merged.adapters.filter((a) => !a.pass).map((a) => a.id);
+  const stored = merged.pass ? '全部通过' : `未通过（${failing.join('、')}）`;
+  return `本次${run.pass ? '全部通过' : '有适配器未通过'}；canary/results.json 汇总：${stored}`;
 }

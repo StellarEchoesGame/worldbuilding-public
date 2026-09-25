@@ -1,10 +1,10 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { existsSync, mkdtempSync, readFileSync, rmSync } from 'node:fs';
+import { existsSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { fakeBackend } from './adapters/fake.ts';
-import { canaryPrompt, mergeCanaryResults, newCanaryToken, plantCanary, runCanary, scanCanary } from './canary.ts';
+import { canaryPrompt, canarySummary, mergeCanaryResults, newCanaryToken, plantCanary, runCanary, scanCanary } from './canary.ts';
 
 const PHRASES = ['斑马短语甲', 'zebra phrase two'];
 
@@ -88,4 +88,23 @@ test('a failed call is reported by error category only, never with its raw error
   assert.deepEqual(scanCanary({ ...base, error: 'timed out after 1000 ms' }, token, PHRASES).reasons, ['call failed: timeout']);
   assert.deepEqual(scanCanary({ ...base, error: 'served model x is not in accepted_served' }, token, PHRASES).reasons, ['call failed: served model']);
   assert.deepEqual(scanCanary({ ...base, error: 'something odd' }, token, PHRASES).reasons, ['call failed: other']);
+});
+
+test('canarySummary reports the run verdict and the stored verdict, naming stored failures', () => {
+  const run = { token_sha256: 't', prompt_sha256: 'p', pass: true, adapters: [] };
+  const rec = (id: string, pass: boolean) => ({ id, family: 'F', model: 'm', served_model: null, version: null, ms: 1, pass, reasons: [], at: 'a', token_sha256: 't', prompt_sha256: 'p' });
+  assert.equal(canarySummary(run, { pass: true, adapters: [rec('grok', true)] }), '本次全部通过；canary/results.json 汇总：全部通过');
+  assert.equal(canarySummary(run, { pass: false, adapters: [rec('grok', true), rec('kimi', false)] }), '本次全部通过；canary/results.json 汇总：未通过（kimi）');
+  assert.equal(canarySummary({ ...run, pass: false }, { pass: false, adapters: [rec('kimi', false)] }), '本次有适配器未通过；canary/results.json 汇总：未通过（kimi）');
+});
+
+test('runCanary rejects with a readable message when the canary files cannot be planted', async () => {
+  const root = mkdtempSync(join(tmpdir(), 'forge-canary-'));
+  const blocker = join(root, 'file');
+  writeFileSync(blocker, 'x');
+  await assert.rejects(
+    runCanary([fakeBackend('j', 'xAI', () => 'OK')], { dir: join(blocker, 'sub'), protocolText: 'p', privatePhrases: [], timeoutMs: 1000, log: () => undefined }),
+    /could not plant canary files/u,
+  );
+  rmSync(root, { recursive: true });
 });
