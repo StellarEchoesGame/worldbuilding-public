@@ -54,6 +54,22 @@ export function parseCell(value: unknown): Result<Cell> {
   return ok({ id, rowId, title, entity, time, layers, settingNotes, protagonists, forbidden, stances });
 }
 
+/** Serializes a cell back to the committed file shape (snake_case) so it round-trips through parseCell. */
+export function cellToJson(cell: Cell): Record<string, unknown> {
+  return {
+    id: cell.id,
+    row_id: cell.rowId,
+    title: cell.title,
+    entity: cell.entity,
+    time: cell.time,
+    layers: cell.layers,
+    setting_notes: cell.settingNotes,
+    protagonists: cell.protagonists,
+    forbidden: cell.forbidden,
+    stances: cell.stances,
+  };
+}
+
 function list(items: readonly string[]): string {
   return items.map((s) => `- ${s}`).join('\n');
 }
