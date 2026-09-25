@@ -31,6 +31,21 @@ const GIT_UNSET: readonly string[] = [
   'GIT_NOGLOB_PATHSPECS',
   'GIT_ICASE_PATHSPECS',
 ];
+/**
+ * Canonical `git diff` for the approval diff whose SHA-256 the owner approves: every option that git config could
+ * change is pinned (full index hashes instead of core.abbrev, myers without the indent heuristic, fixed prefixes /
+ * context / hunk merging / order, default path quoting, no user attributes file), so any clone reproduces the bytes.
+ */
+const CANONICAL_DIFF_CONFIG: readonly string[] = [
+  '-c', 'core.quotePath=true', '-c', 'core.attributesFile=/dev/null', '-c', 'diff.noprefix=false', '-c', 'diff.mnemonicPrefix=false',
+  '-c', 'diff.suppressBlankEmpty=false',
+];
+const CANONICAL_DIFF_FLAGS: readonly string[] = [
+  '--no-ext-diff', '--no-renames', '--no-color', '--no-textconv', '--no-relative', '--full-index', '--diff-algorithm=myers',
+  '--no-indent-heuristic', '--inter-hunk-context=0', '-O/dev/null', '--src-prefix=a/', '--dst-prefix=b/', '-U3',
+];
+/** The same diff between two commits, for the PR reviewer checklist (`<merge-base>` is a placeholder). */
+export const APPROVAL_DIFF_COMMAND = ['git', ...CANONICAL_DIFF_CONFIG, 'diff', ...CANONICAL_DIFF_FLAGS, '<merge-base>', 'HEAD', '--', 'world/current'].join(' ');
 const ASSEMBLER_TIMEOUT_MS = 120_000;
 const DOCTOR_TIMEOUT_MS = 20 * 60_000;
 
@@ -240,7 +255,7 @@ export function gitPort(repoDir: string, run: RunProcess): GitPort {
         const add = await git(['add', '--intent-to-add', ...intent]);
         if (!succeeded(add)) return err(failure('git add --intent-to-add', add));
       }
-      const d = await git(['diff', '--no-ext-diff', '--no-renames', '--no-color', '--no-textconv', '--no-relative', '--src-prefix=a/', '--dst-prefix=b/', '-U3', baseRef, ...specs(repoPaths)]);
+      const d = await git([...CANONICAL_DIFF_CONFIG, 'diff', ...CANONICAL_DIFF_FLAGS, baseRef, ...specs(repoPaths)]);
       if (intent.length > 0) {
         const undo = await git(['reset', '--quiet', ...intent]);
         if (!succeeded(undo)) return err(failure('git reset (intent-to-add)', undo));

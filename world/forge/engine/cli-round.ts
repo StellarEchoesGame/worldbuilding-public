@@ -1,4 +1,4 @@
-import { existsSync, readdirSync, readFileSync } from 'node:fs';
+import { existsSync, readFileSync } from 'node:fs';
 import { join, relative, resolve, sep } from 'node:path';
 import { gatewayBackend } from './adapters/gateway.ts';
 import { judgeBackend } from './adapters/judges.ts';
@@ -13,7 +13,8 @@ import { hashListed, isDone } from './marker.ts';
 import { cliDoctor, ghPort, gitPort, pythonAssembler, systemClock, systemEntropy } from './ports-cli.ts';
 import { err, ok, type Result } from './result.ts';
 import { loadProtocolBundle } from './rules.ts';
-import { EXIT, isStepId, readStatus, runSteps, stepsSha256, verifyChain, type Pipeline, type RunReport, type StepId } from './runner.ts';
+import { drainMirrors, pendingMirrors } from './mirror.ts';
+import { acquireEngineLock, EXIT, isStepId, readStatus, runSteps, stepsSha256, verifyChain, type Pipeline, type RunReport, type StepId } from './runner.ts';
 import { ROUND_STEPS } from './steps/index.ts';
 import { SEED_PATTERN, calibrationSets, openRoundBranches } from './steps/start.ts';
 import { roundPaths } from './store.ts';
@@ -93,17 +94,58 @@ function cellOption(root: string, value: string | undefined): Result<string | nu
   return ok(rel);
 }
 
-function context(at: ForgeRoots, deps: EngineDeps, id: string, pipeline: Pipeline, startOptions: StartOptions, quotaBudgetMs: number | null): Result<StepContext> {
+/** StepContext of round `id` (rounds/<id>/) from the forge root's configuration (local.json required). */
+export function roundContext(at: ForgeRoots, deps: EngineDeps, id: string, pipeline: Pipeline, startOptions: StartOptions, quotaBudgetMs: number | null): Result<StepContext> {
   const config = loadConfig(at.root, { requireLocal: true });
   if (!config.ok) return config;
   return buildContext({ root: at.root, repo: at.repo, roundId: id, pipeline, paths: roundPaths(at.root, id), config: config.value, deps, startOptions, quotaBudgetMs });
 }
 
-function report(deps: EngineDeps, id: string, r: RunReport): number {
+/** Logs the run's end state (`R01: waiting at 09b-decision (waiting for decision): …`); returns its exit code. */
+export function report(deps: EngineDeps, id: string, r: RunReport): number {
   const where = r.step === null ? '' : ` at ${r.step}`;
   const waiting = r.waitingFor === null ? '' : ` (waiting for ${r.waitingFor})`;
   deps.log(`${id}: ${r.state}${where}${waiting}${r.detail === '' ? '' : `: ${r.detail}`}`);
   return r.exitCode;
+}
+
+/**
+ * Round 0's pending bench notices (cycles R00-init and R00, on the epic issue): no round run is R00's own, so every run
+ * drains them too (plan §8 E1). Only while rounds/R00 exists, as `forge mirror`; problems are logged.
+ */
+async function drainRound0(ctx: StepContext, deps: EngineDeps): Promise<void> {
+  if (ctx.roundId === 'R00' || !existsSync(roundPaths(ctx.root, 'R00').dir)) return;
+  const pending = pendingMirrors(ctx.root, 'R00', ctx.ports.clock.now());
+  if (!pending.ok) {
+    deps.log(`mirror R00: ${pending.error}`);
+    return;
+  }
+  if (pending.value.length === 0) return;
+  const r00 = roundContext({ root: ctx.root, repo: ctx.repo }, deps, 'R00', 'bench-r00', { cell: null, seed: null }, null);
+  if (!r00.ok) {
+    deps.log(`mirror R00: ${r00.error}`);
+    return;
+  }
+  await drainMirrors(r00.value);
+}
+
+/**
+ * drainMirrors for ctx's round, then round 0's bench notices, after a command ran its steps (plan §8: `forge round run`,
+ * `forge merge`). The runner released the engine lock at its end, so the drain takes it again; a held lock or any drain
+ * problem is only logged: a mirror never changes a round state or an exit code.
+ */
+export async function drainAfterRun(ctx: StepContext, deps: EngineDeps): Promise<void> {
+  const lock = acquireEngineLock(ctx.root, deps.pid, (pid) => deps.isAlive(pid), ctx.ports.clock.now());
+  if (!lock.ok) {
+    deps.log(`mirror ${ctx.roundId}: not drained (${lock.error})`);
+    return;
+  }
+  try {
+    await drainMirrors(ctx);
+    await drainRound0(ctx, deps);
+  } finally {
+    lock.value.release();
+  }
 }
 
 /** One round at a time (steps/start.ts openRoundBranches, squash merges included); the reason to refuse, else null. */
@@ -140,7 +182,7 @@ async function start(argv: readonly string[], deps: EngineDeps, at: ForgeRoots):
   if (seed !== null && !SEED_PATTERN.test(seed)) return usage(deps, '--seed must be 8-64 lowercase hex digits');
   const quota = quotaBudget(args.value);
   if (!quota.ok) return usage(deps, quota.error);
-  const ctx = context(at, deps, id.value, 'round', { cell: cell.value, seed }, quota.value);
+  const ctx = roundContext(at, deps, id.value, 'round', { cell: cell.value, seed }, quota.value);
   if (!ctx.ok) return usage(deps, ctx.error);
   if (isDone(ctx.value, '00-start')) return usage(deps, `${id.value} is already started; continue it with forge round run ${id.value}`);
   const open = await openRoundProblem(ctx.value);
@@ -149,7 +191,7 @@ async function start(argv: readonly string[], deps: EngineDeps, at: ForgeRoots):
   return report(deps, id.value, r);
 }
 
-/** `round run`: resumes at the first unmarked step (refused before `round start` marked 00-start). */
+/** `round run`: resumes at the first unmarked step (refused before `round start` marked 00-start); then drains mirrors. */
 async function run(argv: readonly string[], deps: EngineDeps, at: ForgeRoots): Promise<number> {
   const args = parseArgs(argv, ['--until', '--from', '--redo-from', '--quota-budget-min'], []);
   if (!args.ok) return usage(deps, `${args.error}\n${RUN_USAGE}`);
@@ -164,13 +206,15 @@ async function run(argv: readonly string[], deps: EngineDeps, at: ForgeRoots): P
   if (!redoFrom.ok) return usage(deps, redoFrom.error);
   if (!quota.ok) return usage(deps, quota.error);
   if (from.value !== null && redoFrom.value !== null) return usage(deps, '--from and --redo-from exclude each other');
-  const ctx = context(at, deps, id.value, 'round', { cell: null, seed: null }, quota.value);
+  const ctx = roundContext(at, deps, id.value, 'round', { cell: null, seed: null }, quota.value);
   if (!ctx.ok) return usage(deps, ctx.error);
   if (!isDone(ctx.value, '00-start')) return usage(deps, `${id.value} is not started; run forge round start ${id.value} first`);
   const r = await runSteps(ctx.value, {
     pipeline: 'round', steps: ROUND_STEPS, until: until.value, from: from.value, redoFrom: redoFrom.value, pid: deps.pid, isAlive: (pid) => deps.isAlive(pid),
   });
-  return report(deps, id.value, r);
+  const code = report(deps, id.value, r);
+  await drainAfterRun(ctx.value, deps);
+  return code;
 }
 
 const ROUND_STEP_IDS: readonly StepId[] = ROUND_STEPS.map((s) => s.id);
@@ -250,11 +294,10 @@ export function freezeDrift(root: string, id: string): Result<string[]> {
 
 const FREEZE_USAGE = 'usage: forge freeze --check [RNN]';
 
-/** `forge freeze --check [RNN]` (default: the newest frozen R round): exit 0 clean, 3 drift, 1 usage. */
+/** `forge freeze --check [RNN]` (default: the newest frozen R round): exit 0 clean, 3 drift, 1 usage (cli.ts sends `--post-merge` to cli-merge.ts). */
 export async function freezeCommand(argv: readonly string[], deps: EngineDeps, at: ForgeRoots): Promise<number> {
-  const args = parseArgs(argv, [], ['--check', '--post-merge']);
+  const args = parseArgs(argv, [], ['--check']);
   if (!args.ok) return usage(deps, `${args.error}\n${FREEZE_USAGE}`);
-  if (args.value.switches.has('--post-merge')) return usage(deps, 'forge freeze --post-merge arrives with the merge steps (10d)');
   if (!args.value.switches.has('--check')) return usage(deps, FREEZE_USAGE);
   const given = args.value.positional[0] ?? null;
   if (args.value.positional.length > 1 || (given !== null && !ROUND_ID.test(given))) return usage(deps, FREEZE_USAGE);

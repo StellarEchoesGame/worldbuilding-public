@@ -102,6 +102,22 @@ function quoteKeys(quote: string): string[] {
   return [...new Set([sentenceKey(quote), sentenceKey(stripMarkdown(quote))])];
 }
 
+/**
+ * The donor rule of donorSentences for one sentence: some comparison key of `quote` with at least MIN_QUOTE_CHARS
+ * significant characters occurs in sentenceKey(sentence). NFKC folds width; punctuation and whitespace are not folded.
+ * Merge preparation (merge.ts regateFacts, merge-editor.ts editorMaterial / mergeability) calls this and
+ * sentencesCarrying, so it never keeps a donor sentence mergecheck would reject, or drops one it would accept.
+ */
+export function carriesQuote(sentence: string, quote: string): boolean {
+  const key = sentenceKey(sentence);
+  return quoteKeys(quote).filter(quoteLongEnough).some((q) => key.includes(q));
+}
+
+/** The sentences of a submission, split as donorSentences splits them, that carry `quote` (carriesQuote), in text order. */
+export function sentencesCarrying(submission: string, quote: string): string[] {
+  return splitSentences(stripMarkdown(submission)).filter((s) => carriesQuote(s, quote));
+}
+
 function escapeRegex(text: string): string {
   return text.replace(/[\\^$.*+?()[\]{}|/]/gu, '\\$&');
 }

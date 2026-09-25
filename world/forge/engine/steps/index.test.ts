@@ -1,36 +1,30 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { existsSync, mkdtempSync, readdirSync, readFileSync, rmSync, statSync, writeFileSync } from 'node:fs';
-import { tmpdir } from 'node:os';
-import { join, relative, sep } from 'node:path';
-import type { FakeReply } from '../adapters/fake.ts';
-import { freezeCommand, roundCommand, type ForgeRoots } from '../cli-round.ts';
-import { loadConfig, type Family } from '../config.ts';
-import type { EngineDeps, RoundBackends, RunHooks } from '../context.ts';
+import { existsSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { join } from 'node:path';
+import { freezeCommand, roundCommand } from '../cli-round.ts';
+import type { RunHooks } from '../context.ts';
 import { isRecord, readArray, readNumber, readRecord, readString } from '../json.ts';
 import { sha256Bytes } from '../marker.ts';
+import { mirrorMarker } from '../mirror.ts';
 import { probeMarker } from '../probe.ts';
 import { LOCK_FILE, readStatus, STEP_IDS, verifyChain } from '../runner.ts';
-import { loadSchema, validate } from '../schema.ts';
 import { unwrap } from '../tasks/fenced.ts';
-import { FORECAST_COUNT, FORECAST_SLOTS } from '../tasks/forecast.ts';
-import { fakePorts, type FakePorts } from '../testing/fakes.ts';
-import { DEFAULT_FIXTURE, FIXTURE_GATEWAY_HOST, FIXTURE_WRITER_MODEL, fixtureWorld, type FixtureWorld } from '../testing/fixture-world.ts';
-import { ownerSim, type OwnerSim } from '../testing/owner-sim.ts';
-import { callLog, fakeRouter, type FakeCallMeta, type FakeRouter, type Route } from '../testing/scripted.ts';
-import { splitSentences } from '../text.ts';
+import { FIXTURE_GATEWAY_HOST } from '../testing/fixture-world.ts';
+import {
+  allCalls, DECOY_LOVER, deps, filesUnder, must, pickTopic, readObject, ROUND, schemaErrors, SEALED_VALUE, world,
+} from '../testing/round-script.ts';
 import { ROUND_STEPS } from './index.ts';
 
 /*
- * Cross-module fixture round (PR-A + PR-B): the real ROUND_STEPS 00-start … 09b-decision through `forge round
+ * Cross-module fixture round (PR-A + PR-B; the world lives in testing/round-script.ts): the real ROUND_STEPS
+ * 00-start … 09b-decision through `forge round
  * start|run|status` and `forge freeze --check`, on fixtureWorld with fake ports and backends scripted per role. The
  * owner approves the protocol, picks the topic, answers the audit and decides through owner-sim; the run is killed
  * inside 04-write and again inside 06b (throwing afterCall hooks, the in-process crash path) and each new "process"
  * resumes with zero repeated paid calls.
  */
 
-const START_ISO = '2026-10-01T00:00:00.000Z';
-const ROUND = 'R01';
 const PID_KILLED = 4101;
 const PID_RESUME = 4102;
 const PID_TASTE_KILLED = 4103;
@@ -39,279 +33,19 @@ const KILL_AFTER = 'write-W2';
 /** The 06b kill fires in the afterCall of this many-th taste call. */
 const KILL_TASTE_AT = 5;
 
-/** Every writer text carries it; the baseline (numbered canon sentences) never does: taste fakes prefer it. */
-const WRITER_MARK = '配给簿上多了一行字';
-/** W2's first version states it; honest gate judges flag it (a fact contradiction, not a mechanical word). */
-const TRAP = '母星的回信当晚就到了';
-/** The defect writer puts it into the copy's second sentence; honest judges flag it as well. */
-const DEFECT_MARK = '星门';
-/** The decoy writer's generic replacements; the taste fakes recognise the decoy by the first. */
-const DECOY_GENERICS: readonly string[] = ['某样东西', '某个地方'];
-/** This family prefers the decoy in every call of session s1 (and its rerun) of the W1 champion pair. */
-const DECOY_LOVER: Family = 'Moonshot';
-const NUMERAL: Readonly<Record<string, string>> = { W1: '一', W2: '二', W3: '三' };
-/** A sealed forecast value (`预测<forecaster>第<i>项`): none may reach a tracked file, a GitHub body or a prompt before 07a. */
-const SEALED_VALUE = /预测[^第\s]{1,40}第\d项/u;
-
-function fence(value: unknown): string {
-  return `\`\`\`json\n${JSON.stringify(value)}\n\`\`\``;
-}
-
-function head(text: string): string {
-  return [...text].slice(0, 12).join('');
-}
-
-function writerText(body: string): string {
-  return ['```submission', body, '```', '```delta', '{"new_proper_nouns":[],"claims":[]}', '```', '```interface', '{"shots":[{},{},{}],"object":{"n":1},"hook":{"h":1}}', '```', '种子：', '- 一'].join('\n');
-}
-
-/** The first three numbered canon sentences of the baseline prompt, verbatim (the fake reads material only via unwrap). */
-function baselineReply(prompt: string): FakeReply {
-  const numbered = unwrap(prompt, '正典句');
-  if (numbered === null) return { error: 'fake baseline: no 正典句 block in the prompt' };
-  const sentences = numbered.split('\n').map((l) => l.replace(/^〔C\d{3}〕/u, '')).slice(0, 3);
-  return writerText(sentences.join(''));
-}
-
-/** W2's first attempt holds the trap sentence; its blind resubmission `write-W2-r2` (same prompt) does not. */
-function writerReply(slot: string, meta: FakeCallMeta): FakeReply {
-  const trap = slot === 'W2' && meta.taskId === 'write-W2' ? `值班的老周说${TRAP}，大家可以放心地吃饭。` : '';
-  return writerText(`温芮在第三邻里的工具墙前停下，${NUMERAL[slot] ?? slot}号${WRITER_MARK}。${trap}她把扳手挂回去，去听循环泵的节拍。`);
-}
-
-function forecastReply(id: string): FakeReply {
-  const items = FORECAST_SLOTS.slice(0, FORECAST_COUNT).map((slot, i) => ({ slot, value: `预测${id}第${i}项` }));
-  return fence({ forecasts: items });
-}
-
-/** Ids of `〔label〕` lines `D1｜…` / `W1.a｜…`. */
-function idsOf(prompt: string, label: string): string[] {
-  return (unwrap(prompt, label) ?? '').split('\n').map((l) => l.split('｜')[0] ?? '').filter((x) => x !== '');
-}
-
-/** Defect writer: swaps the first three characters of sentence 2 for the defect mark, against the first offered id. */
-function defectReply(prompt: string): FakeReply {
-  const original = ((unwrap(prompt, '正文') ?? '').split('\n')[1] ?? '').replace(/^〔S\d{3}〕/u, '');
-  const against = idsOf(prompt, '条目')[0] ?? '';
-  return fence({ sentence_no: 2, original, replacement: `${DEFECT_MARK}旁${[...original].slice(3).join('')}`, against });
-}
-
-/** A binding id of the pack: the first fact row that is not a path instance, else the first regression id. */
-function bindingId(prompt: string): string {
-  const row = (unwrap(prompt, '事实表') ?? '').split('\n').map((l) => l.split('｜')).find((c) => c.length >= 3 && c[1] !== '状态与路径实例');
-  return row?.[0] ?? idsOf(prompt, '回归证据')[0] ?? '';
-}
-
-interface Script {
-  /** The first family asked about a defect copy answers 无矛盾 on it (so it is voided and a reserve replaces it). */
-  blind: Family | null;
-  /** Taste questions of the pinned benchmark. */
-  questions: readonly string[];
-}
-
-/** Honest gate judge: flags every sentence holding the trap or the defect mark; the blind family misses the copy. */
-function gateRoute(script: Script, family: Family, copy: boolean): Route {
-  return (prompt) => {
-    if (copy && script.blind === null) script.blind = family;
-    if (copy && script.blind === family) return fence({ contradiction: false, findings: [] });
-    const against = bindingId(prompt);
-    const hits = splitSentences(unwrap(prompt, '文本甲') ?? '').filter((s) => s.includes(TRAP) || s.includes(DEFECT_MARK));
-    const findings = hits.map((quote) => ({ quote, against, reason: '与冻结事实矛盾' }));
-    return fence({ contradiction: findings.length > 0, findings });
-  };
-}
-
-/** The first four-character window of `sentence` that occurs exactly once in `text`. */
-function uniqueWindow(text: string, sentence: string): string {
-  const chars = [...sentence];
-  for (let i = 0; i + 4 <= chars.length; i += 1) {
-    const window = chars.slice(i, i + 4).join('');
-    if (text.split(window).length === 2) return window;
-  }
-  return '';
-}
-
-/** Decoy writer: one unique four-character detail of each of the first two sentences becomes a generic phrase. */
-function decoyReply(prompt: string): FakeReply {
-  const text = unwrap(prompt, '文本甲') ?? '';
-  const originals = splitSentences(text).slice(0, 2).map((s) => uniqueWindow(text, s));
-  return fence({ replacements: originals.map((original, i) => ({ original, generic: DECOY_GENERICS[i] ?? '某处', kind: '其他' })) });
-}
-
-/** Taste judge: prefers the writer text on every question; avoids the decoy unless it is the decoy lover in W1 s1. */
-function tasteRoute(script: Script, family: Family): Route {
-  return (prompt, _n, meta) => {
-    const t1 = unwrap(prompt, '文本甲') ?? '';
-    const t2 = unwrap(prompt, '文本乙') ?? '';
-    const pick = !t1.includes(WRITER_MARK) && t2.includes(WRITER_MARK) ? 2 : 1;
-    const answers = Object.fromEntries(script.questions.map((q) => [q, { pick, quote: head(pick === 1 ? t1 : t2) }]));
-    const t3 = unwrap(prompt, '文本丙');
-    const t4 = unwrap(prompt, '文本丁');
-    if (t3 === null || t4 === null) return fence({ answers });
-    const decoyAt = t3.includes(DECOY_GENERICS[0] ?? '') ? 3 : 4;
-    const lover = family === DECOY_LOVER && meta.taskId.startsWith(`taste-W1-${DECOY_LOVER}-s1`);
-    const decoyPick = lover ? decoyAt : 7 - decoyAt;
-    return fence({ answers, decoy: { pick: decoyPick, quote: head(decoyPick === 3 ? t3 : t4) } });
-  };
-}
-
-function measureRoutes(): Record<string, Route> {
-  return {
-    recall: (prompt) => {
-      const text = unwrap(prompt, '文本甲') ?? '';
-      const sorted = (unwrap(prompt, '数列') ?? '').split('、').map(Number).sort((a, b) => a - b);
-      return fence({ sorted, image: [...text].slice(3, 9).join(''), quote: head(text) });
-    },
-    skin: (prompt) => fence({ pick: '甲', quote: head(unwrap(prompt, '文本甲') ?? ''), reason: '邻里与配给簿' }),
-    cold: (prompt) => {
-      const quote = head(unwrap(prompt, '文本甲') ?? '');
-      return fence({ where: { answer: '一艘船上的邻里', quote }, who: { name: '温芮', wants: '把工具还回去', cost: null, quote }, go: { answer: null, quote: null } });
-    },
-    producer: (prompt) => fence({ items: idsOf(prompt, '检查项').map((id) => ({ id, ok: true, missing: null })) }),
-  };
-}
-
-function surpriseRoutes(): Record<string, Route> {
-  return {
-    match: (prompt) => fence({ matches: idsOf(prompt, '细节').map((detail) => ({ detail, forecast: null, relation: 'none' })) }),
-    chain: (prompt) => {
-      const offered = unwrap(prompt, '正典') ?? '';
-      const file = /〔文件：([^〕]+)〕/u.exec(offered)?.[1] ?? '';
-      const body = offered.split('\n').find((l) => l.trim() !== '' && !l.startsWith('〔文件：')) ?? '';
-      return fence({ chains: idsOf(prompt, '细节').map((detail) => ({ detail, canon: { file, quote: head(body.trim()) }, steps: ['借用要登记，所以工具会被还回原处。'], lands_on: '扳手挂回工具墙' })) });
-    },
-    accept: (prompt) => fence({ verdicts: idsOf(prompt, '链').map((detail) => ({ detail, accept: true, reason: '登记推出归还' })) }),
-  };
-}
-
-interface World {
-  dir: string;
-  w: FixtureWorld;
-  at: ForgeRoots;
-  ports: FakePorts;
-  sim: OwnerSim;
-  backends: RoundBackends;
-  routers: FakeRouter[];
-  logs: string[];
-  script: Script;
-}
-
-function benchQuestions(root: string): string[] {
-  const bench: unknown = JSON.parse(readFileSync(join(root, 'benchmark', 'v1.json'), 'utf8'));
-  return (readArray(readRecord(bench, 'taste'), 'questions') ?? []).map((q) => readString(q, 'id') ?? '').filter((id) => id !== '');
-}
-
-function world(): World {
-  const dir = mkdtempSync(join(tmpdir(), 'forge-pipeline-'));
-  const w = fixtureWorld(dir, { ...DEFAULT_FIXTURE, champions: 'none', protocolApproved: false });
-  const config = loadConfig(w.root, { requireLocal: true });
-  if (!config.ok) throw new Error(config.error);
-  const ports = fakePorts({ repoDir: w.repo, main: w.main, startIso: START_ISO, seed: 'pipeline-seed' });
-  const script: Script = { blind: null, questions: benchQuestions(w.root) };
-  const routers: FakeRouter[] = [];
-  const add = (r: FakeRouter): FakeRouter => {
-    routers.push(r);
-    return r;
-  };
-  const judges = config.value.judges.map((j) => ({
-    backend: add(fakeRouter({
-      forecast: () => forecastReply(j.id),
-      gate: gateRoute(script, j.family, false),
-      gatecopy: gateRoute(script, j.family, true),
-      taste: tasteRoute(script, j.family),
-      ...measureRoutes(),
-      ...surpriseRoutes(),
-    }, { id: j.id, family: j.family, model: j.model })),
-    concurrency: j.concurrency,
-  }));
-  const gateway = add(fakeRouter({ forecast: () => forecastReply('gw') }, { id: 'gateway-deepseek-fixture', family: 'DeepSeek', model: FIXTURE_WRITER_MODEL }));
-  const writers = ['W1', 'W2', 'W3'].map((slot) => ({
-    slot,
-    // W3's first attempt fails with an adapter error carrying the gateway host (it must reach no file unredacted); the retry answers.
-    backend: add(fakeRouter({ write: (_p, _n, meta) => (slot === 'W3' && meta.attempt === 1 ? { error: `gateway request failed: connect ECONNREFUSED https://${FIXTURE_GATEWAY_HOST}/v1` } : writerReply(slot, meta)) }, { id: slot, family: 'DeepSeek', model: FIXTURE_WRITER_MODEL })),
-  }));
-  const idle = (id: string): FakeRouter => add(fakeRouter({}, { id, family: 'Anthropic', model: `idle-${id}` }));
-  const backends: RoundBackends = {
-    writers,
-    baseline: add(fakeRouter({ baseline: (prompt) => baselineReply(prompt) }, { id: 'BASE', family: 'DeepSeek', model: FIXTURE_WRITER_MODEL })),
-    // Gateway models (family DeepSeek, like the writers): no taste family is excluded as a decoy author.
-    decoy: add(fakeRouter({ decoy: (prompt) => decoyReply(prompt) }, { id: 'decoy', family: 'DeepSeek', model: FIXTURE_WRITER_MODEL })),
-    defect: add(fakeRouter({ defect: (prompt) => defectReply(prompt) }, { id: 'defect', family: 'DeepSeek', model: FIXTURE_WRITER_MODEL })),
-    judges,
-    forecasters: [...judges.map((j) => j.backend), gateway],
-    maintainer: idle('maintainer'),
-    mergeEditor: idle('merge_editor'),
-    calibGateway: new Map(),
-  };
-  return { dir, w, at: { root: w.root, repo: w.repo }, ports, sim: ownerSim(w.root, ports.clock), backends, routers, logs: [], script };
-}
-
-/**
- * Every paid call starts one fake second later (beforeCall), so writer, defect and decoy calls start strictly after
- * the probe was mirrored, as on a real clock (07a's ordering check refuses a call stamped at the mirror instant).
- */
-function deps(x: World, pid: number, hooks: RunHooks = {}): EngineDeps {
-  const tick: RunHooks = { ...hooks, beforeCall: () => x.ports.clock.advance(1000) };
-  return { ports: x.ports, backends: () => x.backends, hooks: tick, env: {}, pid, isAlive: (p) => p === pid, log: (line) => x.logs.push(line) };
-}
-
-/** Every paid call of every process, `taskId#attempt`. */
-function allCalls(x: World): string[] {
-  return x.routers.flatMap((r) => callLog(r));
-}
-
-function must<T>(r: { ok: true; value: T } | { ok: false; error: string }): T {
-  if (!r.ok) throw new Error(r.error);
-  return r.value;
-}
-
-/** Forge-root-relative paths of every file under `dir` (recursive). */
-function filesUnder(root: string, dir: string): string[] {
-  if (!existsSync(dir)) return [];
-  const out: string[] = [];
-  for (const name of readdirSync(dir)) {
-    const path = join(dir, name);
-    if (statSync(path).isDirectory()) out.push(...filesUnder(root, path));
-    else out.push(relative(root, path).split(sep).join('/'));
-  }
-  return out;
-}
-
-function readObject(path: string): Record<string, unknown> {
-  const raw: unknown = JSON.parse(readFileSync(path, 'utf8'));
-  if (!isRecord(raw)) throw new Error(`${path}: not a JSON object`);
-  return raw;
-}
-
-/** Schema errors of `value` against schema/<name>.schema.json (an entry under `properties` when `entry` is set). */
-function schemaErrors(root: string, name: string, value: unknown, entry: string | null = null): string[] {
-  const raw: unknown = JSON.parse(readFileSync(join(root, 'schema', `${name}.schema.json`), 'utf8'));
-  const picked = entry === null ? raw : readRecord(readRecord(raw, 'properties'), entry);
-  const schema = loadSchema(picked);
-  if (!schema.ok) throw new Error(`${name}: ${schema.error}`);
-  return validate(schema.value, value);
-}
-
-function pickTopic(x: World, round: string): void {
-  const offered = readArray(JSON.parse(readFileSync(join(round, 'topic-offer.json'), 'utf8')), 'top3')?.[0];
-  const rowId = readString(offered, 'row_id');
-  const layer = readString(offered, 'layer');
-  assert.ok(rowId !== null && layer !== null);
-  x.sim.pickTopic(ROUND, { row_id: rowId, layer });
-}
-
-test('ROUND_STEPS is a prefix of STEP_IDS ending at 09b-decision (PR-A 00-start … 05a, PR-B 05b … 09b)', () => {
+test('ROUND_STEPS ids are a prefix of STEP_IDS in order, ending at 11e-agreement (PR-A … 05a, PR-B 05b … 09b, PR-D 10a … 11e)', () => {
   const ids = ROUND_STEPS.map((s) => s.id);
   assert.deepEqual(ids, STEP_IDS.slice(0, ids.length));
   assert.equal(ids[ids.indexOf('05a-gate-mech') + 1], '05b-defect');
-  assert.equal(ids[ids.length - 1], '09b-decision');
+  assert.equal(ids[ids.indexOf('09b-decision') + 1], '10a-regate');
+  assert.equal(ids[ids.length - 1], '11e-agreement');
 });
 
 test('a fixture round runs 00-start … 09b-decision through the CLI: kills inside 04-write and 06b resume with no repeated paid call; owner waits at 09a and 09b', async () => {
   const x = world();
   const round = join(x.w.root, 'rounds', ROUND);
   const status = () => must(readStatus(x.w.root, ROUND));
-  const ids = ROUND_STEPS.map((s) => s.id);
+  const ids = ROUND_STEPS.map((s) => s.id).slice(0, ROUND_STEPS.findIndex((s) => s.id === '09b-decision') + 1);
   const prefix = ids.slice(0, ids.indexOf('05a-gate-mech') + 1);
 
   // 00-start waits for the protocol approval before touching git or GitHub.
@@ -415,12 +149,12 @@ test('a fixture round runs 00-start … 09b-decision through the CLI: kills insi
   assert.equal(status().waiting_for, 'decision');
   assert.deepEqual(readFileSync(join(round, 'audit-set.json')), auditSetBytes);
 
-  // owner-sim decides → 09b done: the build's pipeline ends there (exit 0, state done).
+  // owner-sim decides → 09b done (this test stops there; steps/merge-pipeline.test.ts goes on).
   const labels = readObject(join(round, 'labels.json'));
   const pick = Object.keys(labels).sort()[0] ?? '';
   assert.notEqual(pick, '');
   x.sim.decide(ROUND, { pick, reason: '平', fav: pick, publish: 'no', facts: [] });
-  assert.equal(await roundCommand(['run', ROUND], deps(x, PID_FINAL), x.at), 0, x.logs.join('\n'));
+  assert.equal(await roundCommand(['run', ROUND, '--until', '09b-decision'], deps(x, PID_FINAL), x.at), 0, x.logs.join('\n'));
   assert.equal(status().state, 'done');
   assert.deepEqual(status().done, ids);
   assert.equal(existsSync(join(x.w.root, LOCK_FILE)), false);
@@ -530,9 +264,12 @@ test('a fixture round runs 00-start … 09b-decision through the CLI: kills insi
   assert.ok(attempts > 0);
   assert.deepEqual(readRecord(readObject(join(round, 'wild-seeds.json')), 'seeds'), { W1: ['一'], 'W2-r2': ['一'], W3: ['一'] });
 
-  // Git and GitHub: PR-B steps commit nothing and post nothing (merge and mirrors come later).
+  // Git and GitHub: PR-B steps commit nothing; the end-of-run drains posted the card (after the audit) and the
+  // decision, each once, next to the probe.
   assert.equal(x.ports.git.commits('forge/r01').length, 1);
-  assert.equal(x.ports.github.comments().length, 1);
+  const bodies = x.ports.github.comments().map((c) => c.body.split('\n', 1)[0] ?? '');
+  const decisionSha = sha256Bytes(readFileSync(join(round, 'decision.json')));
+  assert.deepEqual(bodies, [probeMarker(ROUND), mirrorMarker('card', ROUND, ROUND), mirrorMarker('decision', ROUND, decisionSha)]);
 
   // No gateway host in any engine-written file; no sealed forecast value in a tracked file, a GitHub body or any
   // prompt except the surprise matchers' (after 07a unsealed).
