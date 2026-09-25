@@ -1,0 +1,12 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "game-need.schema.json",
+  "title": "WB-F1 thin-map game need",
+  "description": "weights maps row_id to a non-negative game-need weight; rows not listed weigh 1. The forge schema subset has no keyword for map values, so parseGameNeed in engine/thinmap.ts validates the weights.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["weights"],
+  "properties": {
+    "weights": { "type": "object" }
+  }
+}

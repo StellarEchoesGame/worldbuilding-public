@@ -1,19 +1,38 @@
+import { existsSync, readFileSync } from 'node:fs';
 import type { Backend } from './adapters/types.ts';
+import { anonymizeText, assignLabels } from './anonymize.ts';
 import { baselinePrompt, cellToJson, WRITER_ROLE, writerPrompt, type Canon, type Cell } from './brief.ts';
 import type { Family } from './config.ts';
-import { mechanicalGate, type GateResult } from './gate.ts';
-import { readBoolean, readNumber, readString } from './json.ts';
+import { buildFreeze, diffFreeze, parseFreeze, type FreezeRecord } from './freeze.ts';
+import { mechanicalGate, type ForbiddenWord, type GateLimits, type GateResult } from './gate.ts';
+import { isRecord, readBoolean, readNumber, readString } from './json.ts';
 import { callWithRetry, limiter } from './calls.ts';
 import { err, ok } from './result.ts';
 import { progress, readJson, roundPaths, seeded, seededShuffle, writeJson, type RoundPaths } from './store.ts';
 import { tallyChampionPair, type PairTally, type SessionPair } from './tally.ts';
 import { parseVerdict, tastePrompt, type Benchmark, type Pick, type Verdict } from './taste.ts';
-import { stripMarkdown } from './text.ts';
 import { parseWriterOutput, type WriterOutput } from './writer-output.ts';
 
 export interface JudgeSlot {
   backend: Backend;
   concurrency: number;
+}
+
+/** Gate rules taken from the PROTOCOL.md `limits`, `forbidden-words`, `negations` and `negation-exceptions` blocks. */
+export interface RoundRules {
+  limits: GateLimits;
+  forbidden: readonly ForbiddenWord[];
+  negations: readonly string[];
+  negationExceptions: readonly string[];
+  /** Wins needed when four families are eligible: the stricter of the protocol and benchmark bars. */
+  barFourFamilies: 7 | 8;
+}
+
+/** Raw inputs pinned by content hash in freeze.json when a round starts. */
+export interface RoundPins {
+  benchmarkText: string;
+  writersText: string;
+  protocolBundleSha256: string;
 }
 
 export interface RoundDeps {
@@ -28,11 +47,12 @@ export interface RoundDeps {
   judges: JudgeSlot[];
   judgeTimeoutMs: number;
   writerTimeoutMs: number;
+  rules: RoundRules;
+  pins: RoundPins;
   log: (message: string) => void;
 }
 
 export const CHAMPION_ID = 'BASE';
-const LABELS = ['A', 'B', 'C', 'D', 'E', 'F'];
 
 export interface LoadedSubmission {
   id: string;
@@ -104,15 +124,22 @@ function gateStep(deps: RoundDeps, paths: RoundPaths): Record<string, GateResult
   for (const id of [...deps.writers.map((w) => w.id), CHAMPION_ID]) {
     const sub = loadSubmission(paths, id);
     if (sub === null || sub.output === null) continue;
-    results[id] = mechanicalGate(sub.output, { baseline: sub.kind === 'baseline' });
+    results[id] = mechanicalGate(sub.output, {
+      baseline: sub.kind === 'baseline',
+      limits: deps.rules.limits,
+      forbidden: deps.rules.forbidden,
+      negations: deps.rules.negations,
+      negationExceptions: deps.rules.negationExceptions,
+    });
   }
   writeJson(`${paths.dir}/gate.json`, results);
   progress(paths, 'gate', 'done', Object.entries(results).map(([id, g]) => `${id}:${g.pass ? '通过' : '未过'}`).join(' '));
   return results;
 }
 
+/** The text judges and the owner see: Markdown and typographic tells removed. */
 export function displayText(out: WriterOutput): string {
-  return stripMarkdown(out.submission);
+  return anonymizeText(out.submission);
 }
 
 interface TasteRecord {
@@ -185,11 +212,7 @@ export interface CandidateTally {
 }
 
 function tallyStep(deps: RoundDeps, paths: RoundPaths, candidates: LoadedSubmission[], champion: LoadedSubmission): CandidateTally[] {
-  const ordered = seededShuffle(candidates.map((c) => c.id), deps.seed, 'labels');
-  const labels: Record<string, string> = {};
-  ordered.forEach((id, i) => {
-    labels[LABELS[i] ?? `X${i}`] = id;
-  });
+  const labels = stableLabels(paths, candidates.map((c) => c.id), deps.seed);
   writeJson(`${paths.dir}/labels.json`, labels);
   const out: CandidateTally[] = [];
   for (const [label, id] of Object.entries(labels)) {
@@ -205,11 +228,25 @@ function tallyStep(deps: RoundDeps, paths: RoundPaths, candidates: LoadedSubmiss
         sessions.push({ family: judge.backend.family, index: s, forward: fwd?.pick ?? null, reverse: rev?.pick ?? null });
       }
     }
-    out.push({ label, submission: id, tally: tallyChampionPair(sessions, families), sessions });
+    out.push({ label, submission: id, tally: tallyChampionPair(sessions, families, { barFourFamilies: deps.rules.barFourFamilies }), sessions });
   }
   writeJson(`${paths.dir}/tally.json`, { benchmark: deps.bench.version, champion: CHAMPION_ID, session_pairs: deps.sessionPairs, candidates: out });
   progress(paths, 'tally', 'done', out.map((c) => `${c.label}:${c.tally.totalWins}/${c.tally.needed}${c.tally.beatsChampion ? ' 胜擂' : ''}`).join(' '));
   return out;
+}
+
+/** Keeps an existing label file when it names exactly these candidates, so labels never move under the owner. */
+function stableLabels(paths: RoundPaths, ids: readonly string[], seed: string): Record<string, string> {
+  const existing = readJson(`${paths.dir}/labels.json`);
+  if (isRecord(existing)) {
+    const kept: Record<string, string> = {};
+    for (const [label, id] of Object.entries(existing)) if (typeof id === 'string') kept[label] = id;
+    const keptIds = Object.values(kept).sort();
+    const wanted = [...ids].sort();
+    if (keptIds.length === wanted.length && keptIds.every((id, i) => id === wanted[i])) return kept;
+  }
+  const byId = assignLabels(ids, seed);
+  return Object.fromEntries(Object.entries(byId).map(([id, label]) => [label, id]));
 }
 
 function auditStep(deps: RoundDeps, paths: RoundPaths, tallies: CandidateTally[]): void {
@@ -221,9 +258,54 @@ function auditStep(deps: RoundDeps, paths: RoundPaths, tallies: CandidateTally[]
   progress(paths, 'audit-set', 'done', `${pairs.length} 对盲审`);
 }
 
+function currentFreeze(deps: RoundDeps, paths: RoundPaths, roundId: string): FreezeRecord {
+  return buildFreeze({
+    round: roundId,
+    files: {
+      'BOOK.md': deps.canon.book,
+      'REFERENCE.md': deps.canon.reference,
+      'brief.json': readFileSync(`${paths.dir}/brief.json`, 'utf8'),
+      benchmark: deps.pins.benchmarkText,
+      'writers.json': deps.pins.writersText,
+    },
+    benchmarkVersion: deps.bench.version,
+    eligibleFamilies: [...new Set(deps.judges.map((j) => j.backend.family))].sort(),
+    flags: {},
+    protocolBundleSha256: deps.pins.protocolBundleSha256,
+    probeCreatedAt: null,
+  });
+}
+
+/** Writes freeze.json for a new round; for an existing one, refuses to resume if any pinned input drifted. */
+function freezeStep(deps: RoundDeps, paths: RoundPaths, roundId: string, isNew: boolean): void {
+  const file = `${paths.dir}/freeze.json`;
+  const current = currentFreeze(deps, paths, roundId);
+  if (isNew) {
+    writeJson(file, current);
+    progress(paths, 'freeze', 'done', `benchmark ${current.benchmark_version}`);
+    return;
+  }
+  if (!existsSync(file)) {
+    deps.log(`注意：${roundId} 没有 freeze.json（原型轮次），续跑时不校验输入是否变化。`);
+    return;
+  }
+  const pinned = parseFreeze(readJson(file));
+  if (!pinned.ok) throw new Error(`round ${roundId}: freeze.json is invalid: ${pinned.error}`);
+  const drift = diffFreeze(pinned.value, current);
+  // The frozen family set decides the bar; a different judge set on resume would score against another bar.
+  const was = [...pinned.value.eligible_families].sort().join('、');
+  const now = current.eligible_families.join('、');
+  if (was !== now) drift.push(`eligible families changed: ${was} → ${now}`);
+  if (drift.length > 0) {
+    progress(paths, 'freeze', 'error', drift.join('; '));
+    throw new Error(`round ${roundId} inputs changed since it was frozen (${drift.join('; ')}); start a new round instead`);
+  }
+}
+
 export async function runRound(deps: RoundDeps, roundId: string): Promise<CandidateTally[]> {
   const paths = roundPaths(deps.root, roundId);
-  if (readJson(`${paths.dir}/brief.json`) === null) {
+  const isNew = readJson(`${paths.dir}/brief.json`) === null;
+  if (isNew) {
     writeJson(`${paths.dir}/brief.json`, {
       round: roundId,
       kind: 'prototype',
@@ -239,6 +321,7 @@ export async function runRound(deps: RoundDeps, roundId: string): Promise<Candid
     });
     progress(paths, 'brief', 'done', deps.cell.title);
   }
+  freezeStep(deps, paths, roundId, isNew);
   deps.log('写手写稿中…');
   await writeStep(deps, paths);
   const gates = gateStep(deps, paths);

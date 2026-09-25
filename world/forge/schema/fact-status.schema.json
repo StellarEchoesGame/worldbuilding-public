@@ -1,0 +1,78 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "fact-status.schema.json",
+  "title": "07 §2 fact statuses",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "source",
+    "owner_confirmed",
+    "note",
+    "facts"
+  ],
+  "properties": {
+    "source": {
+      "type": "string"
+    },
+    "owner_confirmed": {
+      "type": "boolean"
+    },
+    "note": {
+      "type": "string"
+    },
+    "facts": {
+      "type": "array",
+      "minItems": 15,
+      "maxItems": 15,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "fact",
+          "table_label",
+          "status",
+          "rows",
+          "ambiguous",
+          "note"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^F(0[1-9]|1[0-5])$"
+          },
+          "fact": {
+            "type": "string",
+            "minLength": 1
+          },
+          "table_label": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "共同事实",
+              "已选地方事实",
+              "状态与路径实例",
+              "有边界的未知"
+            ]
+          },
+          "rows": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "string",
+              "pattern": "^(ALL|SHIP|CIV-.+|[SI][0-9]-.+)$"
+            }
+          },
+          "ambiguous": {
+            "type": "boolean"
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  }
+}

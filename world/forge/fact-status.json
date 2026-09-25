@@ -1,0 +1,186 @@
+{
+  "source": "world/current/reference/07-register-and-creation.md §2",
+  "owner_confirmed": false,
+  "note": "Proposed in F1-01. Each F-ID maps to exactly one 07 §1 status and to thin-map rows (ALL = every row). The gate uses these statuses; ambiguous entries await the owner.",
+  "facts": [
+    {
+      "id": "F01",
+      "fact": "正航时、无需目的地门的跃迁；共同事实",
+      "table_label": "共同事实",
+      "status": "共同事实",
+      "rows": [
+        "ALL"
+      ],
+      "ambiguous": false,
+      "note": ""
+    },
+    {
+      "id": "F02",
+      "fact": "航约428，地球历史连续；共同事实",
+      "table_label": "共同事实",
+      "status": "共同事实",
+      "rows": [
+        "ALL"
+      ],
+      "ambiguous": false,
+      "note": ""
+    },
+    {
+      "id": "F03",
+      "fact": "人类航网最大跨度1000光年，远汐80、首发约40；共同创作尺度",
+      "table_label": "共同创作尺度",
+      "status": "共同事实",
+      "rows": [
+        "ALL"
+      ],
+      "ambiguous": false,
+      "note": "表中标为“共同创作尺度”，不是 §1 的术语；按共同事实处理。"
+    },
+    {
+      "id": "F04",
+      "fact": "361年接触绮珀、401年部分民用互认；共同历史",
+      "table_label": "共同历史",
+      "status": "共同事实",
+      "rows": [
+        "CIV-绮珀诸庭",
+        "CIV-阈庭联政",
+        "CIV-回纹共同体"
+      ],
+      "ambiguous": false,
+      "note": ""
+    },
+    {
+      "id": "F05",
+      "fact": "阈庭主动入侵，地方反抗及外援真实存在；共同事实",
+      "table_label": "共同事实",
+      "status": "共同事实",
+      "rows": [
+        "CIV-阈庭联政",
+        "S0-外围接应区",
+        "SHIP"
+      ],
+      "ambiguous": false,
+      "note": ""
+    },
+    {
+      "id": "F06",
+      "fact": "远航号是大型武装远征家园舰，成功接应后共同更名；共同身份与条件",
+      "table_label": "共同身份与条件",
+      "status": "共同事实",
+      "rows": [
+        "SHIP"
+      ],
+      "ambiguous": true,
+      "note": "更名的条件是共同事实；实际更名属于状态与路径实例（“正式成功主线选择了更名”）。"
+    },
+    {
+      "id": "F07",
+      "fact": "D4接应后的780+84=864人；共同开局截面",
+      "table_label": "共同开局截面",
+      "status": "共同事实",
+      "rows": [
+        "SHIP"
+      ],
+      "ambiguous": true,
+      "note": "表中标为“共同开局截面”；D4 后的 864 人是共同开局，之后的人数变化是状态。"
+    },
+    {
+      "id": "F08",
+      "fact": "876生活床位及各示例排班是设计输入，尚非工程证明",
+      "table_label": "",
+      "status": "共同事实",
+      "rows": [
+        "SHIP"
+      ],
+      "ambiguous": true,
+      "note": "876 床位是作者给定的设计输入（“尚非工程证明”是验证边界，不是作者未定）；也可视为有边界的未知。"
+    },
+    {
+      "id": "F09",
+      "fact": "息壤作业群在先遣前无文明；固定地方过去",
+      "table_label": "固定地方过去",
+      "status": "已选地方事实",
+      "rows": [
+        "S1-冷湾",
+        "S1-赤脊",
+        "S1-帘影"
+      ],
+      "ambiguous": false,
+      "note": ""
+    },
+    {
+      "id": "F10",
+      "fact": "鹤灯尘层局部连通翻折、散射与热回声分开；固定自然答案",
+      "table_label": "固定自然答案",
+      "status": "已选地方事实",
+      "rows": [
+        "I0-鹤灯测点甲",
+        "I1-鹤灯测点乙"
+      ],
+      "ambiguous": false,
+      "note": ""
+    },
+    {
+      "id": "F11",
+      "fact": "回纹独立于阈庭，生理相近不等于同一政治主体；固定地方关系",
+      "table_label": "固定地方关系",
+      "status": "已选地方事实",
+      "rows": [
+        "CIV-回纹共同体",
+        "CIV-阈庭联政",
+        "CIV-绮珀诸庭",
+        "S7-回纹地方节点"
+      ],
+      "ambiguous": true,
+      "note": "回纹与阈庭的独立关系跨文明，也可视为共同事实。"
+    },
+    {
+      "id": "F12",
+      "fact": "S6材料分层/温差剥落，S7取向与响应差异；本轮选定自然答案",
+      "table_label": "本轮选定自然答案",
+      "status": "已选地方事实",
+      "rows": [
+        "S6-自然调查",
+        "S6-部署取样",
+        "S7-环境调查"
+      ],
+      "ambiguous": true,
+      "note": "07 写“本轮选定自然答案”，但 06 把“S6/S7局部自然问题”列在“有边界的待深化”。"
+    },
+    {
+      "id": "F13",
+      "fact": "已发生事件E、记录R、抵达A、获知K按因果排序",
+      "table_label": "",
+      "status": "共同事实",
+      "rows": [
+        "ALL"
+      ],
+      "ambiguous": false,
+      "note": ""
+    },
+    {
+      "id": "F14",
+      "fact": "更名后的810人为指定接应实例，858是该次峰值；路径实例",
+      "table_label": "路径实例",
+      "status": "状态与路径实例",
+      "rows": [
+        "SHIP",
+        "S0-外围接应区",
+        "S2-生活维修接待"
+      ],
+      "ambiguous": false,
+      "note": ""
+    },
+    {
+      "id": "F15",
+      "fact": "工质配额J与水气、营养、滤材、医疗、推进及热控分别核查",
+      "table_label": "",
+      "status": "共同事实",
+      "rows": [
+        "ALL"
+      ],
+      "ambiguous": false,
+      "note": "主要约束母舰账目，也适用于每一次港口交换。"
+    }
+  ]
+}

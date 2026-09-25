@@ -1,5 +1,6 @@
+import { execFileSync } from 'node:child_process';
 import { randomBytes } from 'node:crypto';
-import { readFileSync } from 'node:fs';
+import { existsSync, readFileSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { gatewayBackend } from './adapters/gateway.ts';
@@ -9,9 +10,14 @@ import type { Backend } from './adapters/types.ts';
 import { parseCell, type Canon } from './brief.ts';
 import { familyOf, loadConfig, type ForgeConfig, type WriterSlot } from './config.ts';
 import { isRecord, readString } from './json.ts';
+import { validateBenchmark } from './bench-validate.ts';
+import { canonFiles, factRowsFrom, parseMergeDecision, parseRegister07, sourcesFromRound } from './inputs.ts';
+import { mergecheck } from './mergecheck.ts';
 import { runRound } from './round.ts';
+import { benchContext, findBenchmark, loadProtocolBundle, parseRollbacks, roundRules, type ProtocolBundle } from './rules.ts';
 import { readJson, readLines, roundPaths, sha256 } from './store.ts';
 import { parseBenchmark } from './taste.ts';
+import { checkTags, computeThinmap, DEFAULT_GAME_NEED, formatThinmap, parseAliases, parseGameNeed, parseRows, type Alias, type Row } from './thinmap.ts';
 import { launchUi } from './ui-launch.ts';
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
@@ -31,6 +37,29 @@ function config(): ForgeConfig {
   const cfg = loadConfig(ROOT, { requireLocal: true });
   if (!cfg.ok) fail(cfg.error);
   return cfg.value;
+}
+
+function protocolBundle(): ProtocolBundle {
+  const bundle = loadProtocolBundle(ROOT);
+  if (!bundle.ok) fail(bundle.error);
+  return bundle.value;
+}
+
+function readText(path: string): string {
+  try {
+    return readFileSync(path, 'utf8');
+  } catch (e) {
+    return fail(`cannot read ${path}: ${e instanceof Error ? e.message : String(e)}`);
+  }
+}
+
+function parseJsonText(text: string, path: string): unknown {
+  try {
+    const value: unknown = JSON.parse(text);
+    return value;
+  } catch (e) {
+    return fail(`${path} is not valid JSON: ${e instanceof Error ? e.message : String(e)}`);
+  }
 }
 
 function writerBackend(cfg: ForgeConfig, slot: WriterSlot): Backend {
@@ -84,7 +113,11 @@ async function roundRun(args: readonly string[]): Promise<void> {
   if (storedCell === null && cellArg === null) fail('a new round needs --cell cells/<cell>.json');
   const cell = parseCell(storedCell ?? readJson(resolve(ROOT, cellArg ?? '')));
   if (!cell.ok) fail(cell.error);
-  const bench = parseBenchmark(readJson(join(ROOT, 'benchmark/v0.json')));
+  const bundle = protocolBundle();
+  const benchPath = resolve(ROOT, option(args, '--benchmark') ?? 'benchmark/v0.json');
+  const benchText = readText(benchPath);
+  const benchRaw = parseJsonText(benchText, benchPath);
+  const bench = parseBenchmark(benchRaw);
   if (!bench.ok) fail(bench.error);
   const local = cfg.local;
   if (local === null) fail('local.json is required');
@@ -96,12 +129,14 @@ async function roundRun(args: readonly string[]): Promise<void> {
       canon: loadCanon(),
       bench: bench.value,
       seed,
-      sessionPairs: 2,
+      sessionPairs: bundle.protocol.bars.sessionPairs,
       writers: cfg.slots.map((s) => writerBackend(cfg, s)),
       baselineWriter: writerBackend(cfg, cfg.baseline),
       judges: cfg.judges.map((j) => ({ backend: judgeBackend(j, local), concurrency: j.concurrency })),
       judgeTimeoutMs: cfg.judgeTimeoutMs,
       writerTimeoutMs: cfg.writerTimeoutMs,
+      rules: roundRules(bundle.protocol, benchRaw),
+      pins: { benchmarkText: benchText, writersText: readText(join(ROOT, 'writers.json')), protocolBundleSha256: bundle.bundleSha256 },
       log: (m) => process.stdout.write(`${m}\n`),
     },
     id,
@@ -129,13 +164,163 @@ function roundStatus(args: readonly string[]): void {
   process.stdout.write(`已完成评委调用 ${judged}，错误事件 ${errors}\n`);
 }
 
+function protocolHash(): void {
+  const bundle = protocolBundle();
+  process.stdout.write(`Protocol version: ${bundle.protocol.version}\nbundle sha256: ${bundle.bundleSha256}\n`);
+}
+
+function benchValidate(args: readonly string[]): void {
+  const candidatePath = args[0];
+  if (candidatePath === undefined) fail('usage: forge bench validate <candidate.json> [--parent <parent.json>] [--round <n>] [--rollbacks <file>]');
+  const bundle = protocolBundle();
+  const candidateFile = resolve(process.cwd(), candidatePath);
+  const candidate = parseJsonText(readText(candidateFile), candidateFile);
+  const parentArg = option(args, '--parent');
+  const namedParent = readString(candidate, 'parent');
+  let parent: unknown = null;
+  if (parentArg !== null) {
+    const parentFile = resolve(process.cwd(), parentArg);
+    parent = parseJsonText(readText(parentFile), parentFile);
+  } else if (namedParent !== null) {
+    const found = findBenchmark(ROOT, namedParent);
+    if (!found.ok) fail(`candidate names parent ${namedParent}: ${found.error}`);
+    process.stderr.write(`parent ${namedParent}: ${found.value.path}\n`);
+    parent = found.value.value;
+  }
+  const roundArg = option(args, '--round') ?? '0';
+  const round = Number(roundArg);
+  if (!Number.isInteger(round) || round < 0) fail(`--round must be a non-negative integer, got ${roundArg}`);
+  const rollbacksArg = option(args, '--rollbacks');
+  const rollbacks = rollbacksArg === null ? null : parseRollbacks(jsonFile(resolve(process.cwd(), rollbacksArg)));
+  if (rollbacks !== null && !rollbacks.ok) fail(rollbacks.error);
+  const ctx = benchContext(ROOT, bundle.protocol, round, rollbacks === null ? [] : rollbacks.value);
+  if (!ctx.ok) fail(ctx.error);
+  const v = validateBenchmark(candidate, parent, ctx.value);
+  process.stdout.write(`${JSON.stringify(v, null, 2)}\n`);
+  if (!v.ok) process.exitCode = 1;
+}
+
+function jsonFile(path: string): unknown {
+  return parseJsonText(readText(path), path);
+}
+
+function mapRows(aliasesArg: string | null = null): { rows: Row[]; aliases: Alias[]; rowIds: string[] } {
+  const rows = parseRows(jsonFile(join(ROOT, 'map/rows.json')));
+  if (!rows.ok) fail(rows.error);
+  const aliasesPath = aliasesArg === null ? join(ROOT, 'map/aliases.json') : resolve(process.cwd(), aliasesArg);
+  if (aliasesArg !== null && !existsSync(aliasesPath)) fail(`no such file ${aliasesPath}`);
+  const aliases = existsSync(aliasesPath) ? parseAliases(jsonFile(aliasesPath)) : null;
+  if (aliases !== null && !aliases.ok) fail(aliases.error);
+  const aliasList = aliases === null ? [] : aliases.value;
+  const characters = aliasList.filter((a) => a.kind === 'character').map((a) => a.row_id);
+  return { rows: rows.value, aliases: aliasList, rowIds: [...rows.value.map((r) => r.row_id), ...characters] };
+}
+
+function thinmap(args: readonly string[]): void {
+  const { rows, aliases, rowIds } = mapRows(option(args, '--aliases'));
+  const tagsArg = option(args, '--tags');
+  const tagsPath = tagsArg === null ? join(ROOT, 'map/tags.json') : resolve(process.cwd(), tagsArg);
+  if (tagsArg !== null && !existsSync(tagsPath)) fail(`no such file ${tagsPath}`);
+  const tagged = existsSync(tagsPath);
+  const tags = tagged ? jsonFile(tagsPath) : { cells: {} };
+  for (const problem of checkTags(tags, rowIds)) process.stderr.write(`${tagsPath}: ${problem}\n`);
+  const needArg = option(args, '--game-need');
+  const needPath = needArg === null ? join(ROOT, 'map/game-need.json') : resolve(process.cwd(), needArg);
+  if (needArg !== null && !existsSync(needPath)) fail(`no such file ${needPath}`);
+  const need = existsSync(needPath) ? parseGameNeed(jsonFile(needPath)) : null;
+  if (need !== null && !need.ok) fail(need.error);
+  const factRows = factRowsFrom(jsonFile(join(ROOT, 'fact-status.json')));
+  if (!factRows.ok) fail(factRows.error);
+  const canon = canonFiles(REPO);
+  const topArg = option(args, '--top') ?? '20';
+  const top = Number(topArg);
+  if (!Number.isInteger(top) || top < 1) fail(`--top must be a positive integer, got ${topArg}`);
+  const result = computeThinmap({
+    rows,
+    aliases,
+    tags,
+    canon,
+    registered: parseRegister07(canon['reference/07-register-and-creation.md'] ?? ''),
+    factRows: factRows.value,
+    gameNeed: need === null ? DEFAULT_GAME_NEED : need.value,
+    mentions: {},
+  });
+  if (!tagged) process.stdout.write('注意：map/tags.json 尚未标注（F1-05），所有格值为 0，排序只反映游戏需求权重。\n');
+  process.stdout.write(`${formatThinmap(result, top)}\n`);
+}
+
+function git(args: readonly string[]): string | null {
+  try {
+    return execFileSync('git', ['-C', REPO, ...args], { encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'], maxBuffer: 64 * 1024 * 1024 });
+  } catch {
+    return null;
+  }
+}
+
+/** Files `assemble_reference.py` regenerates during a merge; checked by reproducing them, not by mergecheck. */
+const ASSEMBLER_OUTPUTS: readonly string[] = ['reference/REFERENCE.md', 'reference/hashes.json', 'reference/manifest.json'];
+
+function mergeCheck(args: readonly string[]): void {
+  const decisionArg = option(args, '--decision');
+  if (decisionArg === null) fail('usage: forge mergecheck --decision <merge-decision.json> [--base <git-ref>]');
+  const decision = parseMergeDecision(jsonFile(resolve(process.cwd(), decisionArg)));
+  if (!decision.ok) fail(decision.error);
+  const base = option(args, '--base') ?? 'main';
+  if (git(['rev-parse', '--verify', '--quiet', `${base}^{commit}`]) === null) fail(`unknown git ref ${base}`);
+  const sources = sourcesFromRound(ROOT, decision.value.round);
+  if (!sources.ok) fail(sources.error);
+  const merge = protocolBundle().protocol;
+  // Every canon Markdown file goes to mergecheck, which fails any change outside 09, 07 and 01–06.
+  const after = canonFiles(REPO);
+  const before: Record<string, string> = {};
+  for (const key of new Set([...Object.keys(after), 'reference/09-scenes-and-people.md'])) {
+    before[key] = git(['show', `${base}:world/current/${key}`]) ?? '';
+  }
+  // Paths mergecheck does not see (deleted files, subfolders, non-Markdown) may only be the assembler's outputs.
+  const changedTracked = git(['diff', '--name-only', base, '--', 'world/current']);
+  const untracked = git(['ls-files', '--others', '--exclude-standard', '--', 'world/current']);
+  if (changedTracked === null || untracked === null) fail('cannot list changed files under world/current');
+  const outside = [...changedTracked.split('\n'), ...untracked.split('\n')]
+    .filter((line) => line.startsWith('world/current/'))
+    .map((line) => line.slice('world/current/'.length))
+    .filter((key) => !(key in before) && !ASSEMBLER_OUTPUTS.includes(key));
+  const result = mergecheck({
+    constants: { ...merge.merge, connectives: merge.connectives },
+    rowIds: mapRows().rowIds,
+    decision: decision.value,
+    sources: sources.value,
+    before,
+    after,
+  });
+  const violations = [...result.violations, ...[...new Set(outside)].sort().map((key) => `unexpected change: ${key}`)];
+  const passed = result.ok && violations.length === 0;
+  process.stdout.write(passed ? `mergecheck 通过（对照 ${base}）\n` : `mergecheck 未通过（对照 ${base}）：\n${violations.map((v) => `- ${v}`).join('\n')}\n`);
+  if (!passed) process.exitCode = 1;
+}
+
 async function main(): Promise<void> {
   const [cmd, sub, ...rest] = process.argv.slice(2);
   if (cmd === 'doctor') return doctor();
   if (cmd === 'round' && sub === 'run') return roundRun(rest);
   if (cmd === 'round' && sub === 'status') return roundStatus(rest);
+  if (cmd === 'protocol' && sub === 'hash') return protocolHash();
+  if (cmd === 'bench' && sub === 'validate') return benchValidate(rest);
+  if (cmd === 'thinmap') return thinmap([sub, ...rest].filter((s): s is string => s !== undefined));
+  if (cmd === 'mergecheck') return mergeCheck([sub, ...rest].filter((s): s is string => s !== undefined));
   if (cmd === 'ui') return launchUi(ROOT, [sub, ...rest].filter((s): s is string => s !== undefined));
-  fail('usage: forge doctor | forge round run <ID> --cell <file> | forge round status <ID> | forge ui');
+  fail(
+    [
+      'usage:',
+      '  forge doctor',
+      '  forge round run <ID> --cell <file> [--seed <seed>] [--benchmark <file>]',
+      '  forge round status <ID>',
+      '  forge protocol hash',
+      '  forge bench validate <candidate.json> [--parent <parent.json>] [--round <n>] [--rollbacks <file>]',
+      '  forge thinmap [--top <n>] [--aliases <file>] [--tags <file>] [--game-need <file>]',
+      '  forge mergecheck --decision <merge-decision.json> [--base <git-ref>]',
+      '  forge ui',
+    ].join('\n'),
+  );
 }
 
 await main();

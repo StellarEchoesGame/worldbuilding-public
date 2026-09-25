@@ -24,9 +24,13 @@
       "items": {
         "type": "object",
         "additionalProperties": false,
-        "required": ["change", "evidence_ids", "expected_effect"],
+        "required": ["change", "keys", "evidence_ids", "expected_effect"],
         "properties": {
           "change": { "type": "string", "minLength": 1, "maxLength": 300 },
+          "keys": {
+            "type": "array",
+            "items": { "type": "string", "enum": ["taste", "measures", "cliche_list", "interface_checklist_extra", "decoy_recipe", "baseline_rebuilds", "bars"] }
+          },
           "evidence_ids": { "type": "array", "items": { "type": "string", "pattern": "^E-[A-Za-z0-9-]+$" } },
           "expected_effect": { "type": "string", "maxLength": 300 }
         }

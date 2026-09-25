@@ -1,0 +1,34 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "aliases.schema.json",
+  "title": "WB-F1 thin-map aliases",
+  "description": "Names by which a row is recognised in canon text, with the first verbatim occurrence. Character rows (row_id P-<name>, kind character) exist only here; parseAliases also enforces that pairing.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["entries"],
+  "properties": {
+    "entries": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["row_id", "kind", "primary", "aliases", "first_quote"],
+        "properties": {
+          "row_id": { "type": "string", "pattern": "^(?:(?:S[0-7]|I[01])-.+|SHIP|CIV-.+|P-.+)$" },
+          "kind": { "type": "string", "enum": ["area", "ship", "civilization", "character"] },
+          "primary": { "type": "string", "minLength": 1 },
+          "aliases": { "type": "array", "items": { "type": "string", "minLength": 1 } },
+          "first_quote": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["file", "quote"],
+            "properties": {
+              "file": { "type": "string", "minLength": 1 },
+              "quote": { "type": "string", "minLength": 1 }
+            }
+          }
+        }
+      }
+    }
+  }
+}
