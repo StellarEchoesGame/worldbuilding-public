@@ -11,6 +11,24 @@ const MERGE = {
   heading8: '## 8. 现场登记',
   tableHeader8: '| 编号 | 行 | 事实 | 地位 | 挂靠 | 延伸自 | 误用 | 轮次 |\n|---|---|---|---|---|---|---|---|',
   maxJointsPer500: 3,
+  notesPaths: ['reference/CHANGES.md'],
+  manifestHeader: ['', '另收样本现场。'],
+};
+
+const CALIBRATION_JSON = {
+  categories: ['canon_vs_rewrite', 'cross_model', 'stance', 'known'],
+  pairs_per_category: 6,
+  retest_pairs: 4,
+  visible_round0: 12,
+  qualify_nonknown_pct: 72,
+  qualify_known_max_miss: 1,
+  requal: { nonknown: 9, nonknown_min: 8, known: 3, known_min: 3 },
+  gate_dryrun_max_miss: 1,
+  interval_z: 1.6448536269514722,
+  agreement: { threshold: 0.6, flag_n: 12, flag_p: 0.8, suspend_n: 24, suspend_p: 0.95 },
+  audit_visible: 2,
+  replay_max_pairs: 16,
+  replay_min_pairs: 4,
 };
 
 const FIXTURE_RXX = {
@@ -37,6 +55,7 @@ function blocks(): Block[] {
     ['connectives', '["同一天，", "后来，"]'],
     ['merge', JSON.stringify(MERGE, null, 2)],
     ['fixture-rxx', JSON.stringify(FIXTURE_RXX, null, 2)],
+    ['calibration', JSON.stringify(CALIBRATION_JSON, null, 2)],
   ];
 }
 
@@ -59,6 +78,21 @@ const EXPECTED: Protocol = {
   connectives: ['同一天，', '后来，'],
   merge: MERGE,
   fixtureRxx: FIXTURE_RXX,
+  calibration: {
+    categories: ['canon_vs_rewrite', 'cross_model', 'stance', 'known'],
+    pairsPerCategory: 6,
+    retestPairs: 4,
+    visibleRound0: 12,
+    qualifyNonknownPct: 72,
+    qualifyKnownMaxMiss: 1,
+    requal: { nonknown: 9, nonknownMin: 8, known: 3, knownMin: 3 },
+    gateDryrunMaxMiss: 1,
+    intervalZ: 1.6448536269514722,
+    agreement: { threshold: 0.6, flagN: 12, flagP: 0.8, suspendN: 24, suspendP: 0.95 },
+    auditVisible: 2,
+    replayMaxPairs: 16,
+    replayMinPairs: 4,
+  },
 };
 
 function render(list: readonly Block[], versionLine = 'Protocol version: 1.0-test'): string {
@@ -144,6 +178,26 @@ test('malformed block shapes are reported naming the block', () => {
     ['defect-types', '[{"id": "D1", "text": "a", "requires": 3}]', /protocol:defect-types: \[0\]\.requires must be a non-empty string or null/u],
     ['merge', JSON.stringify({ ...MERGE, tableHeader8: '| a |' }), /protocol:merge: tableHeader8 must be two non-empty lines/u],
     ['merge', JSON.stringify({ ...MERGE, maxJointsPer500: '3' }), /protocol:merge: maxJointsPer500 must be a non-negative integer/u],
+    ['merge', JSON.stringify({ ...MERGE, notesPaths: ['../outside.md'] }), /protocol:merge: notesPaths\[0\] must be a relative path under world\/current/u],
+    ['merge', JSON.stringify({ ...MERGE, notesPaths: ['reference/07-register-and-creation.md'] }), /protocol:merge: notesPaths\[0\] must not be a checked canon file/u],
+    ['merge', JSON.stringify({ ...MERGE, manifestHeader: 'x' }), /protocol:merge: manifestHeader must be an array of strings/u],
+    ['calibration', JSON.stringify({ ...CALIBRATION_JSON, categories: [...CALIBRATION_JSON.categories, 'extra'] }), /protocol:calibration: categories must be exactly canon_vs_rewrite, cross_model, stance, known/u],
+    ['calibration', JSON.stringify({ ...CALIBRATION_JSON, visible_round0: 25 }), /protocol:calibration: visible_round0 must be at most 4 · pairs_per_category/u],
+    ['calibration', JSON.stringify({ ...CALIBRATION_JSON, qualify_nonknown_pct: 0 }), /protocol:calibration: qualify_nonknown_pct must be an integer from 1 to 100/u],
+    ['calibration', JSON.stringify({ ...CALIBRATION_JSON, agreement: { ...CALIBRATION_JSON.agreement, flag_p: 1 } }), /protocol:calibration: agreement\.flag_p must be strictly between 0 and 1/u],
+    ['calibration', JSON.stringify({ ...CALIBRATION_JSON, agreement: { ...CALIBRATION_JSON.agreement, suspend_n: 6 } }), /protocol:calibration: agreement\.suspend_n must be at least flag_n/u],
+    ['calibration', JSON.stringify({ ...CALIBRATION_JSON, requal: { ...CALIBRATION_JSON.requal, nonknown_min: 10 } }), /protocol:calibration: requal\.nonknown_min must be at most requal\.nonknown/u],
+    ['calibration', JSON.stringify({ ...CALIBRATION_JSON, replay_min_pairs: 20 }), /protocol:calibration: replay_min_pairs must be at most replay_max_pairs/u],
+    ['calibration', JSON.stringify({ ...CALIBRATION_JSON, replay_min_pairs: 0 }), /protocol:calibration: replay_min_pairs must be at least 1/u],
+    ['calibration', JSON.stringify({ ...CALIBRATION_JSON, retest_pairs: 25 }), /protocol:calibration: retest_pairs must be at most 4 · pairs_per_category/u],
+    ['calibration', JSON.stringify({ ...CALIBRATION_JSON, audit_visible: 5 }), /protocol:calibration: audit_visible must be at most 4/u],
+    ['calibration', JSON.stringify({ ...CALIBRATION_JSON, interval_z: 0 }), /protocol:calibration: interval_z must be a positive number/u],
+    ['calibration', JSON.stringify({ ...CALIBRATION_JSON, qualify_known_max_miss: 7 }), /protocol:calibration: qualify_known_max_miss must be at most pairs_per_category/u],
+    ['calibration', JSON.stringify({ ...CALIBRATION_JSON, agreement: { ...CALIBRATION_JSON.agreement, suspend_p: 0.7 } }), /protocol:calibration: agreement\.suspend_p must be at least flag_p/u],
+    ['merge', JSON.stringify({ ...MERGE, notesPaths: ['reference/CHANGES.md', 'reference/CHANGES.md'] }), /protocol:merge: notesPaths\[1\] duplicates "reference\/CHANGES.md"/u],
+    ['merge', JSON.stringify({ ...MERGE, notesPaths: [''] }), /protocol:merge: notesPaths\[0\] must be a relative path under world\/current/u],
+    ['merge', JSON.stringify({ ...MERGE, notesPaths: ['reference/notes'] }), /protocol:merge: notesPaths\[0\] must be a Markdown file/u],
+    ['merge', JSON.stringify({ ...MERGE, notesPaths: ['reference/REVIEW.md'] }), /protocol:merge: notesPaths\[0\] must not be a checked canon file/u],
     ['fixture-rxx', JSON.stringify({ ...FIXTURE_RXX, rxx: 'R1-1' }), /protocol:fixture-rxx: rxx must match R<nn>-<nn>/u],
     ['fixture-rxx', JSON.stringify({ ...FIXTURE_RXX, reversal: '' }), /protocol:fixture-rxx: reversal must be a non-empty string/u],
   ];

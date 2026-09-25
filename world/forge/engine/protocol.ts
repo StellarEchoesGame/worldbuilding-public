@@ -13,7 +13,8 @@ export type ProtocolBlockName =
   | 'defect-types'
   | 'connectives'
   | 'merge'
-  | 'fixture-rxx';
+  | 'fixture-rxx'
+  | 'calibration';
 
 export const PROTOCOL_BLOCKS: readonly ProtocolBlockName[] = [
   'protected-keys',
@@ -27,6 +28,7 @@ export const PROTOCOL_BLOCKS: readonly ProtocolBlockName[] = [
   'connectives',
   'merge',
   'fixture-rxx',
+  'calibration',
 ];
 
 export const BUNDLE_FILES: readonly string[] = ['PROTOCOL.md', 'families.json', 'judges.json'];
@@ -62,6 +64,31 @@ export interface ProtocolMerge {
   heading8: string;
   tableHeader8: string;
   maxJointsPer500: number;
+  /** Revision-notes files under world/current that a merge may edit; mergecheck skips them (§7.7). */
+  notesPaths: string[];
+  /** Lines appended to the manifest header when 09 first joins the reference set (§7). */
+  manifestHeader: string[];
+}
+
+export type CalibCategory = 'canon_vs_rewrite' | 'cross_model' | 'stance' | 'known';
+
+export const CALIB_CATEGORIES: readonly CalibCategory[] = ['canon_vs_rewrite', 'cross_model', 'stance', 'known'];
+
+/** Calibration and agreement numbers (§9, `protocol:calibration`). */
+export interface ProtocolCalibration {
+  categories: CalibCategory[];
+  pairsPerCategory: number;
+  retestPairs: number;
+  visibleRound0: number;
+  qualifyNonknownPct: number;
+  qualifyKnownMaxMiss: number;
+  requal: { nonknown: number; nonknownMin: number; known: number; knownMin: number };
+  gateDryrunMaxMiss: number;
+  intervalZ: number;
+  agreement: { threshold: number; flagN: number; flagP: number; suspendN: number; suspendP: number };
+  auditVisible: number;
+  replayMaxPairs: number;
+  replayMinPairs: number;
 }
 
 export interface FixtureRxx {
@@ -89,6 +116,7 @@ export interface Protocol {
   connectives: string[];
   merge: ProtocolMerge;
   fixtureRxx: FixtureRxx;
+  calibration: ProtocolCalibration;
 }
 
 export interface BundleFile {
@@ -227,8 +255,32 @@ function defectTypes(value: unknown): DefectType[] {
   });
 }
 
+function textLines(rec: JsonRecord, key: string): string[] {
+  const items = stringArray(rec[key]);
+  if (items === null) return fail(`${key} must be an array of strings`);
+  return items;
+}
+
+/** A checked canon file (09, 07, 01–08 entries, book chapters, BOOK, the bundle and the reviews) can never be a notes path. */
+const CHECKED_CANON = /^(?:reference\/)?(?:\d{2}-[^/]*|BOOK|REFERENCE|REVIEW|AUDIT)\.md$/u;
+
+function notesPaths(rec: JsonRecord): string[] {
+  const items = textLines(rec, 'notesPaths');
+  const seen = new Set<string>();
+  for (const [i, path] of items.entries()) {
+    const where = `notesPaths[${i}]`;
+    if (path === '' || path.startsWith('/') || path.split('/').some((part) => part === '' || part === '.' || part === '..')) {
+      fail(`${where} must be a relative path under world/current`);
+    }
+    if (!path.endsWith('.md')) fail(`${where} must be a Markdown file (mergecheck only sees .md files)`);
+    if (CHECKED_CANON.test(path)) fail(`${where} must not be a checked canon file`);
+    unique(seen, path, where);
+  }
+  return items;
+}
+
 function merge(value: unknown): ProtocolMerge {
-  const rec = shape(value, '', ['preamble09', 'pointer07', 'heading8', 'tableHeader8', 'maxJointsPer500']);
+  const rec = shape(value, '', ['preamble09', 'pointer07', 'heading8', 'tableHeader8', 'maxJointsPer500', 'notesPaths', 'manifestHeader']);
   const tableHeader8 = text(rec, 'tableHeader8', '');
   const lines = tableHeader8.split('\n');
   if (lines.length !== 2 || lines.some((l) => l.trim() === '')) fail('tableHeader8 must be two non-empty lines (header row and separator row)');
@@ -238,6 +290,83 @@ function merge(value: unknown): ProtocolMerge {
     heading8: text(rec, 'heading8', ''),
     tableHeader8,
     maxJointsPer500: count(rec, 'maxJointsPer500', ''),
+    notesPaths: notesPaths(rec),
+    manifestHeader: textLines(rec, 'manifestHeader'),
+  };
+}
+
+function isCalibCategory(value: string): value is CalibCategory {
+  return CALIB_CATEGORIES.some((c) => c === value);
+}
+
+function probability(rec: JsonRecord, key: string, path: string): number {
+  const v = rec[key];
+  if (typeof v !== 'number' || !Number.isFinite(v) || v <= 0 || v >= 1) return fail(`${at(path, key)} must be strictly between 0 and 1`);
+  return v;
+}
+
+function calibration(value: unknown): ProtocolCalibration {
+  const rec = shape(value, '', [
+    'categories', 'pairs_per_category', 'retest_pairs', 'visible_round0', 'qualify_nonknown_pct', 'qualify_known_max_miss',
+    'requal', 'gate_dryrun_max_miss', 'interval_z', 'agreement', 'audit_visible', 'replay_max_pairs', 'replay_min_pairs',
+  ]);
+  const names = stringArray(rec['categories']);
+  const categories = (names ?? []).filter(isCalibCategory);
+  if (names === null || names.length !== CALIB_CATEGORIES.length || categories.length !== names.length || CALIB_CATEGORIES.some((c) => !categories.includes(c))) {
+    fail(`categories must be exactly ${CALIB_CATEGORIES.join(', ')}`);
+  }
+  const pairsPerCategory = count(rec, 'pairs_per_category', '');
+  if (pairsPerCategory === 0) fail('pairs_per_category must be at least 1');
+  const total = CALIB_CATEGORIES.length * pairsPerCategory;
+  const retestPairs = count(rec, 'retest_pairs', '');
+  if (retestPairs > total) fail('retest_pairs must be at most 4 · pairs_per_category');
+  const visibleRound0 = count(rec, 'visible_round0', '');
+  if (visibleRound0 > total) fail('visible_round0 must be at most 4 · pairs_per_category');
+  const pct = count(rec, 'qualify_nonknown_pct', '');
+  if (pct < 1 || pct > 100) fail('qualify_nonknown_pct must be an integer from 1 to 100');
+  const qualifyKnownMaxMiss = count(rec, 'qualify_known_max_miss', '');
+  if (qualifyKnownMaxMiss > pairsPerCategory) fail('qualify_known_max_miss must be at most pairs_per_category');
+  const rq = shape(rec['requal'], 'requal', ['nonknown', 'nonknown_min', 'known', 'known_min']);
+  const requal = {
+    nonknown: count(rq, 'nonknown', 'requal'),
+    nonknownMin: count(rq, 'nonknown_min', 'requal'),
+    known: count(rq, 'known', 'requal'),
+    knownMin: count(rq, 'known_min', 'requal'),
+  };
+  if (requal.nonknownMin > requal.nonknown) fail('requal.nonknown_min must be at most requal.nonknown');
+  if (requal.knownMin > requal.known) fail('requal.known_min must be at most requal.known');
+  const z = rec['interval_z'];
+  if (typeof z !== 'number' || !Number.isFinite(z) || z <= 0) fail('interval_z must be a positive number');
+  const ag = shape(rec['agreement'], 'agreement', ['threshold', 'flag_n', 'flag_p', 'suspend_n', 'suspend_p']);
+  const agreement = {
+    threshold: probability(ag, 'threshold', 'agreement'),
+    flagN: count(ag, 'flag_n', 'agreement'),
+    flagP: probability(ag, 'flag_p', 'agreement'),
+    suspendN: count(ag, 'suspend_n', 'agreement'),
+    suspendP: probability(ag, 'suspend_p', 'agreement'),
+  };
+  if (agreement.suspendN < agreement.flagN) fail('agreement.suspend_n must be at least flag_n');
+  if (agreement.suspendP < agreement.flagP) fail('agreement.suspend_p must be at least flag_p');
+  const auditVisible = count(rec, 'audit_visible', '');
+  if (auditVisible > 4) fail('audit_visible must be at most 4 (the blind audit has 4 pairs)');
+  const replayMaxPairs = count(rec, 'replay_max_pairs', '');
+  const replayMinPairs = count(rec, 'replay_min_pairs', '');
+  if (replayMinPairs === 0) fail('replay_min_pairs must be at least 1');
+  if (replayMinPairs > replayMaxPairs) fail('replay_min_pairs must be at most replay_max_pairs');
+  return {
+    categories,
+    pairsPerCategory,
+    retestPairs,
+    visibleRound0,
+    qualifyNonknownPct: pct,
+    qualifyKnownMaxMiss,
+    requal,
+    gateDryrunMaxMiss: count(rec, 'gate_dryrun_max_miss', ''),
+    intervalZ: z,
+    agreement,
+    auditVisible,
+    replayMaxPairs,
+    replayMinPairs,
   };
 }
 
@@ -361,6 +490,7 @@ export function parseProtocol(markdown: string): Result<Protocol> {
   const connectives = take('connectives', stringList);
   const mergeValue = take('merge', merge);
   const fixture = take('fixture-rxx', fixtureRxx);
+  const calibrationValue = take('calibration', calibration);
 
   if (protectedKeys !== null && activationMap !== null) {
     for (const key of Object.keys(activationMap)) {
@@ -381,7 +511,8 @@ export function parseProtocol(markdown: string): Result<Protocol> {
     defects === null ||
     connectives === null ||
     mergeValue === null ||
-    fixture === null
+    fixture === null ||
+    calibrationValue === null
   ) {
     return err(errors.join('; '));
   }
@@ -398,6 +529,7 @@ export function parseProtocol(markdown: string): Result<Protocol> {
     connectives,
     merge: mergeValue,
     fixtureRxx: fixture,
+    calibration: calibrationValue,
   });
 }
 

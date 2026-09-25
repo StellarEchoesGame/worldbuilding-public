@@ -25,6 +25,28 @@ test('loads the committed configuration without local.json when not required', (
   rmSync(dir, { recursive: true });
 });
 
+test('the merge editor is read from judges.json like the maintainer', () => {
+  const dir = tempRoot();
+  const r = loadConfig(dir, { requireLocal: false });
+  assert.equal(r.ok, true);
+  if (r.ok) {
+    assert.equal(r.value.mergeEditor.id, 'merge_editor');
+    assert.equal(r.value.mergeEditor.family, 'Anthropic');
+    assert.equal(r.value.mergeEditor.cli, 'claude');
+  }
+  rmSync(dir, { recursive: true });
+});
+
+test('a judges.json without merge_editor is rejected naming it', () => {
+  const dir = tempRoot();
+  const spec = { id: 'm', family: 'Anthropic', cli: 'claude', model: 'fable', effort: 'max', concurrency: 1, accepted_served: [] };
+  writeFileSync(join(dir, 'judges.json'), JSON.stringify({ timeout_ms: 1, judges: [{ ...spec, id: 'claude', model: 'opus' }], maintainer: spec }));
+  const r = loadConfig(dir, { requireLocal: false });
+  assert.equal(r.ok, false);
+  if (!r.ok) assert.match(r.error, /merge_editor/u);
+  rmSync(dir, { recursive: true });
+});
+
 test('missing file is reported by name', () => {
   const dir = tempRoot();
   rmSync(join(dir, 'writers.json'));
