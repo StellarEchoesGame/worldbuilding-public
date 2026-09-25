@@ -8,6 +8,8 @@ export interface MergeConstants {
   tableHeader8: string;
   connectives: string[];
   maxJointsPer500: number;
+  /** Revision-notes files (PROTOCOL §7.7) a merge may edit freely. */
+  notesPaths: string[];
 }
 
 export interface DeltaFact {
@@ -418,7 +420,7 @@ function checkIndexes(input: MergeInput, violations: string[]): void {
   }
 }
 
-/** Any path other than 09, 07 and 01–06 must be unchanged. */
+/** Any path other than 09, 07, 01–06 and the notes paths must be unchanged. */
 /** A new 01–06 file (absent or empty before) is not an index target. */
 function isNewIndexedFile(input: MergeInput, path: string): boolean {
   return INDEXED_PATH.test(path) && fileText(input.before, path) === '' && fileText(input.after, path) !== '';
@@ -427,7 +429,7 @@ function isNewIndexedFile(input: MergeInput, path: string): boolean {
 function checkUntouched(input: MergeInput, violations: string[]): void {
   for (const path of allPaths(input)) {
     if (isNewIndexedFile(input, path)) violations.push(`unexpected change: ${path}`);
-    if (path === SCENES_PATH || path === REGISTER_PATH || INDEXED_PATH.test(path)) continue;
+    if (path === SCENES_PATH || path === REGISTER_PATH || INDEXED_PATH.test(path) || input.constants.notesPaths.includes(path)) continue;
     if (fileText(input.before, path) !== fileText(input.after, path)) violations.push(`unexpected change: ${path}`);
   }
 }

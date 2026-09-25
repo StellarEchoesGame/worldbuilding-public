@@ -45,6 +45,8 @@ export interface ForgeConfig {
   root: string;
   judges: JudgeSpec[];
   maintainer: JudgeSpec;
+  /** Writes the canon diff at merge time (PROTOCOL §7). */
+  mergeEditor: JudgeSpec;
   judgeTimeoutMs: number;
   slots: WriterSlot[];
   baseline: WriterSlot;
@@ -157,6 +159,8 @@ export function loadConfig(root: string, opts: { requireLocal: boolean }): Resul
   }
   const maintainer = parseJudge(readRecord(judgesRaw.value, 'maintainer'), 'judges.json maintainer');
   if (!maintainer.ok) return maintainer;
+  const mergeEditor = parseJudge(readRecord(judgesRaw.value, 'merge_editor'), 'judges.json merge_editor');
+  if (!mergeEditor.ok) return mergeEditor;
 
   const slotList = readArray(writersRaw.value, 'slots');
   const writerTimeoutMs = readNumber(writersRaw.value, 'timeout_ms');
@@ -193,6 +197,7 @@ export function loadConfig(root: string, opts: { requireLocal: boolean }): Resul
     root,
     judges,
     maintainer: maintainer.value,
+    mergeEditor: mergeEditor.value,
     judgeTimeoutMs,
     slots,
     baseline: baseline.value,

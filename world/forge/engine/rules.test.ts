@@ -12,7 +12,7 @@ const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 test('the committed protocol bundle parses and hashes', () => {
   const r = loadProtocolBundle(ROOT);
   assert.ok(r.ok, r.ok ? '' : r.error);
-  assert.equal(r.value.protocol.version, '1.0');
+  assert.equal(r.value.protocol.version, '1.1');
   assert.match(r.value.bundleSha256, /^[0-9a-f]{64}$/u);
 });
 

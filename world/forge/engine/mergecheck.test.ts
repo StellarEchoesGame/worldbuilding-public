@@ -21,6 +21,7 @@ const CONSTANTS: MergeConstants = {
   tableHeader8: TABLE_HEADER,
   connectives: ['同一天，', '稍后，'],
   maxJointsPer500: 3,
+  notesPaths: ['reference/CHANGES.md'],
 };
 
 function fact(over: Partial<DeltaFact>): DeltaFact {
@@ -291,6 +292,12 @@ test('an unchanged path outside 01-07 and 09 passes', () => {
 
 test('a changed path outside 01-07 and 09 fails', () => {
   failsExactly(withFiles(firstMerge(), { [REF08]: 'a\n' }, { [REF08]: 'b\n' }), `unexpected change: ${REF08}`);
+});
+
+test('a revision-notes path listed in notesPaths may change; an unlisted notes file may not', () => {
+  const notes = 'reference/CHANGES.md';
+  assert.deepEqual(mergecheck(withFiles(firstMerge(), { [notes]: '# 8.1\n' }, { [notes]: '# 8.1\n\n## 8.2 样本现场 R01\n' })), { ok: true, violations: [] });
+  failsExactly(withFiles(firstMerge(), { 'reference/README.md': 'a\n' }, { 'reference/README.md': 'b\n' }), 'unexpected change: reference/README.md');
 });
 
 test('a path outside 01-07 and 09 that is added or removed fails', () => {

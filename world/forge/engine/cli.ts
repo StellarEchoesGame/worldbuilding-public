@@ -269,7 +269,10 @@ function git(args: readonly string[]): string | null {
   }
 }
 
-/** Files `assemble_reference.py` regenerates during a merge; checked by reproducing them, not by mergecheck. */
+/**
+ * Files a merge writes outside mergecheck's view: `assemble_reference.py` regenerates REFERENCE.md and hashes.json, and
+ * the engine updates manifest.json (PROTOCOL §7.7). They are checked by reproducing them, not by mergecheck.
+ */
 const ASSEMBLER_OUTPUTS: readonly string[] = ['reference/REFERENCE.md', 'reference/hashes.json', 'reference/manifest.json'];
 
 function mergeCheck(args: readonly string[]): void {
