@@ -1,7 +1,7 @@
 import { spawn, spawnSync } from 'node:child_process';
 import { randomBytes } from 'node:crypto';
-import { mkdirSync, writeFileSync } from 'node:fs';
-import { join, resolve } from 'node:path';
+import { mkdirSync, rmSync, writeFileSync } from 'node:fs';
+import { dirname, join, resolve } from 'node:path';
 
 /** Environment variables that only exist inside an agent session (not in the owner's own terminal). */
 export const AGENT_MARKERS = ['CLAUDECODE', 'CLAUDE_CODE_ENTRYPOINT', 'CODEX_SANDBOX', 'CODEX_SANDBOX_NETWORK_DISABLED', 'CODEX_THREAD_ID'];
@@ -55,10 +55,10 @@ export async function launchUi(root: string, args: readonly string[]): Promise<v
     process.exit(1);
   }
   const url = `${base}/login?t=${token}`;
+  const file = join(resolve(root, '.runs'), 'ui-login-url.txt');
+  child.on('close', () => rmSync(file, { force: true }));
   if (args.includes('--no-open')) {
-    const dir = resolve(root, '.runs');
-    mkdirSync(dir, { recursive: true });
-    const file = join(dir, 'ui-login-url.txt');
+    mkdirSync(dirname(file), { recursive: true });
     writeFileSync(file, `${url}\n`, { mode: 0o600 });
     process.stdout.write(`forge ui: 没有自动打开浏览器；登录地址写在 ${file}（仅本人可读）。\n`);
   } else {
