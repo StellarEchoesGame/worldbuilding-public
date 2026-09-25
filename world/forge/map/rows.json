@@ -1,0 +1,24 @@
+{
+  "rows": [
+    { "row_id": "S0-外围接应区", "kind": "area", "primary": "外围接应区", "system": "S0 晷川", "aliases": ["外围交接区", "晷川交接区"] },
+    { "row_id": "S1-冷湾", "kind": "area", "primary": "冷湾", "system": "S1 息壤所在系", "aliases": [] },
+    { "row_id": "S1-赤脊", "kind": "area", "primary": "赤脊", "system": "S1 息壤所在系", "aliases": [] },
+    { "row_id": "S1-帘影", "kind": "area", "primary": "帘影", "system": "S1 息壤所在系", "aliases": [] },
+    { "row_id": "S2-生活维修接待", "kind": "area", "primary": "生活维修接待", "system": "S2 砧港所在系", "aliases": [] },
+    { "row_id": "S2-外部工业作业", "kind": "area", "primary": "外部工业作业", "system": "S2 砧港所在系", "aliases": [] },
+    { "row_id": "S3-公共生活接待", "kind": "area", "primary": "公共生活接待", "system": "S3 栖衡节点所在系", "aliases": [] },
+    { "row_id": "S3-生态维护", "kind": "area", "primary": "生态维护", "system": "S3 栖衡节点所在系", "aliases": [] },
+    { "row_id": "S4-培养群与冰栈交接", "kind": "area", "primary": "培养群与冰栈交接", "system": "S4 逐霜当期节点所在系", "aliases": [] },
+    { "row_id": "S5-转运与远征准备场", "kind": "area", "primary": "转运与远征准备场", "system": "S5 协作节点所在系", "aliases": ["转运准备场"] },
+    { "row_id": "S6-自然调查", "kind": "area", "primary": "自然调查", "system": "S6 前沿甲", "aliases": [] },
+    { "row_id": "S6-部署取样", "kind": "area", "primary": "部署取样", "system": "S6 前沿甲", "aliases": ["仪器部署"] },
+    { "row_id": "S7-环境调查", "kind": "area", "primary": "环境调查", "system": "S7 前沿乙", "aliases": ["环境调查区"] },
+    { "row_id": "S7-回纹地方节点", "kind": "area", "primary": "回纹地方节点", "system": "S7 前沿乙", "aliases": ["回纹地方共同体", "当地作业队区域"] },
+    { "row_id": "I0-鹤灯测点甲", "kind": "area", "primary": "鹤灯测点甲", "system": "I0 鹤灯测点甲", "aliases": [] },
+    { "row_id": "I1-鹤灯测点乙", "kind": "area", "primary": "鹤灯测点乙", "system": "I1 鹤灯测点乙", "aliases": [] },
+    { "row_id": "SHIP", "kind": "ship", "primary": "远航号", "system": "", "aliases": ["母舰", "家园舰", "归航号"] },
+    { "row_id": "CIV-绮珀诸庭", "kind": "civilization", "primary": "绮珀人", "system": "", "aliases": ["诸庭", "诸庭传统", "绮珀诸庭传统"] },
+    { "row_id": "CIV-阈庭联政", "kind": "civilization", "primary": "阈庭联政", "system": "", "aliases": ["阈庭"] },
+    { "row_id": "CIV-回纹共同体", "kind": "civilization", "primary": "回纹共同体", "system": "", "aliases": ["回纹"] }
+  ]
+}

@@ -1,6 +1,6 @@
 ---
 import Base from '../../../layouts/Base.astro';
-import { dataDir, loadRound, type CandidateView } from '../../../lib/data.ts';
+import { dataDir, gateMark, loadRound, type CandidateView } from '../../../lib/data.ts';
 
 const id = Astro.params.id ?? '';
 const view = /^[A-Z]\d{2}$/u.test(id) ? loadRound(dataDir(), id) : null;
@@ -12,6 +12,8 @@ const q = (qid: string): string => view.questions.find((x) => x.id === qid)?.tex
 const marks = (c: CandidateView, fam: string): string =>
   c.sessions.filter((s) => s.family === fam).map((s) => (s.forward === null || s.reverse === null ? '·' : s.win ? '✔' : '✖')).join('');
 const verdictLabel = (c: CandidateView): string => (c.trial ? '试验对' : c.beats ? '胜擂' : '未胜擂');
+const flaggedChecks = (c: CandidateView): number => c.gate.filter((g) => gateMark(g) === '⚠').length;
+const gateLabel = (c: CandidateView): string => (!c.gatePass ? '未过' : flaggedChecks(c) > 0 ? `通过（⚠ ${flaggedChecks(c)} 项待复核）` : '通过');
 ---
 <Base title={`${view.id} ${view.title}`} refresh={!view.done}>
   <p class="muted">轮次 {view.id} · 原型轮，不进正典</p>
@@ -49,7 +51,7 @@ const verdictLabel = (c: CandidateView): string => (c.trial ? '试验对' : c.be
               {families.map((f) => <td class="marks">{marks(c, f)}</td>)}
               <td>{c.totalWins ?? '—'} / {c.needed ?? '—'}</td>
               <td><span class={`pill ${c.beats ? 'ok' : c.trial ? 'warn' : ''}`}>{verdictLabel(c)}</span></td>
-              <td>{c.gatePass ? <span class="pill ok">通过</span> : <span class="pill bad">未过</span>}</td>
+              <td><span class={`pill ${!c.gatePass ? 'bad' : flaggedChecks(c) > 0 ? 'warn' : 'ok'}`}>{gateLabel(c)}</span></td>
             </tr>
           ))}
         </tbody>
@@ -73,8 +75,20 @@ const verdictLabel = (c: CandidateView): string => (c.trial ? '试验对' : c.be
           {(
             <>
               <details>
-                <summary>事实门 {c.gatePass ? '通过' : '未过'}</summary>
-                <table>{c.gate.map((g) => <tr><td>{g.ok ? '✔' : '✖'}</td><td>{g.name}</td><td>{g.detail}</td></tr>)}</table>
+                <summary>事实门 {gateLabel(c)}</summary>
+                <p class="muted">✔ 通过 · ⚠ 通过但有句子待复核 · ✖ 未过</p>
+                <table>
+                  {c.gate.map((g) => (
+                    <tr>
+                      <td>{gateMark(g)}</td>
+                      <td>{g.name}</td>
+                      <td>
+                        {g.detail}
+                        {g.flags.length > 0 && <ul>{g.flags.map((f) => <li>待复核：{f}</li>)}</ul>}
+                      </td>
+                    </tr>
+                  ))}
+                </table>
               </details>
               <details>
                 <summary>新增作者事实 {c.facts.length} 条 · 新专名 {c.newProperNouns.join('、') || '无'}</summary>

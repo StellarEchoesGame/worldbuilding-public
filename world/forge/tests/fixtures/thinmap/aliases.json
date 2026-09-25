@@ -1,0 +1,25 @@
+{
+  "entries": [
+    {
+      "row_id": "SHIP",
+      "kind": "ship",
+      "primary": "远航号",
+      "aliases": ["母舰", "家园舰", "归航号"],
+      "first_quote": { "file": "01-universe.md", "quote": "远航号离开晷川时，原定回港那天要穿的衣服还挂在许多人的门后。" }
+    },
+    {
+      "row_id": "P-温芮",
+      "kind": "character",
+      "primary": "温芮",
+      "aliases": [],
+      "first_quote": { "file": "04-life-and-people.md", "quote": "温芮38岁，协调普通维修，也喜欢改衣服。" }
+    },
+    {
+      "row_id": "P-林澈",
+      "kind": "character",
+      "primary": "林澈",
+      "aliases": [],
+      "first_quote": { "file": "04-life-and-people.md", "quote": "11岁的林澈说像穿反了" }
+    }
+  ]
+}

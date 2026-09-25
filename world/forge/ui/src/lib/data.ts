@@ -65,6 +65,14 @@ export interface GateCheckView {
   name: string;
   ok: boolean;
   detail: string;
+  /** Sentences the check passed but wants reviewed, e.g. negated forbidden words. */
+  flags: string[];
+}
+
+/** ✔ passed, ⚠ passed with flagged sentences to review, ✖ failed. */
+export function gateMark(check: GateCheckView): '✔' | '⚠' | '✖' {
+  if (!check.ok) return '✖';
+  return check.flags.length > 0 ? '⚠' : '✔';
 }
 
 export interface SessionView {
@@ -115,13 +123,22 @@ export interface RoundView {
   done: boolean;
 }
 
-function gateFor(root: string, id: string, subId: string): { pass: boolean; checks: GateCheckView[] } {
-  const g = readRecord(readJson(join(roundPaths(root, id).dir, 'gate.json')), subId);
+/** One submission's record from gate.json. */
+export function readGate(g: unknown): { pass: boolean; checks: GateCheckView[] } {
   const checks: GateCheckView[] = [];
   for (const c of readArray(g, 'checks') ?? []) {
-    checks.push({ name: readString(c, 'name') ?? '', ok: readBoolean(c, 'ok') === true, detail: readString(c, 'detail') ?? '' });
+    checks.push({
+      name: readString(c, 'name') ?? '',
+      ok: readBoolean(c, 'ok') === true,
+      detail: readString(c, 'detail') ?? '',
+      flags: (readArray(c, 'flags') ?? []).filter((x): x is string => typeof x === 'string'),
+    });
   }
   return { pass: readBoolean(g, 'pass') === true, checks };
+}
+
+function gateFor(root: string, id: string, subId: string): { pass: boolean; checks: GateCheckView[] } {
+  return readGate(readRecord(readJson(join(roundPaths(root, id).dir, 'gate.json')), subId));
 }
 
 function sessionsFor(root: string, id: string, subId: string): SessionView[] {

@@ -1,0 +1,27 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "rows.schema.json",
+  "title": "WB-F1 thin-map fixed rows",
+  "description": "The fixed rows of the thin-map (areas, the ship, civilizations) in display order. Character rows live only in aliases.json. system is the node code plus name for areas and empty for the ship and civilizations.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["rows"],
+  "properties": {
+    "rows": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["row_id", "kind", "primary", "system", "aliases"],
+        "properties": {
+          "row_id": { "type": "string", "pattern": "^(?:(?:S[0-7]|I[01])-.+|SHIP|CIV-.+)$" },
+          "kind": { "type": "string", "enum": ["area", "ship", "civilization"] },
+          "primary": { "type": "string", "minLength": 1 },
+          "system": { "type": "string", "pattern": "^(?:(?:S[0-7]|I[01]) .+)?$" },
+          "aliases": { "type": "array", "items": { "type": "string", "minLength": 1 } }
+        }
+      }
+    }
+  }
+}

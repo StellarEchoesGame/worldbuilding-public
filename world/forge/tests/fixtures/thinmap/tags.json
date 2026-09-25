@@ -1,0 +1,74 @@
+{
+  "cells": {
+    "S0-外围接应区": {
+      "mechanism": {
+        "quotes": [
+          { "file": "reference/01-space-and-history.md", "quote": "早期勘测建立检修驻点，逐步引来工人、家属及独立经营者" },
+          { "file": "reference/01-space-and-history.md", "quote": "某些地点被占，某些仍在守备控制下，还有失联地区" },
+          { "file": "reference/01-space-and-history.md", "quote": "资源并未自然枯竭。首发仅深入同一外围接应区的两种阶段" },
+          { "file": "reference/01-space-and-history.md", "quote": "不同设施能独立支持一段生活，但高规格制造和运输相互依赖" }
+        ],
+        "dangling": []
+      },
+      "sensory_scene": {
+        "quotes": [
+          { "file": "reference/01-space-and-history.md", "quote": "旧到港班期与新的临时转运表同时留在公告上" },
+          { "file": "reference/01-space-and-history.md", "quote": "维修履历沿用苇环日期链和砧港检定标记，两者可能并存" },
+          { "file": "reference/01-space-and-history.md", "quote": "外侧衡湾有居住船坞，铸流有精密维护链，苇环有培养与生物工艺" },
+          { "file": "reference/01-space-and-history.md", "quote": "战争破坏了这些习惯的可靠性，却没有把其来处抹掉" }
+        ],
+        "dangling": ["衡湾"]
+      },
+      "object": {
+        "quotes": [
+          { "file": "reference/01-space-and-history.md", "quote": "旧到港班期与新的临时转运表同时留在公告上" },
+          { "file": "reference/01-space-and-history.md", "quote": "维修履历沿用苇环日期链和砧港检定标记，三者可能并存" }
+        ],
+        "dangling": []
+      }
+    },
+    "S1-冷湾": {
+      "mechanism": {
+        "quotes": [
+          { "file": "reference/01-space-and-history.md", "quote": "冷湾是冰卫星作业盆地" },
+          { "file": "reference/01-space-and-history.md", "quote": "既有冰岩样品来自真实先遣" }
+        ],
+        "dangling": []
+      },
+      "quest_hook": {
+        "quotes": [
+          { "file": "reference/01-space-and-history.md", "quote": "旧取样点、磨损的工具、设备撤走后的锚定痕迹可以成为人的新历史" },
+          { "file": "reference/01-space-and-history.md", "quote": "留置测站与小缓存不等于独立城市" },
+          { "file": "reference/99-missing.md", "quote": "冷湾旧取样点" }
+        ],
+        "dangling": []
+      }
+    },
+    "S1-赤脊": {
+      "mechanism": {
+        "quotes": [
+          { "file": "reference/01-space-and-history.md", "quote": "赤脊是岩卫星的露头与破碎地带" },
+          { "file": "reference/01-space-and-history.md", "quote": "赤脊是岩卫星的露头与破碎地带" }
+        ],
+        "dangling": []
+      }
+    },
+    "SHIP": {
+      "object": {
+        "quotes": [
+          { "file": "01-universe.md", "quote": "原定回港那天要穿的衣服还挂在许多人的门后" }
+        ],
+        "dangling": []
+      }
+    },
+    "P-温芮": {
+      "character_want": {
+        "quotes": [
+          { "file": "04-life-and-people.md", "quote": "温芮38岁，协调普通维修，也喜欢改衣服。" },
+          { "file": "04-life-and-people.md", "quote": "她的靛蓝外套袖口翻出灰银色里布，两边故意不对称。" }
+        ],
+        "dangling": []
+      }
+    }
+  }
+}

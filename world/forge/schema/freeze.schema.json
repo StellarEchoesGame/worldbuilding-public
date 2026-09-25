@@ -1,0 +1,28 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "freeze.schema.json",
+  "title": "WB-F1 round freeze record",
+  "description": "Content hashes pinned when a round starts. sha256 keys are logical names (BOOK.md, REFERENCE.md, brief.json, champion, benchmark, writers.json, skill:<name>); the schema subset cannot constrain values of skill:<name> keys or of flags, so engine/freeze.ts parseFreeze checks those.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["round", "sha256", "benchmark_version", "eligible_families", "flags", "protocol_bundle_sha256", "probe_created_at"],
+  "properties": {
+    "round": { "type": "string", "pattern": "^[A-Z][0-9]{2}$" },
+    "sha256": {
+      "type": "object",
+      "properties": {
+        "BOOK.md": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+        "REFERENCE.md": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+        "brief.json": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+        "champion": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+        "benchmark": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+        "writers.json": { "type": "string", "pattern": "^[0-9a-f]{64}$" }
+      }
+    },
+    "benchmark_version": { "type": "string", "pattern": "^v[0-9]+(\\.[0-9]+)?(-[a-z]+)?$" },
+    "eligible_families": { "type": "array", "items": { "type": "string", "minLength": 1 } },
+    "flags": { "type": "object" },
+    "protocol_bundle_sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+    "probe_created_at": { "type": ["string", "null"], "minLength": 1 }
+  }
+}

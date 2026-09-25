@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { charCount, normalizeForQuote, quoteIn, ruleSentenceRatio, splitSentences, stripMarkdown } from './text.ts';
+import { charCount, normalizeForQuote, quoteIn, ruleSentenceRatio, sentenceKey, splitSentences, stripMarkdown } from './text.ts';
 
 test('stripMarkdown removes headings, emphasis, list and quote markers', () => {
   assert.equal(stripMarkdown('# 标题\n\n- **温芮**走进*舱室*。\n> 引文'), '标题\n\n温芮走进舱室。\n引文');
@@ -42,4 +42,14 @@ test('quoteIn enforces a caller-supplied minimum length', () => {
   const text = '温芮把旧水壶放回架上，“明天再修。”';
   assert.equal(quoteIn('旧水壶放回', text, 8), false);
   assert.equal(quoteIn('把旧水壶放回架上明天', text, 8), true);
+});
+
+test('splitSentences keeps the original text; sentenceKey compares sentences under NFKC', () => {
+  assert.deepEqual(splitSentences('Ａ区的灯亮了…她停下。'), ['Ａ区的灯亮了…', '她停下。']);
+  assert.equal(sentenceKey('Ａ区的灯亮了，她说：「走」！'), 'A区的灯亮了,她说:「走」!');
+  assert.equal(sentenceKey('他说：走。'), sentenceKey('他说:走。'));
+});
+
+test('splitSentences gives each table cell its own sentence and skips separator rows', () => {
+  assert.deepEqual(splitSentences('| 名称 | 说明 |\n|---|:---:|\n| 值班表 | 贴在门边。还有一行 |'), ['名称', '说明', '值班表', '贴在门边。', '还有一行']);
 });

@@ -24,14 +24,45 @@ export function charCount(text: string): number {
   return [...stripMarkdown(text)].length;
 }
 
+const TABLE_ROW = /^\s*\|.*\|\s*$/u;
+const TABLE_SEPARATOR = /^:?-+:?$/u;
+
+/** Table rows become one line per cell; separator rows disappear. */
+function tableCellsAsLines(text: string): string {
+  return text
+    .split('\n')
+    .flatMap((line) => {
+      if (!TABLE_ROW.test(line)) return [line];
+      const cells = line.trim().slice(1, -1).split('|').map((c) => c.trim());
+      return cells.every((c) => TABLE_SEPARATOR.test(c)) ? [] : cells;
+    })
+    .join('\n');
+}
+
+/**
+ * The comparison key for sentences, quotes, terms and connectives: NFKC, so width variants compare equal.
+ * Not applied to the text itself because NFKC turns Chinese full-width punctuation (，：！) and … into ASCII.
+ */
+export function sentenceKey(text: string): string {
+  return text.normalize('NFKC');
+}
+
+/**
+ * The shared sentence splitter: splits on 。！？；… (and ASCII !?;) and on newlines, keeps closing quotes
+ * with their sentence and gives table cells their own sentences. Compare its output with `sentenceKey`.
+ */
 export function splitSentences(text: string): string[] {
   const out: string[] = [];
-  const chars = [...text];
+  const push = (sentence: string): void => {
+    const trimmed = sentence.trim();
+    if (trimmed !== '') out.push(trimmed);
+  };
+  const chars = [...tableCellsAsLines(text)];
   let current = '';
   for (let i = 0; i < chars.length; i += 1) {
     const ch = chars[i] ?? '';
     if (ch === '\n') {
-      if (current.trim() !== '') out.push(current.trim());
+      push(current);
       current = '';
       continue;
     }
@@ -41,11 +72,11 @@ export function splitSentences(text: string): string[] {
         i += 1;
         current += chars[i] ?? '';
       }
-      if (current.trim() !== '') out.push(current.trim());
+      push(current);
       current = '';
     }
   }
-  if (current.trim() !== '') out.push(current.trim());
+  push(current);
   return out;
 }
 

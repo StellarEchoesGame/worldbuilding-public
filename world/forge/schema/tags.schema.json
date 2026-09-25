@@ -1,0 +1,12 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "tags.schema.json",
+  "title": "WB-F1 thin-map tags",
+  "description": "cells maps row_id to layer (mechanism, sensory_scene, character_want, object, quest_hook, paintable_shot, play_interface) to { quotes: [{ file, quote }], dangling: [name] }. The forge schema subset has no keyword for map values, so checkTags in engine/thinmap.ts validates everything below cells.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["cells"],
+  "properties": {
+    "cells": { "type": "object" }
+  }
+}
