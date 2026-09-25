@@ -1,4 +1,9 @@
+import type { ChampionKind } from './champions.ts';
 import type { Family } from './config.ts';
+import type { FamilySessions, SessionCall } from './pairs.ts';
+import type { GateOutcome } from './tasks/gate-judge.ts';
+import type { SurpriseStatus } from './tasks/surprise.ts';
+import { IntegrityError } from './task.ts';
 import type { Pick } from './taste.ts';
 
 /** One session-pair of a family: the decisive pick when the submission was shown first (forward) and second (reverse); null = void after retry. */
@@ -174,4 +179,211 @@ export function bradleyTerry(items: string[], comparisons: Comparison[], pseudo 
     scores = next.map((v, k) => (compared[k] === true ? v / scale : 1));
   }
   return Object.fromEntries(items.map((id, k) => [id, scores[k] ?? 1]));
+}
+
+// ---------------------------------------------------------------------------------------------------------------
+// tally.json v2 (08-aggregate). buildRoundTally is pure: 08 reads the files and passes summaries in.
+
+/** One champion pair (submission vs CHAMPION_ID) after void drops; shadow families never count. */
+export interface ChampionPairResult {
+  pair: string;
+  submission: string;
+  /** labels.json label (A/B/C). */
+  label: string;
+  /** E after drops, code-unit sorted. */
+  e: Family[];
+  shadow: Family[];
+  dropped: Family[];
+  wins_by_family: Record<string, number>;
+  total_wins: number;
+  needed: number;
+  /** `7/8` or `8/8` at |E| = 4, `6/6` at |E| = 3, `trial` at |E| ≤ 2. */
+  bar: string;
+  beats_champion: boolean;
+  /** |E| ≤ 2: reported, never a failure; card flag `trial`, never replaces a champion, blocked from merge at 10a. */
+  trial: boolean;
+  signs: FamilySigns;
+  /** Session-level one-sided binomial p (descriptive only). */
+  p_value: number;
+}
+
+/** One aux pair (sub–sub or anchor): ordering only. */
+export interface AuxPairResult {
+  pair: string;
+  kind: 'sub_sub' | 'anchor';
+  left: string;
+  right: string;
+  /** Calls whose decisive pick was left / right. */
+  wins_left: number;
+  wins_right: number;
+  families: Family[];
+  void_calls: number;
+}
+
+export type SkinSwapSummary = 'recognised' | 'not_recognised' | 'void' | 'inactive';
+
+/** Per-submission measure summary (08 builds it from measures/*, surprise.json and unseal.json). */
+export interface SubmissionMeasures {
+  hook: number | null;
+  skin_swap: SkinSwapSummary;
+  cold_reader: { status: 'ok' | 'void' | 'inactive'; clarity: number | null };
+  interface: 'pass' | 'fail' | 'unjudged';
+  surprise: { status: SurpriseStatus; surprising: number; eligible: number };
+}
+
+export interface VoidCounts {
+  /** Paid calls counted this round (call records, quota tries excluded). */
+  calls: number;
+  void_tasks: number;
+  retried_tasks: number;
+  session_reruns: number;
+  dropped_families: number;
+}
+
+/** `rounds/RNN/tally.json` v2. */
+export interface RoundTally {
+  v: 2;
+  round: string;
+  benchmark: string;
+  /** Kind of the row's champion the pairs were judged against (`champion.json`): baseline, owner_pick or golden. */
+  champion: ChampionKind;
+  session_pairs: number;
+  champion_pairs: ChampionPairResult[];
+  aux_pairs: AuxPairResult[];
+  /** Bradley–Terry strengths (0.5 pseudo-counts) over the submissions and the aux-pair texts (aux calls only), for ordering only. */
+  ordering: Record<string, number>;
+  gate: Record<string, GateOutcome>;
+  measures: Record<string, SubmissionMeasures>;
+  voids: VoidCounts;
+}
+
+export interface RoundTallyInput {
+  round: string;
+  benchmark: string;
+  /** Kind of the row's champion the pairs were judged against (`champion.json`): baseline, owner_pick or golden. */
+  champion: ChampionKind;
+  sessionPairs: number;
+  barFourFamilies: 7 | 8;
+  /** Submission id → label. */
+  labels: Readonly<Record<string, string>>;
+  championPairs: ReadonlyArray<{ pair: string; submission: string; sessions: readonly FamilySessions[] }>;
+  auxPairs: ReadonlyArray<{ pair: string; kind: 'sub_sub' | 'anchor'; left: string; right: string; sessions: readonly FamilySessions[] }>;
+  gate: Readonly<Record<string, GateOutcome>>;
+  measures: Readonly<Record<string, SubmissionMeasures>>;
+  voids: VoidCounts;
+}
+
+const byCodeUnit = (a: string, b: string): number => (a < b ? -1 : a > b ? 1 : 0);
+
+/** A call's pick in tally.ts position terms: the submission is text 1 in `fwd`, text 2 in `rev`; null = void or decoy preferred. */
+function positionPick(call: SessionCall, submission: string): Pick | null {
+  if (call.status !== 'ok' || call.preferredDecoy || call.decisive === null) return null;
+  const pickedSubmission = call.decisive === submission;
+  if (call.order === 'fwd') return pickedSubmission ? 1 : 2;
+  return pickedSubmission ? 2 : 1;
+}
+
+/** Final session-pairs of one family as tally.ts SessionPairs; a dropped family always carries a void pair. */
+function sessionPairsOf(fs: FamilySessions, submission: string): SessionPair[] {
+  const out = fs.sessions.map(([a, b], index): SessionPair => {
+    const fwd = a.order === 'fwd' ? a : b;
+    const rev = a.order === 'fwd' ? b : a;
+    const valid = fwd.order === 'fwd' && rev.order === 'rev';
+    return { family: fs.family, index, forward: valid ? positionPick(fwd, submission) : null, reverse: valid ? positionPick(rev, submission) : null };
+  });
+  if (fs.dropped !== null && !out.some(isVoid)) out.push({ family: fs.family, index: out.length, forward: null, reverse: null });
+  return out;
+}
+
+function championPairResult(
+  pair: { pair: string; submission: string; sessions: readonly FamilySessions[] },
+  input: RoundTallyInput,
+): ChampionPairResult {
+  const counted = pair.sessions.filter((fs) => !fs.shadow);
+  const families = [...new Set(counted.map((fs) => fs.family))].sort(byCodeUnit);
+  const sessions = counted.flatMap((fs) => sessionPairsOf(fs, pair.submission));
+  const t = tallyChampionPair(sessions, families, { barFourFamilies: input.barFourFamilies });
+  const e = [...t.eligible].sort(byCodeUnit);
+  const n = e.reduce((sum, f) => sum + (t.pairsByFamily[f] ?? 0), 0);
+  const winsByFamily: Record<string, number> = {};
+  for (const f of e) winsByFamily[f] = t.winsByFamily[f] ?? 0;
+  return {
+    pair: pair.pair,
+    submission: pair.submission,
+    label: input.labels[pair.submission] ?? pair.submission,
+    e,
+    shadow: [...new Set(pair.sessions.filter((fs) => fs.shadow).map((fs) => fs.family))].sort(byCodeUnit),
+    dropped: [...t.dropped].sort(byCodeUnit),
+    wins_by_family: winsByFamily,
+    total_wins: t.totalWins,
+    needed: t.needed,
+    bar: t.trial ? 'trial' : `${t.needed}/${e.length * input.sessionPairs}`,
+    beats_champion: t.beatsChampion,
+    trial: t.trial,
+    signs: familySigns(t),
+    p_value: binomialTailP(t.totalWins, n, 0.5),
+  };
+}
+
+function auxPairResult(pair: RoundTallyInput['auxPairs'][number]): AuxPairResult {
+  const calls = pair.sessions.flatMap((fs) => fs.sessions.flatMap(([a, b]) => [a, b]));
+  const valid = calls.filter((c) => c.status === 'ok' && c.decisive !== null);
+  return {
+    pair: pair.pair,
+    kind: pair.kind,
+    left: pair.left,
+    right: pair.right,
+    wins_left: valid.filter((c) => c.decisive === pair.left).length,
+    wins_right: valid.filter((c) => c.decisive === pair.right).length,
+    families: [...new Set(pair.sessions.map((fs) => fs.family))].sort(byCodeUnit),
+    void_calls: calls.length - valid.length,
+  };
+}
+
+/** Code-unit sorted copy of a record, so the serialised tally never depends on input order. */
+/** A copy of `rec` with its keys in code-unit order. */
+export function sortedRecord<T>(rec: Readonly<Record<string, T>>): Record<string, T> {
+  const out: Record<string, T> = {};
+  for (const key of Object.keys(rec).sort(byCodeUnit)) {
+    const v = rec[key];
+    if (v !== undefined) out[key] = v;
+  }
+  return out;
+}
+
+/** Session-pairs per counted family the bars are defined for. */
+const TALLY_SESSION_PAIRS = 2;
+
+/**
+ * tally.json v2: per champion pair E after void drops (shadow families never count), bars by |E| through
+ * tallyChampionPair (|E| = 4 → barFourFamilies of 8, 3 → 6/6, ≤ 2 → trial), family sign counts and the
+ * descriptive session-level binomial p (p = 0.5); aux pairs for ordering only (Bradley–Terry, 0.5 pseudo-counts,
+ * over the submissions and the aux texts; only aux calls are comparisons, PROTOCOL §3, so the champion is not
+ * ranked); measures and void counts as given.
+ */
+export function buildRoundTally(input: RoundTallyInput): RoundTally {
+  // The bars (7/8 or 8/8 at |E| = 4, 6/6 at |E| = 3) and tallyChampionPair's `needed` are defined for exactly 2
+  // session-pairs per family (PROTOCOL §1 擂台对); any other bars.session_pairs would silently loosen them.
+  if (input.sessionPairs !== TALLY_SESSION_PAIRS) throw new IntegrityError(`PROTOCOL bars.session_pairs must be ${TALLY_SESSION_PAIRS}, got ${input.sessionPairs}`);
+  const championPairs = input.championPairs.map((p) => championPairResult(p, input)).sort((a, b) => byCodeUnit(a.label, b.label) || byCodeUnit(a.pair, b.pair));
+  const auxPairs = input.auxPairs.map(auxPairResult).sort((a, b) => byCodeUnit(a.pair, b.pair));
+  const items = new Set<string>(input.championPairs.map((p) => p.submission));
+  for (const p of auxPairs) {
+    items.add(p.left);
+    items.add(p.right);
+  }
+  const comparisons: Comparison[] = auxPairs.map((p) => ({ a: p.left, b: p.right, winsA: p.wins_left, winsB: p.wins_right }));
+  return {
+    v: 2,
+    round: input.round,
+    benchmark: input.benchmark,
+    champion: input.champion,
+    session_pairs: input.sessionPairs,
+    champion_pairs: championPairs,
+    aux_pairs: auxPairs,
+    ordering: bradleyTerry([...items].sort(byCodeUnit), comparisons, 0.5),
+    gate: sortedRecord(input.gate),
+    measures: sortedRecord(input.measures),
+    voids: { ...input.voids },
+  };
 }

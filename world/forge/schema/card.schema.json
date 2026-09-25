@@ -1,0 +1,140 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "card.schema.json",
+  "title": "WB-F1 decision card (engine half)",
+  "description": "rounds/RNN/card.json, written by engine/steps/aggregate.ts (08) through engine/card.ts buildCard: one entry per gate-passing submission in label order. Flags are codes; engine/card.ts CARD_FLAG_TEXT holds the Chinese labels the UI shows. trial entries (|E| ≤ 2) are never mergeable. The protagonist line comes from the cold reader (冷读者理解).",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["v", "round", "row_id", "benchmark", "champion", "flags", "entries"],
+  "properties": {
+    "v": { "const": 1 },
+    "round": { "type": "string", "pattern": "^[A-Z]\\d{2}$" },
+    "row_id": { "type": "string", "minLength": 1 },
+    "benchmark": { "type": "string", "minLength": 1 },
+    "champion": { "enum": ["baseline", "owner_pick", "golden"] },
+    "flags": { "type": "array", "items": { "enum": ["surprise_invalid", "probe_remote_unavailable"] } },
+    "entries": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["submission", "slot", "label", "resubmitted", "flags", "mergeable", "wins", "gate", "protagonist", "interface", "measures", "facts", "text_sha256"],
+        "properties": {
+          "submission": { "type": "string", "minLength": 1 },
+          "slot": { "type": "string", "minLength": 1 },
+          "label": { "type": "string", "minLength": 1 },
+          "resubmitted": { "type": "boolean" },
+          "flags": {
+            "type": "array",
+            "items": { "enum": ["gate_judges_short", "gate_split", "defect_unverified", "trial", "layer3_red", "surprise_invalid", "probe_remote_unavailable", "acceptor_reused", "resubmitted"] }
+          },
+          "mergeable": { "type": "boolean" },
+          "wins": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["total", "needed", "e", "bar", "beats_champion", "by_family"],
+            "properties": {
+              "total": { "type": "integer", "minimum": 0 },
+              "needed": { "type": "integer", "minimum": 0 },
+              "e": { "type": "integer", "minimum": 0 },
+              "bar": { "type": "string", "pattern": "^(\\d+/\\d+|trial)$" },
+              "beats_champion": { "type": "boolean" },
+              "by_family": { "type": "object" }
+            }
+          },
+          "gate": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["outcome", "counted", "path_instance_notes"],
+            "properties": {
+              "outcome": { "enum": ["pass", "fail", "split", "unverified"] },
+              "counted": { "type": "array", "items": { "type": "string", "minLength": 1 } },
+              "path_instance_notes": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": ["family", "quote", "against", "reason"],
+                  "properties": {
+                    "family": { "type": "string", "minLength": 1 },
+                    "quote": { "type": "string" },
+                    "against": { "type": "string" },
+                    "reason": { "type": "string" }
+                  }
+                }
+              }
+            }
+          },
+          "protagonist": {
+            "type": ["object", "null"],
+            "additionalProperties": false,
+            "required": ["name", "wants", "cost", "source"],
+            "properties": {
+              "name": { "type": "string" },
+              "wants": { "type": "string" },
+              "cost": { "type": ["string", "null"] },
+              "source": { "const": "cold_reader" }
+            }
+          },
+          "interface": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["status", "shots", "object", "hook", "play_type"],
+            "properties": {
+              "status": { "enum": ["pass", "fail", "unjudged"] },
+              "shots": { "type": "array", "items": { "type": "string" } },
+              "object": { "type": ["string", "null"] },
+              "hook": { "type": ["string", "null"] },
+              "play_type": { "type": ["string", "null"] }
+            }
+          },
+          "measures": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["hook", "skin_swap", "cold_reader", "interface", "surprise"],
+            "properties": {
+              "hook": { "type": ["number", "null"], "minimum": 0, "maximum": 1 },
+              "skin_swap": { "enum": ["recognised", "not_recognised", "void", "inactive"] },
+              "cold_reader": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": ["status", "clarity"],
+                "properties": {
+                  "status": { "enum": ["ok", "void", "inactive"] },
+                  "clarity": { "type": ["integer", "null"], "minimum": 0, "maximum": 3 }
+                }
+              },
+              "interface": { "enum": ["pass", "fail", "unjudged"] },
+              "surprise": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": ["status", "surprising", "eligible"],
+                "properties": {
+                  "status": { "enum": ["full", "reused", "match_only", "insufficient", "invalid", "inactive"] },
+                  "surprising": { "type": "integer", "minimum": 0 },
+                  "eligible": { "type": "integer", "minimum": 0 }
+                }
+              }
+            }
+          },
+          "facts": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["id", "claim", "kind", "register", "flags"],
+              "properties": {
+                "id": { "type": "string", "minLength": 1 },
+                "claim": { "type": "string" },
+                "kind": { "enum": ["author_fact", "character_belief", "rumor"] },
+                "register": { "type": "boolean" },
+                "flags": { "type": "array", "items": { "enum": ["⚑新专名", "⚑贴近 F-ID", "⚑改变既有理解"] } }
+              }
+            }
+          },
+          "text_sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" }
+        }
+      }
+    }
+  }
+}

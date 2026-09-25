@@ -1,0 +1,17 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "unseal.schema.json",
+  "title": "WB-F1 round unseal result (07a)",
+  "description": "rounds/RNN/unseal.json, written once by 07a-unseal from engine/probe.ts unseal(): never any sealed forecast value. invalid (seal, canonical form, probe record, call ordering, remote mismatch, or zero valid forecasters) is a result; 07b then skips. 11a-unseal-publish never rewrites it.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["round", "status", "reasons", "remote", "forecasters", "checked_at"],
+  "properties": {
+    "round": { "type": "string", "pattern": "^[A-Z]\\d{2}$" },
+    "status": { "enum": ["valid", "invalid"] },
+    "reasons": { "type": "array", "items": { "type": "string", "minLength": 1, "pattern": "^[\\x20-\\x7e‖]+$" } },
+    "remote": { "enum": ["verified", "unavailable", "mismatch"] },
+    "forecasters": { "type": "integer", "minimum": 0 },
+    "checked_at": { "type": "string", "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(\\.\\d+)?Z$" }
+  }
+}

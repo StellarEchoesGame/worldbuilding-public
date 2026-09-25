@@ -1,10 +1,11 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { parseBenchmark, parseVerdict, tastePrompt, type Benchmark } from './taste.ts';
+import { DEFAULT_MEASURES, parseBenchmark, parseVerdict, tastePrompt, type Benchmark } from './taste.ts';
 
 const bench: Benchmark = {
   version: 'v0', decisive: 'q1', minQuoteChars: 8, role: '评委', instructions: '只输出 JSON',
   questions: [{ id: 'q1', text: '更想待在哪一篇？' }, { id: 'q2', text: '更记得住哪个人？' }],
+  template: null, measures: DEFAULT_MEASURES, decoyRecipe: null, checklistExtra: [],
 };
 const t1 = '温芮把旧水壶放回架上，炉子还热着。';
 const t2 = '林澈在走廊尽头停下，听见循环泵换了节拍。';

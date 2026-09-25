@@ -11,13 +11,16 @@ import { parseFreeze } from './freeze.ts';
 import { LIMITS } from './gate.ts';
 import { prototypeRoundRefusal, runPrototypeRound, type PrototypeDeps } from './prototype.ts';
 import { sha256 } from './store.ts';
-import type { Benchmark } from './taste.ts';
+import { DEFAULT_MEASURES, type Benchmark } from './taste.ts';
 
 const cell: Cell = {
   id: 'C1', rowId: 'SHIP', title: '测试', entity: '实体', time: '时间', layers: ['物件'], settingNotes: [], protagonists: ['温芮'], forbidden: [],
   stances: [{ id: 's1', text: '立场一' }, { id: 's2', text: '立场二' }, { id: 's3', text: '立场三' }],
 };
-const bench: Benchmark = { version: 'v0', decisive: 'q1', minQuoteChars: 8, role: '评委', instructions: 'JSON', questions: [{ id: 'q1', text: '哪篇？' }] };
+const bench: Benchmark = {
+  version: 'v0', decisive: 'q1', minQuoteChars: 8, role: '评委', instructions: 'JSON', questions: [{ id: 'q1', text: '哪篇？' }],
+  template: null, measures: DEFAULT_MEASURES, decoyRecipe: null, checklistExtra: [],
+};
 
 function writerText(body: string, facts: boolean): string {
   const claims = facts ? `[{"id":"A-01","kind":"author_fact","claim":"c","status":"状态与路径实例","row_id":"SHIP","attaches_to":"04","extends":"F07","misuse":"m","source_quote":"${body.slice(0, 12)}","register":true}]` : '[]';

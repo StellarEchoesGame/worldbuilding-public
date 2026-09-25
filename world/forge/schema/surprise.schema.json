@@ -1,0 +1,14 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "surprise.schema.json",
+  "title": "WB-F1 round surprise report (07b)",
+  "description": "rounds/RNN/surprise.json (engine/steps/surprise.ts SurpriseFile), absent when 07b skipped (unseal invalid or measures.surprise inactive). submissions maps a submission id to its SurpriseReport (engine/tasks/surprise.ts): status full|reused|match_only|insufficient; counts surprising, eligible (details minus unresolved), drift, unresolved, forecast; details[] {id, image, quote, families, outcome forecast|surprising|drift|unresolved, forecasts (opaque ids P01…, never values), writer_default, chain, accept_reason}; chains[] {detail, canon {file, quote} | null, steps (0–2), lands_on}; acceptor_reused; roles {matchers, chain_writer, acceptor}; tasks (task ids). No threshold; sealed forecast values never appear here.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["round", "remote", "submissions"],
+  "properties": {
+    "round": { "type": "string", "pattern": "^[A-Z]\\d{2}$" },
+    "remote": { "enum": ["verified", "unavailable", "mismatch"] },
+    "submissions": { "type": "object" }
+  }
+}

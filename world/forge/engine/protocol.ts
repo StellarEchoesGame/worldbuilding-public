@@ -211,9 +211,11 @@ function activation(value: unknown): Record<string, 'auto' | 'replay' | 'owner'>
 
 function bars(value: unknown): ProtocolBars {
   const rec = shape(value, '', ['beats_champion_four_families', 'session_pairs', 'hold_rounds']);
+  const sessionPairs = count(rec, 'session_pairs', '');
+  if (sessionPairs !== 2) fail('session_pairs must be 2 (the pair schedule and tally assume two session pairs per family)');
   return {
     beatsChampionFourFamilies: count(rec, 'beats_champion_four_families', ''),
-    sessionPairs: count(rec, 'session_pairs', ''),
+    sessionPairs,
     holdRounds: count(rec, 'hold_rounds', ''),
   };
 }

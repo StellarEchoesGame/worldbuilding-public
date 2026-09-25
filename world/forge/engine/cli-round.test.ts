@@ -12,6 +12,7 @@ import { sha256Bytes, writeMarker } from './marker.ts';
 import { parsePrices } from './cost.ts';
 import { loadProtocolBundle } from './rules.ts';
 import type { StepId } from './runner.ts';
+import { ROUND_STEPS } from './steps/index.ts';
 import { roundPaths } from './store.ts';
 import { fakePorts, type FakePorts } from './testing/fakes.ts';
 import { DEFAULT_FIXTURE, fixtureWorld, type FixtureWorld } from './testing/fixture-world.ts';
@@ -123,7 +124,7 @@ test('round start runs 00-start and 01-topic, status reports it, --verify checks
   h.logs.length = 0;
   assert.equal(await roundCommand(['status', 'R01', '--verify'], h.deps, h.at), 0);
   assert.match(h.logs.join('\n'), /R01: done at 01-topic/u);
-  assert.match(h.logs.join('\n'), /2\/10 steps done/u);
+  assert.match(h.logs.join('\n'), new RegExp(`2/${ROUND_STEPS.length} steps done`, 'u'));
   assert.match(h.logs.join('\n'), /marker chain verified/u);
   h.logs.length = 0;
   assert.equal(await roundCommand(['status', 'R01', '--json'], h.deps, h.at), 0);

@@ -1,5 +1,6 @@
 import { isRecord, readArray, readNumber, readRecord, readString, stringArray, type JsonRecord } from './json.ts';
 import { validate, type Schema } from './schema.ts';
+import { parseBenchmark } from './taste.ts';
 
 export type Activation = 'auto' | 'replay' | 'owner';
 
@@ -122,6 +123,10 @@ function strongestActivation(changed: readonly string[], ctx: BenchContext): Act
 export function validateBenchmark(candidate: unknown, parent: unknown | null, ctx: BenchContext): BenchVerdict {
   const errors = schemaErrors(candidate, ctx);
   if (!isRecord(candidate)) return { ok: false, errors, changedKeys: [], activation: null, noChange: false };
+  // The engine's own parse (taste.template slot rules, measure blocks, decoy recipe): rules the schema cannot express,
+  // checked here so a proposal fails at validation time, not at the first paid step of a round.
+  const parsed = parseBenchmark(candidate);
+  if (!parsed.ok) errors.push(parsed.error);
   const parentRecord = isRecord(parent) ? parent : null;
   if (parent !== null && parentRecord === null) errors.push('parent benchmark must be an object');
   // Only a root version (candidate.parent null) may be validated without its parent; it is exempt from the evidence rule.
