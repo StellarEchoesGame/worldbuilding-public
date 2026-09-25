@@ -1,4 +1,6 @@
+import { championStep, forecastPoolStep, taggingStep, unsealPublishStep } from '../bookkeeping.ts';
 import type { StepDef } from '../runner.ts';
+import { agreementStep } from './agreement.ts';
 import { aggregateStep } from './aggregate.ts';
 import { baselineStep } from './baseline.ts';
 import { briefStep } from './brief.ts';
@@ -8,6 +10,7 @@ import { freezeStep } from './freeze.ts';
 import { gateLlmStep, resubmitStep } from './gate-llm.ts';
 import { gateMechStep } from './gate-mech.ts';
 import { measuresStep } from './measures.ts';
+import { applyStep, mergeCommitStep, mergeEditStep, postMergeFreezeStep, postMergeGateStep, regateStep } from './merge.ts';
 import { auditStep, decisionStep } from './owner-waits.ts';
 import { probeMirrorStep } from './probe-mirror.ts';
 import { sealStep } from './seal.ts';
@@ -17,7 +20,10 @@ import { auxPairsStep, championPairsStep, decoyStep } from './taste.ts';
 import { topicStep } from './topic.ts';
 import { writeStep } from './write.ts';
 
-/** Production registry: always a prefix of STEP_IDS (PR-B appended 05b–09b; PR-D appends 10a–11e, PR-E 11f–12b). */
+/**
+ * Production registry: always a prefix of STEP_IDS (PR-B appended 05b–09b, PR-D 10a–11e; PR-E registers 11f–12b, whose
+ * 11k, 11l, 12a and 12b defs already exist in bookkeeping.ts / final.ts).
+ */
 export const ROUND_STEPS: readonly StepDef[] = [
   startStep,
   topicStep,
@@ -41,4 +47,15 @@ export const ROUND_STEPS: readonly StepDef[] = [
   aggregateStep,
   auditStep,
   decisionStep,
+  regateStep,
+  mergeEditStep,
+  applyStep,
+  postMergeFreezeStep,
+  postMergeGateStep,
+  mergeCommitStep,
+  unsealPublishStep,
+  forecastPoolStep,
+  championStep,
+  taggingStep,
+  agreementStep,
 ];

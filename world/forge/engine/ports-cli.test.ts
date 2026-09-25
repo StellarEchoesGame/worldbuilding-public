@@ -100,7 +100,12 @@ test('ghPort errors: exit code with the first stderr line, bad JSON, bad repo, b
   assert.equal(none.log.length, 0);
 });
 
-const sub = (inv: Invocation): string => inv.args[2] ?? '';
+/** The git subcommand after `-C <repo>` and any `-c key=value` pairs. */
+const sub = (inv: Invocation): string => {
+  let i = 2;
+  while (inv.args[i] === '-c') i += 2;
+  return inv.args[i] ?? '';
+};
 
 test('gitPort.commit: add -A, staged check, commit --only with the message on stdin, then the HEAD sha', async () => {
   const { run, log } = fakeRun((inv) => {
@@ -140,7 +145,8 @@ test('gitPort.diff marks untracked files intent-to-add for the diff and unstages
   assert.deepEqual(await gitPort('/repo', run).diff('abc', ['world/current']), { ok: true, value: 'DIFF' });
   assert.deepEqual(log.map(sub), ['ls-files', 'add', 'diff', 'reset']);
   assert.deepEqual(log[1]?.args.slice(3), ['--intent-to-add', '--', ':(top,literal)world/current/new.md']);
-  assert.ok(['--no-ext-diff', '--no-renames', '-U3', 'abc'].every((a) => log[2]?.args.includes(a)));
+  assert.ok(['--no-ext-diff', '--no-renames', '-U3', '--full-index', '--diff-algorithm=myers', '--no-indent-heuristic', 'abc'].every((a) => log[2]?.args.includes(a)));
+  assert.deepEqual(log[2]?.args.slice(2, 4), ['-c', 'core.quotePath=true']);
   assert.deepEqual(log[3]?.args.slice(3), ['--quiet', '--', ':(top,literal)world/current/new.md']);
 });
 

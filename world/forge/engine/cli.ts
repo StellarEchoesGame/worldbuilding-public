@@ -1,4 +1,3 @@
-import { execFileSync } from 'node:child_process';
 import { randomBytes } from 'node:crypto';
 import { existsSync, readFileSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
@@ -13,16 +12,17 @@ import { isRecord, readString } from './json.ts';
 import { validateBenchmark } from './bench-validate.ts';
 import { canarySummary, mergeCanaryResults, runCanary, type CanaryRun } from './canary.ts';
 import { parsePrices, withPrices, type Prices } from './cost.ts';
-import { canonFiles, factRowsFrom, parseMergeDecision, parseRegister07, sourcesFromRound } from './inputs.ts';
-import { mergecheck } from './mergecheck.ts';
+import { canonFiles, factRowsFrom, parseRegister07 } from './inputs.ts';
 import { prototypeRoundRefusal, runPrototypeRound } from './prototype.ts';
 import { calibCommand } from './cli-calib.ts';
+import { mergeCommand, mergecheckCommand, mirrorCommand, postMergeCommand } from './cli-merge.ts';
 import { freezeCommand, productionDeps, roundCommand, type ForgeRoots } from './cli-round.ts';
 import type { EngineDeps } from './context.ts';
 import { benchContext, findBenchmark, loadProtocolBundle, parseRollbacks, roundRules, type ProtocolBundle } from './rules.ts';
 import { readJson, readLines, roundPaths, sha256, writeJson, writeText } from './store.ts';
 import { parseBenchmark } from './taste.ts';
 import { checkTags, computeThinmap, DEFAULT_GAME_NEED, formatThinmap, parseAliases, parseGameNeed, parseRows, type Alias, type Row } from './thinmap.ts';
+import { gitPort } from './ports-cli.ts';
 import { launchUi } from './ui-launch.ts';
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
@@ -266,58 +266,6 @@ function thinmap(args: readonly string[]): void {
   process.stdout.write(`${formatThinmap(result, top)}\n`);
 }
 
-function git(args: readonly string[]): string | null {
-  try {
-    return execFileSync('git', ['-C', REPO, ...args], { encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'], maxBuffer: 64 * 1024 * 1024 });
-  } catch {
-    return null;
-  }
-}
-
-/**
- * Files a merge writes outside mergecheck's view: `assemble_reference.py` regenerates REFERENCE.md and hashes.json, and
- * the engine updates manifest.json (PROTOCOL §7.7). They are checked by reproducing them, not by mergecheck.
- */
-const ASSEMBLER_OUTPUTS: readonly string[] = ['reference/REFERENCE.md', 'reference/hashes.json', 'reference/manifest.json'];
-
-function mergeCheck(args: readonly string[]): void {
-  const decisionArg = option(args, '--decision');
-  if (decisionArg === null) fail('usage: forge mergecheck --decision <merge-decision.json> [--base <git-ref>]');
-  const decision = parseMergeDecision(jsonFile(resolve(process.cwd(), decisionArg)));
-  if (!decision.ok) fail(decision.error);
-  const base = option(args, '--base') ?? 'main';
-  if (git(['rev-parse', '--verify', '--quiet', `${base}^{commit}`]) === null) fail(`unknown git ref ${base}`);
-  const sources = sourcesFromRound(ROOT, decision.value.round);
-  if (!sources.ok) fail(sources.error);
-  const merge = protocolBundle().protocol;
-  // Every canon Markdown file goes to mergecheck, which fails any change outside 09, 07 and 01–06.
-  const after = canonFiles(REPO);
-  const before: Record<string, string> = {};
-  for (const key of new Set([...Object.keys(after), 'reference/09-scenes-and-people.md'])) {
-    before[key] = git(['show', `${base}:world/current/${key}`]) ?? '';
-  }
-  // Paths mergecheck does not see (deleted files, subfolders, non-Markdown) may only be the assembler's outputs.
-  const changedTracked = git(['diff', '--name-only', base, '--', 'world/current']);
-  const untracked = git(['ls-files', '--others', '--exclude-standard', '--', 'world/current']);
-  if (changedTracked === null || untracked === null) fail('cannot list changed files under world/current');
-  const outside = [...changedTracked.split('\n'), ...untracked.split('\n')]
-    .filter((line) => line.startsWith('world/current/'))
-    .map((line) => line.slice('world/current/'.length))
-    .filter((key) => !(key in before) && !ASSEMBLER_OUTPUTS.includes(key));
-  const result = mergecheck({
-    constants: { ...merge.merge, connectives: merge.connectives },
-    rowIds: mapRows().rowIds,
-    decision: decision.value,
-    sources: sources.value,
-    before,
-    after,
-  });
-  const violations = [...result.violations, ...[...new Set(outside)].sort().map((key) => `unexpected change: ${key}`)];
-  const passed = result.ok && violations.length === 0;
-  process.stdout.write(passed ? `mergecheck 通过（对照 ${base}）\n` : `mergecheck 未通过（对照 ${base}）：\n${violations.map((v) => `- ${v}`).join('\n')}\n`);
-  if (!passed) process.exitCode = 1;
-}
-
 async function canary(args: readonly string[]): Promise<void> {
   const cfg = config();
   const local = cfg.local;
@@ -369,12 +317,21 @@ async function main(): Promise<void> {
   if (cmd === 'round' && sub === 'run' && isPrototypeRound(rest[0])) return roundRun(rest);
   if (cmd === 'round' && sub === 'status' && isPrototypeRound(rest[0])) return roundStatus(rest);
   if (cmd === 'round') return engineCommand((deps) => roundCommand(args, deps, ROOTS));
+  if (cmd === 'freeze' && args.includes('--post-merge')) return engineCommand((deps) => postMergeCommand(args, deps, ROOTS));
   if (cmd === 'freeze') return engineCommand((deps) => freezeCommand(args, deps, ROOTS));
+  if (cmd === 'merge') return engineCommand((deps) => mergeCommand(args, deps, ROOTS));
+  if (cmd === 'mirror') return engineCommand((deps) => mirrorCommand(args, deps, ROOTS));
   if (cmd === 'calib') return engineCommand((deps) => calibCommand(args, deps, ROOTS));
   if (cmd === 'protocol' && sub === 'hash') return protocolHash();
   if (cmd === 'bench' && sub === 'validate') return benchValidate(rest);
   if (cmd === 'thinmap') return thinmap(args);
-  if (cmd === 'mergecheck') return mergeCheck(args);
+  if (cmd === 'mergecheck') {
+    process.exitCode = await mergecheckCommand(args, ROOTS, gitPort(REPO, runProcess), {
+      out: (line) => process.stdout.write(`${line}\n`),
+      err: (line) => process.stderr.write(`${line}\n`),
+    });
+    return;
+  }
   if (cmd === 'ui') return launchUi(ROOT, args);
   fail(
     [
@@ -387,6 +344,9 @@ async function main(): Promise<void> {
       '  forge round run <P-ID> --cell <file> [--seed <seed>] [--benchmark <file>]   (prototype runner)',
       '  forge round status <P-ID>',
       '  forge freeze --check [RNN]',
+      '  forge merge <RNN> [--quota-budget-min <n>]',
+      '  forge freeze --post-merge [RNN] [--check]',
+      '  forge mirror [--round <RNN>] [--dry-run]',
       '  forge calib build [--requal <Family> --reason calibration_fail|suspension | --gate <Family>] [--quota-budget-min <n>]',
       '  forge calib run [--set <id>] [--only <c2-gate-dryrun|c3-owner-answers|c4-judge>] [--quota-budget-min <n>]',
       '  forge calib score [--set <id>]',
