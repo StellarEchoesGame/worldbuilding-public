@@ -1,0 +1,23 @@
+{
+  "candidate": "W1",
+  "judge": "codex",
+  "family": "OpenAI",
+  "session": 1,
+  "order": "rev",
+  "ok": true,
+  "error": null,
+  "attempts": 1,
+  "decisive_pick": 1,
+  "verdict": {
+    "picks": {
+      "q1": 1,
+      "q2": 2
+    },
+    "quotes": {
+      "q1": "桌上大壶里是烤谷饮，旁边贴着一张手写纸牌：“加热加甜请自便，但别来跟我说难喝。”",
+      "q2": "她自己的靛蓝外套还挂在门后的钩子上，翻出的灰银色里布还是不对称的——今天没轮上它。"
+    }
+  },
+  "served_model": null,
+  "version": "codex-cli 0.156.0"
+}

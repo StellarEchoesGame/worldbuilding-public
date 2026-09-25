@@ -1,0 +1,117 @@
+---
+import Base from '../../../layouts/Base.astro';
+import { dataDir, loadRound, type CandidateView } from '../../../lib/data.ts';
+
+const id = Astro.params.id ?? '';
+const view = /^[A-Z]\d{2}$/u.test(id) ? loadRound(dataDir(), id) : null;
+if (view === null) return new Response('没有这一轮', { status: 404 });
+const unlocked = view.audit !== null;
+const decided = view.decision !== null;
+const families = [...new Set(view.candidates.flatMap((c) => c.sessions.map((s) => s.family)))];
+const q = (qid: string): string => view.questions.find((x) => x.id === qid)?.text ?? qid;
+const marks = (c: CandidateView, fam: string): string =>
+  c.sessions.filter((s) => s.family === fam).map((s) => (s.forward === null || s.reverse === null ? '·' : s.win ? '✔' : '✖')).join('');
+const verdictLabel = (c: CandidateView): string => (c.trial ? '试验对' : c.beats ? '胜擂' : '未胜擂');
+---
+<Base title={`${view.id} ${view.title}`} refresh={!view.done}>
+  <p class="muted">轮次 {view.id} · 原型轮，不进正典</p>
+  <h1>{view.title}</h1>
+  <div class="card">
+    <div><b>实体</b> {view.entity}</div>
+    <div><b>时间</b> {view.time}</div>
+    <div><b>本轮补厚</b> {view.layers.join('、')}</div>
+    <div><b>评审问题</b> {view.questions.map((x) => `${x.id} ${x.text}`).join('　')}（{view.decisive} 决定胜负）</div>
+  </div>
+
+  {!view.done && <p class="pill warn">这一轮还在进行中，页面每 20 秒刷新。</p>}
+
+  {view.done && !unlocked && (
+    <div class="card">
+      <h3>先盲审，再看评委结果</h3>
+      <p>为了不让评委的结论影响你的判断，评委结果在你答完 {view.auditSet.length} 对盲审之后才显示。盲审只给你两段文字，不告诉你哪篇是候选、哪篇是现任。</p>
+      <a class="btn" href={`/rounds/${view.id}/audit`}>开始盲审</a>
+    </div>
+  )}
+
+  {unlocked && (
+    <>
+      <div style="display:flex;gap:.8rem;align-items:center">
+        {decided ? <span class="pill ok">已决策：选 {String(view.decision?.['pick'] ?? '')}</span> : <a class="btn" href={`/rounds/${view.id}/decide`}>去决策</a>}
+      </div>
+      <h2>对现任（零新事实基线）的成对比较</h2>
+      <p class="muted">每家评委 2 个会话，每个会话正反两序各评一次；两序都选候选才算一胜。✔ 胜 · ✖ 负或前后不一致 · · 作废。四家有效时 8 胜 7 算胜擂，三家有效时需 6 胜 6。</p>
+      <table>
+        <thead><tr><th>候选</th>{families.map((f) => <th>{f}</th>)}<th>合计</th><th>结果</th><th>事实门</th></tr></thead>
+        <tbody>
+          {view.candidates.map((c) => (
+            <tr>
+              <td><a href={`#cand-${c.label}`}>{c.label}</a></td>
+              {families.map((f) => <td class="marks">{marks(c, f)}</td>)}
+              <td>{c.totalWins ?? '—'} / {c.needed ?? '—'}</td>
+              <td><span class={`pill ${c.beats ? 'ok' : c.trial ? 'warn' : ''}`}>{verdictLabel(c)}</span></td>
+              <td>{c.gatePass ? <span class="pill ok">通过</span> : <span class="pill bad">未过</span>}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+      {view.failed.length > 0 && (
+        <p class="muted">未进入比较：{view.failed.map((f) => `${f.id}（${f.error.slice(0, 60)}）`).join('；')}</p>
+      )}
+    </>
+  )}
+
+  {unlocked && (
+    <>
+      <h2>稿件</h2>
+      {[...view.candidates, ...(view.baseline === null ? [] : [view.baseline])].map((c) => (
+        <div class="card" id={`cand-${c.label}`}>
+          <h3>{c.label === '现任（基线）' ? c.label : `候选 ${c.label}`}{decided && c.stance !== null && <span class="muted">　立场 {c.stance} · {c.model}</span>}</h3>
+          <details>
+            <summary>正文（{[...c.text].length} 字）</summary>
+            <div class="prose">{c.text}</div>
+          </details>
+          {(
+            <>
+              <details>
+                <summary>事实门 {c.gatePass ? '通过' : '未过'}</summary>
+                <table>{c.gate.map((g) => <tr><td>{g.ok ? '✔' : '✖'}</td><td>{g.name}</td><td>{g.detail}</td></tr>)}</table>
+              </details>
+              <details>
+                <summary>新增作者事实 {c.facts.length} 条 · 新专名 {c.newProperNouns.join('、') || '无'}</summary>
+                <table>
+                  <thead><tr><th>ID</th><th>事实</th><th>地位</th><th>延伸自</th><th>误用</th><th>登记</th></tr></thead>
+                  {c.facts.map((f) => <tr><td>{f.id}</td><td>{f.claim}</td><td>{f.status}</td><td>{f.extends}</td><td>{f.misuse}</td><td>{f.register ? '是' : ''}</td></tr>)}
+                </table>
+              </details>
+              {c.iface !== null && (
+                <details>
+                  <summary>接口卡（镜头 {c.iface.shots.length} · 物件 · 钩子）</summary>
+                  <pre style="white-space:pre-wrap;font-size:.85rem">{JSON.stringify(c.iface.raw, null, 2)}</pre>
+                </details>
+              )}
+              {c.sessions.length > 0 && (
+                <details>
+                  <summary>评委引文</summary>
+                  {c.sessions.map((s) => (
+                    <div style="margin:.6rem 0">
+                      <b>{s.family}</b> 会话 {s.session + 1}：{s.forward === null || s.reverse === null ? '作废' : s.win ? '胜' : '负'}
+                      {s.quotes.map((x) => (
+                        <blockquote>{x.order === 'fwd' ? '正序' : '反序'} · {q(x.question)} → 选{x.forCandidate ? '候选' : '现任'}：「{x.quote}」</blockquote>
+                      ))}
+                    </div>
+                  ))}
+                </details>
+              )}
+              {c.seeds.length > 0 && <p class="muted">野生种子：{c.seeds.join(' / ')}</p>}
+            </>
+          )}
+        </div>
+      ))}
+    </>
+  )}
+
+  <details>
+    <summary>进度日志（{view.events.length} 条）</summary>
+    <table>{view.events.slice(-200).map((e) => <tr><td class="muted">{e.at.slice(11, 19)}</td><td>{e.step}</td><td>{e.status}</td><td>{e.detail}</td></tr>)}</table>
+  </details>
+</Base>

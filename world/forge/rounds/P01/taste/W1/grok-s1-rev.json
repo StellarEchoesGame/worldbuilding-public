@@ -1,0 +1,23 @@
+{
+  "candidate": "W1",
+  "judge": "grok",
+  "family": "xAI",
+  "session": 1,
+  "order": "rev",
+  "ok": true,
+  "error": null,
+  "attempts": 1,
+  "decisive_pick": 1,
+  "verdict": {
+    "picks": {
+      "q1": 1,
+      "q2": 2
+    },
+    "quotes": {
+      "q1": "隔壁有人在敲汤勺，节奏很慢，像是在试一个自己听过的调子。",
+      "q2": "正好盖住孟遥那道磨得发亮的肩线。"
+    }
+  },
+  "served_model": "grok-4.7-build",
+  "version": "grok 1.0.41 (4220f3b224a6)"
+}

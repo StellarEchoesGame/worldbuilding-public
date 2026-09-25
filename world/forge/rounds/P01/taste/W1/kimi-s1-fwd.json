@@ -1,0 +1,23 @@
+{
+  "candidate": "W1",
+  "judge": "kimi",
+  "family": "Moonshot",
+  "session": 1,
+  "order": "fwd",
+  "ok": true,
+  "error": null,
+  "attempts": 1,
+  "decisive_pick": 2,
+  "verdict": {
+    "picks": {
+      "q1": 2,
+      "q2": 2
+    },
+    "quotes": {
+      "q1": "演员穿反了，袖子垂在背后，认真地念着一段故意念错的台词",
+      "q2": "你能一眼看出形状的时候，那就不叫泡软了，那叫淹死"
+    }
+  },
+  "served_model": null,
+  "version": "0.34.0"
+}

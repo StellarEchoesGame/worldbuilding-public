@@ -1,0 +1,23 @@
+{
+  "candidate": "W3",
+  "judge": "codex",
+  "family": "OpenAI",
+  "session": 0,
+  "order": "fwd",
+  "ok": true,
+  "error": null,
+  "attempts": 1,
+  "decisive_pick": 1,
+  "verdict": {
+    "picks": {
+      "q1": 1,
+      "q2": 1
+    },
+    "quotes": {
+      "q1": "回去的路看着比来的路短——不是真的短，是他已经知道哪一段栏杆是温的。",
+      "q2": "我住两个人，我朋友来下棋，不是来排班的。"
+    }
+  },
+  "served_model": null,
+  "version": "codex-cli 0.156.0"
+}

@@ -1,0 +1,17 @@
+{
+  "label": "write-W3-a1",
+  "backend": "W3",
+  "family": "DeepSeek",
+  "requested_model": "deepseek/deepseek-v4.1-flash",
+  "served_model": "deepseek-v4-1-flash-260910",
+  "version": null,
+  "ok": true,
+  "error": null,
+  "ms": 110940,
+  "tokens_in": 37359,
+  "tokens_out": 14557,
+  "cost_usd": null,
+  "prompt_sha256": "479f1e4ff4e83e0be5663dc982441ac567cc7981029f3dc1d47c8d0fb7abde1a",
+  "output_sha256": "ccbda785fb6ae0618bf31a550acbe6c175f2e2bbe841d819c5c9e5dcccf636eb",
+  "at": "2026-09-25T06:03:47.604Z"
+}

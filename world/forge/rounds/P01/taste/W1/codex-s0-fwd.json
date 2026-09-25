@@ -1,0 +1,23 @@
+{
+  "candidate": "W1",
+  "judge": "codex",
+  "family": "OpenAI",
+  "session": 0,
+  "order": "fwd",
+  "ok": true,
+  "error": null,
+  "attempts": 1,
+  "decisive_pick": 2,
+  "verdict": {
+    "picks": {
+      "q1": 2,
+      "q2": 1
+    },
+    "quotes": {
+      "q1": "孟遥被拉进去了，她的计分方法和本地的不一样，第一局输得很快，她说“那再一局”，第二局还是输，第三局她终于赢了一局，旁边有人笑，说是新方法生效了。",
+      "q2": "她自己的靛蓝外套还挂在门后的钩子上，翻出的灰银色里布还是不对称的——今天没轮上它。"
+    }
+  },
+  "served_model": null,
+  "version": "codex-cli 0.156.0"
+}

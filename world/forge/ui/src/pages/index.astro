@@ -1,0 +1,28 @@
+---
+import Base from '../layouts/Base.astro';
+import { dataDir, listRounds } from '../lib/data.ts';
+
+const rounds = listRounds(dataDir());
+const running = rounds.some((r) => !r.done);
+---
+<Base title="总览" refresh={running}>
+  <h1>总览</h1>
+  {rounds.length === 0 && <p class="muted">还没有轮次。在终端运行 <code>npm run forge -- round run P01 --cell cells/R1-mothership.json</code>。</p>}
+  <table>
+    <thead><tr><th>轮次</th><th>单元格</th><th>进度</th><th>评委调用</th><th>盲审</th><th>决策</th><th>最近事件</th></tr></thead>
+    <tbody>
+      {rounds.map((r) => (
+        <tr>
+          <td><a href={`/rounds/${r.id}`}>{r.id}</a></td>
+          <td>{r.title}</td>
+          <td>{r.done ? <span class="pill ok">已完成</span> : <span class="pill warn">进行中</span>}{r.errors > 0 && <span class="pill bad">错误 {r.errors}</span>}</td>
+          <td>{r.judged}</td>
+          <td>{r.audited ? '✔' : r.done ? <a href={`/rounds/${r.id}/audit`}>去盲审</a> : '—'}</td>
+          <td>{r.decided ? '✔' : r.audited ? <a href={`/rounds/${r.id}/decide`}>去决策</a> : '—'}</td>
+          <td class="muted">{r.last === null ? '' : `${r.last.at.slice(11, 19)} ${r.last.step} ${r.last.status} ${r.last.detail}`.slice(0, 90)}</td>
+        </tr>
+      ))}
+    </tbody>
+  </table>
+  {running && <p class="muted">页面每 20 秒自动刷新。</p>}
+</Base>

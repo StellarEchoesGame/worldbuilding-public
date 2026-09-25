@@ -1,0 +1,56 @@
+---
+interface Props {
+  title: string;
+  refresh?: boolean;
+}
+const { title, refresh = false } = Astro.props;
+---
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    {refresh && <meta http-equiv="refresh" content="20" />}
+    <title>{title} · 回响工坊</title>
+    <style is:global>
+      :root { --ink: #1d232b; --muted: #66707c; --line: #dde2e8; --bg: #f6f7f9; --card: #fff; --ok: #1f7a4d; --bad: #b23b3b; --accent: #2f5d8a; --warn: #9a6a00; }
+      * { box-sizing: border-box; }
+      body { margin: 0; font: 15px/1.7 -apple-system, "PingFang SC", "Hiragino Sans GB", "Noto Sans CJK SC", system-ui, sans-serif; color: var(--ink); background: var(--bg); }
+      header.top { display: flex; gap: 1.5rem; align-items: baseline; padding: .8rem 2rem; background: #16202b; color: #e8edf2; }
+      header.top a { color: #e8edf2; text-decoration: none; }
+      header.top .brand { font-weight: 600; letter-spacing: .05em; }
+      main { max-width: 1180px; margin: 0 auto; padding: 1.5rem 2rem 4rem; }
+      h1 { font-size: 1.5rem; margin: .2rem 0 1rem; }
+      h2 { font-size: 1.15rem; margin: 2rem 0 .8rem; }
+      h3 { font-size: 1rem; margin: 0 0 .5rem; }
+      .muted { color: var(--muted); }
+      .card { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 1rem 1.2rem; margin: 0 0 1rem; }
+      .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+      .pill { display: inline-block; padding: 0 .55rem; border-radius: 999px; font-size: .82rem; border: 1px solid var(--line); background: #f1f3f6; }
+      .pill.ok { color: var(--ok); border-color: #b9dcc8; background: #eef8f2; }
+      .pill.bad { color: var(--bad); border-color: #e6c2c2; background: #fbf0f0; }
+      .pill.warn { color: var(--warn); border-color: #ead9ae; background: #fbf6e8; }
+      table { border-collapse: collapse; width: 100%; font-size: .92rem; }
+      th, td { text-align: left; padding: .45rem .6rem; border-bottom: 1px solid var(--line); vertical-align: top; }
+      th { color: var(--muted); font-weight: 500; }
+      .prose { white-space: pre-wrap; font-size: 1rem; line-height: 1.9; }
+      .btn { display: inline-block; padding: .5rem 1.1rem; border-radius: 8px; border: 1px solid var(--accent); background: var(--accent); color: #fff; text-decoration: none; font: inherit; cursor: pointer; }
+      .btn.ghost { background: #fff; color: var(--accent); }
+      details > summary { cursor: pointer; color: var(--accent); }
+      blockquote { margin: .3rem 0; padding: .2rem .8rem; border-left: 3px solid var(--line); color: #38414c; }
+      label.choice { display: flex; gap: .5rem; align-items: center; padding: .4rem .6rem; border: 1px solid var(--line); border-radius: 8px; cursor: pointer; }
+      .error { color: var(--bad); }
+      .marks { font-family: ui-monospace, Menlo, monospace; letter-spacing: .1em; }
+    </style>
+  </head>
+  <body>
+    <header class="top">
+      <a class="brand" href="/">回响工坊 · WB-F1</a>
+      <a href="/">总览</a>
+      <span class="muted" style="margin-left:auto">原型 F1-00 · 仅本机</span>
+    </header>
+    <main>
+      <slot />
+    </main>
+  </body>
+</html>

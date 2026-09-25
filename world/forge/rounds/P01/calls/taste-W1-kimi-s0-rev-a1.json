@@ -1,0 +1,17 @@
+{
+  "label": "taste-W1-kimi-s0-rev-a1",
+  "backend": "kimi",
+  "family": "Moonshot",
+  "requested_model": "kimi-code/k3",
+  "served_model": null,
+  "version": "0.34.0",
+  "ok": true,
+  "error": null,
+  "ms": 46524,
+  "tokens_in": null,
+  "tokens_out": null,
+  "cost_usd": null,
+  "prompt_sha256": "4e4eea88aef94e173f6f10546f0f32c6daf263fe0f281381e6a151d4f26cc221",
+  "output_sha256": "6bb02a0c29511eb09e7203f50d78606192e34daec224eafe1f878081e3aa008e",
+  "at": "2026-09-25T06:04:34.852Z"
+}

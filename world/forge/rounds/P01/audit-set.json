@@ -1,0 +1,19 @@
+{
+  "pairs": [
+    {
+      "id": "audit-2",
+      "left": "BASE",
+      "right": "B"
+    },
+    {
+      "id": "audit-3",
+      "left": "C",
+      "right": "BASE"
+    },
+    {
+      "id": "audit-1",
+      "left": "BASE",
+      "right": "A"
+    }
+  ]
+}

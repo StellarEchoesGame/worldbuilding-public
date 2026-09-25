@@ -1,0 +1,23 @@
+{
+  "candidate": "W2",
+  "judge": "claude",
+  "family": "Anthropic",
+  "session": 0,
+  "order": "fwd",
+  "ok": true,
+  "error": null,
+  "attempts": 1,
+  "decisive_pick": 1,
+  "verdict": {
+    "picks": {
+      "q1": 1,
+      "q2": 1
+    },
+    "quotes": {
+      "q1": "折角廊不宽，靠热食柜那侧比另一侧暖",
+      "q2": "她现在想要的东西很小：让走廊干到明天，让留饭签上的字立起来，让她晚上回到台子前的时候手不抖"
+    }
+  },
+  "served_model": "claude-code/claude-opus-5-5[1M]",
+  "version": "2.1.282 (Claude Code)"
+}

@@ -1,0 +1,7 @@
+node_modules/
+local.json
+.runs/
+.sealed/
+.homes/
+ui/dist/
+ui/.astro/

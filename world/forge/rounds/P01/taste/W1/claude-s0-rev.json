@@ -1,0 +1,23 @@
+{
+  "candidate": "W1",
+  "judge": "claude",
+  "family": "Anthropic",
+  "session": 0,
+  "order": "rev",
+  "ok": true,
+  "error": null,
+  "attempts": 1,
+  "decisive_pick": 1,
+  "verdict": {
+    "picks": {
+      "q1": 1,
+      "q2": 2
+    },
+    "quotes": {
+      "q1": "输的人没有受到排班惩罚，只被要求下一局换到对面坐。",
+      "q2": "孟遥上来那天只有这一件像样的衣服。"
+    }
+  },
+  "served_model": "claude-code/claude-opus-5-5[1M]",
+  "version": "2.1.282 (Claude Code)"
+}

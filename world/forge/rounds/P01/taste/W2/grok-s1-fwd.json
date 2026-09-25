@@ -1,0 +1,23 @@
+{
+  "candidate": "W2",
+  "judge": "grok",
+  "family": "xAI",
+  "session": 1,
+  "order": "fwd",
+  "ok": true,
+  "error": null,
+  "attempts": 1,
+  "decisive_pick": 2,
+  "verdict": {
+    "picks": {
+      "q1": 2,
+      "q2": 1
+    },
+    "quotes": {
+      "q1": "隔壁有人在敲汤勺，节奏很慢，像是在试一个自己听过的调子。",
+      "q2": "陈颂在旁边笑了一声，很轻，把汤碗往前推了推，像是要给谁让出位置，其实桌前没人。"
+    }
+  },
+  "served_model": "grok-4.7-build",
+  "version": "grok 1.0.41 (4220f3b224a6)"
+}

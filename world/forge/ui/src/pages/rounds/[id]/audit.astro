@@ -1,0 +1,35 @@
+---
+import Base from '../../../layouts/Base.astro';
+import { dataDir, loadRound, textFor } from '../../../lib/data.ts';
+
+const id = Astro.params.id ?? '';
+const view = /^[A-Z]\d{2}$/u.test(id) ? loadRound(dataDir(), id) : null;
+if (view === null) return new Response('没有这一轮', { status: 404 });
+if (view.audit !== null) return Astro.redirect(`/rounds/${id}`, 303);
+const error = Astro.url.searchParams.get('error');
+---
+<Base title={`${view.id} 盲审`}>
+  <p class="muted">轮次 {view.id} · 盲审</p>
+  <h1>盲审：每对选你更想多待一小时的那一篇</h1>
+  <p class="muted">这里不告诉你哪篇是候选、哪篇是现任，也不显示任何评委意见。只有盲审答案会计入"评委与你的一致率"。提交后不能修改。</p>
+  {error !== null && <p class="error">{error}</p>}
+  {!view.done && <p class="pill warn">这一轮还没跑完。</p>}
+  <form method="post" action={`/api/rounds/${view.id}/audit`}>
+    {view.auditSet.map((p, i) => (
+      <div class="card">
+        <h3>第 {i + 1} 对</h3>
+        <div class="grid2">
+          <div>
+            <label class="choice"><input type="radio" name={p.id} value="left" required /> 选左边</label>
+            <div class="prose" style="margin-top:.6rem">{textFor(view, p.left)}</div>
+          </div>
+          <div>
+            <label class="choice"><input type="radio" name={p.id} value="right" required /> 选右边</label>
+            <div class="prose" style="margin-top:.6rem">{textFor(view, p.right)}</div>
+          </div>
+        </div>
+      </div>
+    ))}
+    <button class="btn" type="submit">提交盲审</button>
+  </form>
+</Base>

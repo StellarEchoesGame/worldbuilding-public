@@ -19,7 +19,7 @@
 
 ## 评测
 
-[世界观评测](benchmarks/README.md)记录对现行设定的评分与评测方法：WB-B1（[#32](https://github.com/StellarEchoesGame/worldbuilding/issues/32)）已对 reference 8.1 完成一轮评分；WB-C1（[#33](https://github.com/StellarEchoesGame/worldbuilding/issues/33)）交付了 v1.3 可执行协议与判定代码，尚未对正文运行，首次运行见 [#40](https://github.com/StellarEchoesGame/worldbuilding/issues/40)。评测快照和分数不是设定本身，写作以 `current/` 为准。
+[世界观评测](benchmarks/README.md)记录对现行设定的评分与评测方法：WB-B1（[#32](https://github.com/StellarEchoesGame/worldbuilding/issues/32)）已对 reference 8.1 完成一轮评分；WB-C1（[#33](https://github.com/StellarEchoesGame/worldbuilding/issues/33)）交付了 v1.3 可执行协议与判定代码，尚未对正文运行，首次运行见 [#40](https://github.com/StellarEchoesGame/worldbuilding/issues/40)。评测快照和分数不是设定本身，写作以 `current/` 为准。[回响工坊](forge/README.md)（WB-F1，[#1](https://github.com/StellarEchoesGame/worldbuilding-public/issues/1)）按单元格迭代补厚设定：网关写手出稿、四家评委盲评、owner 在本地 UI 盲审与决策；原型轮次 `forge/rounds/P01/` 不进正典。
 
 ## 历史与手稿
 

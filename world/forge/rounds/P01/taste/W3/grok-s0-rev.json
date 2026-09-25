@@ -1,0 +1,23 @@
+{
+  "candidate": "W3",
+  "judge": "grok",
+  "family": "xAI",
+  "session": 0,
+  "order": "rev",
+  "ok": true,
+  "error": null,
+  "attempts": 1,
+  "decisive_pick": 1,
+  "verdict": {
+    "picks": {
+      "q1": 1,
+      "q2": 2
+    },
+    "quotes": {
+      "q1": "隔壁有人在敲汤勺，节奏很慢，像是在试一个自己听过的调子。",
+      "q2": "出了事我们照护，不等于我提前把你写进照护名单。"
+    }
+  },
+  "served_model": "grok-4.7-build",
+  "version": "grok 1.0.41 (4220f3b224a6)"
+}

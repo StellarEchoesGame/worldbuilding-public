@@ -1,0 +1,23 @@
+{
+  "candidate": "W1",
+  "judge": "grok",
+  "family": "xAI",
+  "session": 1,
+  "order": "fwd",
+  "ok": true,
+  "error": null,
+  "attempts": 1,
+  "decisive_pick": 1,
+  "verdict": {
+    "picks": {
+      "q1": 1,
+      "q2": 2
+    },
+    "quotes": {
+      "q1": "只有远处载具作业的短促闪光，隔一会儿亮一下，隔一会儿又亮一下。",
+      "q2": "你能一眼看出形状的时候，那就不叫泡软了，那叫淹死。"
+    }
+  },
+  "served_model": "grok-4.7-build",
+  "version": "grok 1.0.41 (4220f3b224a6)"
+}

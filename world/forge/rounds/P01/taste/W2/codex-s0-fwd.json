@@ -1,0 +1,23 @@
+{
+  "candidate": "W2",
+  "judge": "codex",
+  "family": "OpenAI",
+  "session": 0,
+  "order": "fwd",
+  "ok": true,
+  "error": null,
+  "attempts": 1,
+  "decisive_pick": 2,
+  "verdict": {
+    "picks": {
+      "q1": 2,
+      "q2": 1
+    },
+    "quotes": {
+      "q1": "桌上大壶里是烤谷饮，旁边贴着一张手写纸牌：“加热加甜请自便，但别来跟我说难喝。”",
+      "q2": "她现在想要的东西很小：让走廊干到明天，让留饭签上的字立起来，让她晚上回到台子前的时候手不抖。"
+    }
+  },
+  "served_model": null,
+  "version": "codex-cli 0.156.0"
+}
