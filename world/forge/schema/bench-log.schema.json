@@ -1,0 +1,66 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "bench-log.schema.json",
+  "title": "WB-F1 benchmark log line",
+  "description": "One line of benchmark/log.jsonl, appended only by the engine (engine/bench-log.ts appendBenchLogOnce). engine/bench-log.ts parseBenchLog also checks what the schema subset cannot express: at most one line per cycle and per version, `at` never goes backwards, activate / pending_owner lines carry version, sha256, activation and path benchmark/<version>.json (activation owner exactly for pending_owner), rejected_by_replay carries a failed replay, and replay.per_family values.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "at", "cycle", "outcome", "version", "parent", "sha256", "path", "activation", "changed_keys", "evidence_packet",
+    "evidence_packet_sha256", "evidence_ids", "reasons", "errors", "replay", "dropped_cliches", "protocol_bundle_sha256", "calls", "source"
+  ],
+  "properties": {
+    "at": { "type": "string", "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(\\.\\d+)?Z$" },
+    "cycle": { "type": "string", "pattern": "^R\\d{2}(-init)?$" },
+    "outcome": { "enum": ["activate", "pending_owner", "no_change", "no_change_invalid", "rejected_validate", "rejected_by_replay"] },
+    "version": { "type": ["string", "null"], "pattern": "^v[1-9]\\d*$" },
+    "parent": { "type": ["string", "null"], "pattern": "^v[1-9]\\d*$" },
+    "sha256": { "type": ["string", "null"], "pattern": "^[0-9a-f]{64}$" },
+    "path": { "type": ["string", "null"], "pattern": "^([A-Za-z0-9_-][A-Za-z0-9._-]*/)*[A-Za-z0-9_-][A-Za-z0-9._-]*\\.json$" },
+    "activation": { "enum": ["auto", "replay", "owner", null] },
+    "changed_keys": { "type": "array", "items": { "type": "string", "minLength": 1 } },
+    "evidence_packet": { "type": ["string", "null"], "pattern": "^benchmark/evidence/R\\d{2}\\.json$" },
+    "evidence_packet_sha256": { "type": ["string", "null"], "pattern": "^[0-9a-f]{64}$" },
+    "evidence_ids": { "type": "array", "items": { "type": "string", "pattern": "^E-[A-Za-z0-9-]+$" } },
+    "reasons": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["text", "keys", "evidence_ids"],
+        "properties": {
+          "text": { "type": "string" },
+          "keys": { "type": "array", "items": { "type": "string", "minLength": 1 } },
+          "evidence_ids": { "type": "array", "items": { "type": "string", "pattern": "^E-[A-Za-z0-9-]+$" } }
+        }
+      }
+    },
+    "errors": { "type": "array", "items": { "type": "string" } },
+    "replay": {
+      "type": ["object", "null"],
+      "additionalProperties": false,
+      "required": ["labels", "families", "pooled", "per_family", "passed", "reason"],
+      "properties": {
+        "labels": { "type": "array", "items": { "type": "string", "minLength": 1 } },
+        "families": { "type": "array", "items": { "enum": ["DeepSeek", "Anthropic", "OpenAI", "Moonshot", "xAI", "Alibaba", "Zhipu", "MiniMax"] } },
+        "pooled": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["old", "new", "n"],
+          "properties": {
+            "old": { "type": "integer", "minimum": 0 },
+            "new": { "type": "integer", "minimum": 0 },
+            "n": { "type": "integer", "minimum": 0 }
+          }
+        },
+        "per_family": { "type": "object" },
+        "passed": { "type": "boolean" },
+        "reason": { "enum": ["ok", "pooled_lower", "family_drop", "too_few_pairs"] }
+      }
+    },
+    "dropped_cliches": { "type": "array", "items": { "type": "string" } },
+    "protocol_bundle_sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+    "calls": { "type": "array", "items": { "type": "string", "minLength": 1 } },
+    "source": { "const": "engine" }
+  }
+}

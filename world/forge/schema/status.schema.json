@@ -1,0 +1,31 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "status.schema.json",
+  "title": "WB-F1 round status",
+  "description": "rounds/<RNN>/status.json, engine-written by engine/runner.ts (state running at start, so a crash never shows the previous state; a usage exit restores the previous file). The UI polls it together with progress.jsonl. exit_code follows the runner EXIT table (0 done, 2 waiting, 3 integrity, 4 blocked, 5 failed); null while running.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["round", "state", "step", "waiting_for", "detail", "since", "exit_code", "done"],
+  "properties": {
+    "round": {"type": "string", "minLength": 1},
+    "state": {"type": "string", "enum": ["running", "done", "waiting", "integrity", "blocked", "failed"]},
+    "step": {
+      "type": ["string", "null"],
+      "enum": ["00-start", "01-topic", "02a-brief", "02b-baseline", "02c-freeze", "03a-forecast", "03b-seal", "03c-probe-mirror", "04-write", "05a-gate-mech", "05b-defect", "05c-gate-llm", "05d-resubmit", "06a-decoy", "06b-champion-pairs", "06c-aux-pairs", "06d-measures", "07a-unseal", "07b-surprise", "08-aggregate", "09a-audit", "09b-decision", "10a-regate", "10b-merge-edit", "10c-apply", "10d-post-merge-freeze", "10e-post-merge-gate", "10f-commit", "11a-unseal-publish", "11b-forecast-pool", "11c-champion", "11d-tagging", "11e-agreement", "11f-bench-evidence", "11g-bench-propose", "11h-bench-validate", "11i-bench-replay", "11j-bench-outcome", "11k-wiki", "11l-commit", "12a-prepare", "12b-diff-approval", "c1-build", "c2-gate-dryrun", "c3-owner-answers", "c4-judge", "c5-score", "i1-propose", "i2-validate", "i3-outcome", null]
+    },
+    "waiting_for": {
+      "type": ["string", "null"],
+      "enum": ["protocol_approval", "benchmark_approval", "topic", "audit", "decision", "calib_answers", "diff_approval", "owner_log_repair", null]
+    },
+    "detail": {"type": "string"},
+    "since": {"type": "string", "minLength": 1},
+    "exit_code": {"type": ["integer", "null"], "enum": [0, 1, 2, 3, 4, 5, null]},
+    "done": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": ["00-start", "01-topic", "02a-brief", "02b-baseline", "02c-freeze", "03a-forecast", "03b-seal", "03c-probe-mirror", "04-write", "05a-gate-mech", "05b-defect", "05c-gate-llm", "05d-resubmit", "06a-decoy", "06b-champion-pairs", "06c-aux-pairs", "06d-measures", "07a-unseal", "07b-surprise", "08-aggregate", "09a-audit", "09b-decision", "10a-regate", "10b-merge-edit", "10c-apply", "10d-post-merge-freeze", "10e-post-merge-gate", "10f-commit", "11a-unseal-publish", "11b-forecast-pool", "11c-champion", "11d-tagging", "11e-agreement", "11f-bench-evidence", "11g-bench-propose", "11h-bench-validate", "11i-bench-replay", "11j-bench-outcome", "11k-wiki", "11l-commit", "12a-prepare", "12b-diff-approval", "c1-build", "c2-gate-dryrun", "c3-owner-answers", "c4-judge", "c5-score", "i1-propose", "i2-validate", "i3-outcome"]
+      }
+    }
+  }
+}

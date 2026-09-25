@@ -1,0 +1,35 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "marker.schema.json",
+  "title": "WB-F1 done-marker",
+  "description": "markers/<step>.json, written only by engine/runner.ts from a StepOutcome. Map keys are forge-root-relative paths sorted by code unit and values are SHA-256 of the file bytes (.sealed/ files: SHA-256(nonce || bytes)); the schema subset cannot constrain dynamic keys, so engine/marker.ts parseMarker checks them. external is recorded, never verified; local (.sealed/, .runs/) is verified only where present; engine logs are never listed. prev is the SHA-256 of the previous marker file in pipeline order (null for the first step). Rewound or redone markers move to markers/stale/<n>/.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["v", "round", "step", "completed_at", "result", "skipped", "inputs", "outputs", "external", "local", "tasks", "prev"],
+  "properties": {
+    "v": {"const": 1},
+    "round": {"type": "string", "minLength": 1},
+    "step": {
+      "type": "string",
+      "enum": ["00-start", "01-topic", "02a-brief", "02b-baseline", "02c-freeze", "03a-forecast", "03b-seal", "03c-probe-mirror", "04-write", "05a-gate-mech", "05b-defect", "05c-gate-llm", "05d-resubmit", "06a-decoy", "06b-champion-pairs", "06c-aux-pairs", "06d-measures", "07a-unseal", "07b-surprise", "08-aggregate", "09a-audit", "09b-decision", "10a-regate", "10b-merge-edit", "10c-apply", "10d-post-merge-freeze", "10e-post-merge-gate", "10f-commit", "11a-unseal-publish", "11b-forecast-pool", "11c-champion", "11d-tagging", "11e-agreement", "11f-bench-evidence", "11g-bench-propose", "11h-bench-validate", "11i-bench-replay", "11j-bench-outcome", "11k-wiki", "11l-commit", "12a-prepare", "12b-diff-approval", "c1-build", "c2-gate-dryrun", "c3-owner-answers", "c4-judge", "c5-score", "i1-propose", "i2-validate", "i3-outcome"]
+    },
+    "completed_at": {"type": "string", "minLength": 1},
+    "result": {"type": "string", "enum": ["done", "skip", "waiting", "rewind"]},
+    "skipped": {"type": ["string", "null"]},
+    "inputs": {"type": "object"},
+    "outputs": {"type": "object"},
+    "external": {"type": "object"},
+    "local": {"type": "object"},
+    "tasks": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["ok", "void", "calls"],
+      "properties": {
+        "ok": {"type": "integer", "minimum": 0},
+        "void": {"type": "integer", "minimum": 0},
+        "calls": {"type": "integer", "minimum": 0}
+      }
+    },
+    "prev": {"type": ["string", "null"], "pattern": "^[0-9a-f]{64}$"}
+  }
+}

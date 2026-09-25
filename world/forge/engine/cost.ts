@@ -56,7 +56,7 @@ export interface RoundCost {
 
 const round10 = (x: number): number => Math.round(x * 1e10) / 1e10;
 
-/** Sums the round's call records (calls/*.json, one per attempt) per backend; records without a cost count as unpriced. */
+/** Sums the round's call records (calls/*.json, one per attempt; quota retries skipped) per backend; records without a cost count as unpriced. */
 export function roundCost(paths: RoundPaths): RoundCost {
   let names: string[] = [];
   try {
@@ -67,7 +67,8 @@ export function roundCost(paths: RoundPaths): RoundCost {
   const by: Record<string, BackendCost> = {};
   for (const name of names) {
     const rec = readJson(join(paths.calls, name));
-    if (!isRecord(rec)) continue;
+    // Quota retries are waits, not attempts (task.ts labels them -a<k>-q<n>).
+    if (!isRecord(rec) || rec['quota'] === true) continue;
     const backend = readString(rec, 'backend') ?? 'unknown';
     const entry = by[backend] ?? { attempts: 0, tokens_in: 0, tokens_out: 0, cost_usd: 0, unpriced_calls: 0 };
     const cost = readNumber(rec, 'cost_usd');

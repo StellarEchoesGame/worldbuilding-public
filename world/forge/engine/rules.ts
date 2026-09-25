@@ -1,11 +1,21 @@
 import { readdirSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import type { BenchContext, RollbackEntry } from './bench-validate.ts';
+import type { ForbiddenWord, GateLimits } from './gate.ts';
 import { isRecord, readNumber, readRecord, readString, stringArray } from './json.ts';
 import { BUNDLE_FILES, parseProtocol, protocolBundleHash, type BundleFile, type Protocol } from './protocol.ts';
 import { err, ok, type Result } from './result.ts';
-import type { RoundRules } from './round.ts';
 import { loadSchema } from './schema.ts';
+
+/** Gate rules taken from the PROTOCOL.md `limits`, `forbidden-words`, `negations` and `negation-exceptions` blocks. */
+export interface RoundRules {
+  limits: GateLimits;
+  forbidden: readonly ForbiddenWord[];
+  negations: readonly string[];
+  negationExceptions: readonly string[];
+  /** Wins needed when four families are eligible: the stricter of the protocol and benchmark bars. */
+  barFourFamilies: 7 | 8;
+}
 
 export interface ProtocolBundle {
   protocol: Protocol;

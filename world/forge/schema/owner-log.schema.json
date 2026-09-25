@@ -1,0 +1,23 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "owner-log.schema.json",
+  "title": "WB-F1 owner log line",
+  "description": "One line of owner-log.jsonl, written only by the UI (ui/src/lib/owner.ts). version, from, set and slots are absent in older UI lines and read as null. Per-action requirements (round and file on topic / audit / decision / diff_approved, version on bench entries, version and from on rollback, set and slots on calib_answers) are checked by engine/owner-inputs.ts.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["at", "action", "sha256", "source"],
+  "properties": {
+    "at": { "type": "string", "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(\\.\\d+)?Z$" },
+    "action": {
+      "enum": ["protocol_approved", "topic", "audit", "decision", "diff_approved", "calib_answers", "bench_diff_viewed", "bench_approved", "rollback"]
+    },
+    "round": { "type": ["string", "null"], "pattern": "^[A-Z]\\d{2}$" },
+    "file": { "type": ["string", "null"], "minLength": 1 },
+    "sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+    "source": { "const": "ui" },
+    "version": { "type": ["string", "null"], "pattern": "^v[1-9]\\d*$" },
+    "from": { "type": ["string", "null"], "pattern": "^v[1-9]\\d*$" },
+    "set": { "type": ["string", "null"], "pattern": "^[A-Z]\\d{2}$" },
+    "slots": { "type": ["array", "null"], "minItems": 1, "items": { "type": "integer", "minimum": 1 } }
+  }
+}

@@ -69,7 +69,7 @@ function parseClaim(value: unknown, index: number): Result<Claim> {
   const claim = readString(value, 'claim');
   const sourceQuote = readString(value, 'source_quote');
   if (id === null || kind === null || claim === null || sourceQuote === null) return err(`delta claims[${index}]: id, kind, claim and source_quote are required`);
-  if (!isClaimKind(kind)) return err(`delta claims[${index}]: unknown kind ${kind}`);
+  if (!isClaimKind(kind)) return err(`delta claims[${index}]: kind is not author_fact, character_belief or rumor`);
   return ok({
     id,
     kind,

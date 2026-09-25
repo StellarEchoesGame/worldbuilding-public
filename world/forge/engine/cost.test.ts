@@ -35,10 +35,10 @@ test('withPrices fills a missing cost from tokens and keeps a cost the backend r
   assert.ok(p.ok);
   const w = fakeBackend('w', 'DeepSeek', () => 'x'.repeat(10));
   w.model = 'fake-w';
-  const r = await withPrices(w, p.value).call('abcd', { role: 'r', timeoutMs: 1 });
+  const r = await withPrices(w, p.value).call('abcd', { role: 'r', timeoutMs: 1, taskId: 't', attempt: 1 });
   assert.equal(r.costUsd, (4 * 1 + 10 * 2) / 1_000_000);
-  const reported = withPrices({ ...fakeBackend('c', 'Anthropic', () => 'ok'), model: 'fake-c', call: (prompt) => fakeBackend('c', 'Anthropic', () => 'ok').call(prompt, { role: 'r', timeoutMs: 1 }).then((x) => ({ ...x, costUsd: 0.5 })) }, p.value);
-  assert.equal((await reported.call('p', { role: 'r', timeoutMs: 1 })).costUsd, 0.5);
+  const reported = withPrices({ ...fakeBackend('c', 'Anthropic', () => 'ok'), model: 'fake-c', call: (prompt) => fakeBackend('c', 'Anthropic', () => 'ok').call(prompt, { role: 'r', timeoutMs: 1, taskId: 't', attempt: 1 }).then((x) => ({ ...x, costUsd: 0.5 })) }, p.value);
+  assert.equal((await reported.call('p', { role: 'r', timeoutMs: 1, taskId: 't', attempt: 1 })).costUsd, 0.5);
 });
 
 test('roundCost sums tokens and cost per backend and counts unpriced calls', () => {
@@ -56,5 +56,17 @@ test('roundCost sums tokens and cost per backend and counts unpriced calls', () 
   assert.deepEqual(c.by_backend['codex'], { attempts: 1, tokens_in: 0, tokens_out: 0, cost_usd: 0, unpriced_calls: 1 });
   assert.equal(c.total_usd, 0.53);
   assert.equal(c.unpriced_calls, 1);
+  rmSync(root, { recursive: true });
+});
+
+test('roundCost skips quota retries, which never count as attempts or unpriced calls', () => {
+  const root = mkdtempSync(join(tmpdir(), 'forge-cost-'));
+  const paths = roundPaths(root, 'R01');
+  mkdirSync(paths.calls, { recursive: true });
+  writeFileSync(join(paths.calls, 'w-a1-q1.json'), JSON.stringify({ label: 'w-a1-q1', backend: 'W1', tokens_in: null, tokens_out: null, cost_usd: null, quota: true }));
+  writeFileSync(join(paths.calls, 'w-a1.json'), JSON.stringify({ label: 'w-a1', backend: 'W1', tokens_in: 10, tokens_out: 5, cost_usd: 0.01, quota: false }));
+  const c = roundCost(paths);
+  assert.deepEqual(c.by_backend['W1'], { attempts: 1, tokens_in: 10, tokens_out: 5, cost_usd: 0.01, unpriced_calls: 0 });
+  assert.equal(c.unpriced_calls, 0);
   rmSync(root, { recursive: true });
 });

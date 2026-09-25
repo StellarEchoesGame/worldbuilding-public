@@ -1,0 +1,38 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "decision.schema.json",
+  "title": "WB-F1 owner decision",
+  "description": "rounds/RNN/decision.json and the append-only chain decision-2.json, decision-3.json, ... (PROTOCOL §6), written only by the UI. base and supersedes are absent in older UI files and read as null; decision-N.json (N >= 2) carries supersedes = SHA-256 of the previous file (chain rules in engine/owner-inputs.ts).",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["round", "pick", "pick_submission", "champion", "facts", "reason", "fav", "publish", "happened", "decided_at"],
+  "properties": {
+    "round": { "type": "string", "pattern": "^[A-Z]\\d{2}$" },
+    "pick": { "type": "string", "minLength": 1 },
+    "pick_submission": { "type": ["string", "null"], "minLength": 1 },
+    "base": { "type": ["string", "null"], "minLength": 1 },
+    "champion": { "type": "string", "minLength": 1 },
+    "facts": {
+      "type": "array",
+      "maxItems": 6,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["label", "submission", "id", "claim"],
+        "properties": {
+          "label": { "type": "string", "minLength": 1 },
+          "submission": { "type": "string", "minLength": 1 },
+          "id": { "type": "string", "minLength": 1 },
+          "claim": { "type": "string", "minLength": 1 }
+        }
+      }
+    },
+    "reason": { "enum": ["平", "假", "乱", "偏"] },
+    "fav": { "type": "string", "minLength": 1 },
+    "publish": { "enum": ["yes", "no"] },
+    "happened": { "type": "boolean" },
+    "source": { "const": "ui" },
+    "supersedes": { "type": ["string", "null"], "pattern": "^[0-9a-f]{64}$" },
+    "decided_at": { "type": "string", "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(\\.\\d+)?Z$" }
+  }
+}

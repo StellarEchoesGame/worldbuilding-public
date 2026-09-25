@@ -15,7 +15,9 @@ import { canarySummary, mergeCanaryResults, runCanary, type CanaryRun } from './
 import { parsePrices, withPrices, type Prices } from './cost.ts';
 import { canonFiles, factRowsFrom, parseMergeDecision, parseRegister07, sourcesFromRound } from './inputs.ts';
 import { mergecheck } from './mergecheck.ts';
-import { runRound } from './round.ts';
+import { prototypeRoundRefusal, runPrototypeRound } from './prototype.ts';
+import { freezeCommand, productionDeps, roundCommand, type ForgeRoots } from './cli-round.ts';
+import type { EngineDeps } from './context.ts';
 import { benchContext, findBenchmark, loadProtocolBundle, parseRollbacks, roundRules, type ProtocolBundle } from './rules.ts';
 import { readJson, readLines, roundPaths, sha256, writeJson, writeText } from './store.ts';
 import { parseBenchmark } from './taste.ts';
@@ -98,7 +100,7 @@ async function doctor(): Promise<void> {
   for (const s of [...cfg.slots, cfg.baseline]) if (!models.has(s.model)) models.set(s.model, { ...s, id: `writer:${s.model}`, maxTokens: 2000 });
   for (const slot of models.values()) backends.push(writerBackend(cfg, slot));
   process.stdout.write(`检查 ${backends.length} 个后端（评委以最高思考档位运行，可能要一两分钟）…\n`);
-  const results = await Promise.all(backends.map(async (b) => ({ b, r: await b.call(prompt, { role, timeoutMs: 600_000 }) })));
+  const results = await Promise.all(backends.map(async (b) => ({ b, r: await b.call(prompt, { role, timeoutMs: 600_000, taskId: `doctor-${b.id}`, attempt: 1 }) })));
   let allOk = true;
   for (const { b, r } of results) {
     const good = r.ok && /OK/iu.test(r.text);
@@ -116,7 +118,9 @@ async function doctor(): Promise<void> {
 
 async function roundRun(args: readonly string[]): Promise<void> {
   const id = args[0];
-  if (id === undefined) fail('usage: forge round run <ID> --cell cells/<cell>.json [--seed <seed>]');
+  if (id === undefined) fail('usage: forge round run <P-ID> --cell cells/<cell>.json [--seed <seed>]');
+  const refusal = prototypeRoundRefusal(ROOT, id);
+  if (refusal !== null) fail(refusal);
   const cfg = config();
   const paths = roundPaths(ROOT, id);
   const existingBrief = readJson(join(paths.dir, 'brief.json'));
@@ -134,7 +138,7 @@ async function roundRun(args: readonly string[]): Promise<void> {
   const local = cfg.local;
   if (local === null) fail('local.json is required');
   const seed = readString(existingBrief, 'seed') ?? option(args, '--seed') ?? randomBytes(8).toString('hex');
-  const tallies = await runRound(
+  const tallies = await runPrototypeRound(
     {
       root: ROOT,
       cell: cell.value,
@@ -160,7 +164,7 @@ async function roundRun(args: readonly string[]): Promise<void> {
 
 function roundStatus(args: readonly string[]): void {
   const id = args[0];
-  if (id === undefined) fail('usage: forge round status <ID>');
+  if (id === undefined) fail('usage: forge round status <P-ID>');
   const events = readLines(roundPaths(ROOT, id).progress);
   const last = new Map<string, string>();
   let errors = 0;
@@ -343,24 +347,44 @@ async function canary(args: readonly string[]): Promise<void> {
   if (!run.pass) process.exitCode = 1;
 }
 
+const ROOTS: ForgeRoots = { root: ROOT, repo: REPO };
+
+/** P01-style ids run on the prototype runner (P01 is frozen); R rounds run on the step machine. */
+function isPrototypeRound(id: string | undefined): boolean {
+  return id !== undefined && /^P\d{2}$/u.test(id);
+}
+
+async function engineCommand(run: (deps: EngineDeps) => Promise<number>): Promise<void> {
+  const deps = productionDeps(ROOT, REPO);
+  if (!deps.ok) fail(deps.error);
+  process.exitCode = await run(deps.value);
+}
+
 async function main(): Promise<void> {
   const [cmd, sub, ...rest] = process.argv.slice(2);
+  const args = [sub, ...rest].filter((s): s is string => s !== undefined);
   if (cmd === 'doctor') return doctor();
-  if (cmd === 'canary') return canary([sub, ...rest].filter((s): s is string => s !== undefined));
-  if (cmd === 'round' && sub === 'run') return roundRun(rest);
-  if (cmd === 'round' && sub === 'status') return roundStatus(rest);
+  if (cmd === 'canary') return canary(args);
+  if (cmd === 'round' && sub === 'run' && isPrototypeRound(rest[0])) return roundRun(rest);
+  if (cmd === 'round' && sub === 'status' && isPrototypeRound(rest[0])) return roundStatus(rest);
+  if (cmd === 'round') return engineCommand((deps) => roundCommand(args, deps, ROOTS));
+  if (cmd === 'freeze') return engineCommand((deps) => freezeCommand(args, deps, ROOTS));
   if (cmd === 'protocol' && sub === 'hash') return protocolHash();
   if (cmd === 'bench' && sub === 'validate') return benchValidate(rest);
-  if (cmd === 'thinmap') return thinmap([sub, ...rest].filter((s): s is string => s !== undefined));
-  if (cmd === 'mergecheck') return mergeCheck([sub, ...rest].filter((s): s is string => s !== undefined));
-  if (cmd === 'ui') return launchUi(ROOT, [sub, ...rest].filter((s): s is string => s !== undefined));
+  if (cmd === 'thinmap') return thinmap(args);
+  if (cmd === 'mergecheck') return mergeCheck(args);
+  if (cmd === 'ui') return launchUi(ROOT, args);
   fail(
     [
       'usage:',
       '  forge doctor',
       '  forge canary [--only <id,...>]',
-      '  forge round run <ID> --cell <file> [--seed <seed>] [--benchmark <file>]',
-      '  forge round status <ID>',
+      '  forge round start <RNN> [--cell <file>] [--seed <hex>] [--quota-budget-min <n>]',
+      '  forge round run <RNN> [--until|--from|--redo-from <step>] [--quota-budget-min <n>]',
+      '  forge round status <RNN> [--json] [--verify]',
+      '  forge round run <P-ID> --cell <file> [--seed <seed>] [--benchmark <file>]   (prototype runner)',
+      '  forge round status <P-ID>',
+      '  forge freeze --check [RNN]',
       '  forge protocol hash',
       '  forge bench validate <candidate.json> [--parent <parent.json>] [--round <n>] [--rollbacks <file>]',
       '  forge thinmap [--top <n>] [--aliases <file>] [--tags <file>] [--game-need <file>]',
