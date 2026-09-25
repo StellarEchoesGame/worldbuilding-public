@@ -1,0 +1,23 @@
+{
+  "candidate": "W3",
+  "judge": "grok",
+  "family": "xAI",
+  "session": 1,
+  "order": "fwd",
+  "ok": true,
+  "error": null,
+  "attempts": 1,
+  "decisive_pick": 1,
+  "verdict": {
+    "picks": {
+      "q1": 1,
+      "q2": 2
+    },
+    "quotes": {
+      "q1": "回去的路看着比来的路短——不是真的短，是他已经知道哪一段栏杆是温的。",
+      "q2": "她拧亮了床头的小灯，拿出针线盒，把那件外套短的那边又拆开了一道缝。"
+    }
+  },
+  "served_model": "grok-4.7-build",
+  "version": "grok 1.0.41 (4220f3b224a6)"
+}

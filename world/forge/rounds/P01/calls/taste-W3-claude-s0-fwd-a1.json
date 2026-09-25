@@ -1,0 +1,17 @@
+{
+  "label": "taste-W3-claude-s0-fwd-a1",
+  "backend": "claude",
+  "family": "Anthropic",
+  "requested_model": "opus",
+  "served_model": "claude-code/claude-opus-5-5[1M]",
+  "version": "2.1.282 (Claude Code)",
+  "ok": true,
+  "error": null,
+  "ms": 131676,
+  "tokens_in": 2,
+  "tokens_out": 10369,
+  "cost_usd": 0.22756800000000002,
+  "prompt_sha256": "c0b2aac5223859ff759187459ba7a2a505d1f9a9bf89893ddbb7e0754103f8dc",
+  "output_sha256": "1f9ef9ca73871c9cf44fdcafde6133108065235ab027fe445ccf48dfeabafb89",
+  "at": "2026-09-25T06:10:27.387Z"
+}

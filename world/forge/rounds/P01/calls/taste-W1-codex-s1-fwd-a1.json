@@ -1,0 +1,17 @@
+{
+  "label": "taste-W1-codex-s1-fwd-a1",
+  "backend": "codex",
+  "family": "OpenAI",
+  "requested_model": "gpt-6-astra",
+  "served_model": null,
+  "version": "codex-cli 0.156.0",
+  "ok": true,
+  "error": null,
+  "ms": 32066,
+  "tokens_in": null,
+  "tokens_out": null,
+  "cost_usd": null,
+  "prompt_sha256": "5f484d8625632208cd2d2e133eda27cc0e56763c681bbb2481e5bcc2efffac6f",
+  "output_sha256": "5ad012bcbc94798b6f06c246b1e0f2c8ff2f373a52d3436c377e9cb5d923de04",
+  "at": "2026-09-25T06:04:19.744Z"
+}

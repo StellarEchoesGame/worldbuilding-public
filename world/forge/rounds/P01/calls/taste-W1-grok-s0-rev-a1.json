@@ -1,0 +1,17 @@
+{
+  "label": "taste-W1-grok-s0-rev-a1",
+  "backend": "grok",
+  "family": "xAI",
+  "requested_model": "grok-4.7",
+  "served_model": "grok-4.7-build",
+  "version": "grok 1.0.41 (4220f3b224a6)",
+  "ok": true,
+  "error": null,
+  "ms": 102795,
+  "tokens_in": 15513,
+  "tokens_out": 5815,
+  "cost_usd": 0.02241144,
+  "prompt_sha256": "4e4eea88aef94e173f6f10546f0f32c6daf263fe0f281381e6a151d4f26cc221",
+  "output_sha256": "301dc897cb238c4e934e2b2c21f135f156b8e28008a2af3c51d873ea536adf98",
+  "at": "2026-09-25T06:05:30.461Z"
+}

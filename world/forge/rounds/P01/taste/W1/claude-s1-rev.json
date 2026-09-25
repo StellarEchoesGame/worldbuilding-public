@@ -1,0 +1,23 @@
+{
+  "candidate": "W1",
+  "judge": "claude",
+  "family": "Anthropic",
+  "session": 1,
+  "order": "rev",
+  "ok": true,
+  "error": null,
+  "attempts": 1,
+  "decisive_pick": 1,
+  "verdict": {
+    "picks": {
+      "q1": 1,
+      "q2": 2
+    },
+    "quotes": {
+      "q1": "加热加甜请自便，但别来跟我说难喝",
+      "q2": "针脚不漂亮。她也没打算让它漂亮。"
+    }
+  },
+  "served_model": "claude-code/claude-opus-5-5[1M]",
+  "version": "2.1.282 (Claude Code)"
+}

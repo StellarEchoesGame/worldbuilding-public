@@ -1,0 +1,226 @@
+{
+  "benchmark": "v0-prototype",
+  "champion": "BASE",
+  "session_pairs": 2,
+  "candidates": [
+    {
+      "label": "A",
+      "submission": "W3",
+      "tally": {
+        "eligible": [
+          "OpenAI",
+          "Anthropic",
+          "Moonshot",
+          "xAI"
+        ],
+        "dropped": [],
+        "winsByFamily": {
+          "OpenAI": 0,
+          "Anthropic": 2,
+          "Moonshot": 0,
+          "xAI": 0
+        },
+        "totalWins": 2,
+        "needed": 7,
+        "beatsChampion": false,
+        "trial": false
+      },
+      "sessions": [
+        {
+          "family": "OpenAI",
+          "index": 0,
+          "forward": 1,
+          "reverse": 1
+        },
+        {
+          "family": "OpenAI",
+          "index": 1,
+          "forward": 1,
+          "reverse": 1
+        },
+        {
+          "family": "Anthropic",
+          "index": 0,
+          "forward": 1,
+          "reverse": 2
+        },
+        {
+          "family": "Anthropic",
+          "index": 1,
+          "forward": 1,
+          "reverse": 2
+        },
+        {
+          "family": "Moonshot",
+          "index": 0,
+          "forward": 1,
+          "reverse": 1
+        },
+        {
+          "family": "Moonshot",
+          "index": 1,
+          "forward": 2,
+          "reverse": 1
+        },
+        {
+          "family": "xAI",
+          "index": 0,
+          "forward": 1,
+          "reverse": 1
+        },
+        {
+          "family": "xAI",
+          "index": 1,
+          "forward": 1,
+          "reverse": 1
+        }
+      ]
+    },
+    {
+      "label": "B",
+      "submission": "W2",
+      "tally": {
+        "eligible": [
+          "OpenAI",
+          "Anthropic",
+          "Moonshot",
+          "xAI"
+        ],
+        "dropped": [],
+        "winsByFamily": {
+          "OpenAI": 0,
+          "Anthropic": 0,
+          "Moonshot": 0,
+          "xAI": 0
+        },
+        "totalWins": 0,
+        "needed": 7,
+        "beatsChampion": false,
+        "trial": false
+      },
+      "sessions": [
+        {
+          "family": "OpenAI",
+          "index": 0,
+          "forward": 2,
+          "reverse": 1
+        },
+        {
+          "family": "OpenAI",
+          "index": 1,
+          "forward": 2,
+          "reverse": 1
+        },
+        {
+          "family": "Anthropic",
+          "index": 0,
+          "forward": 1,
+          "reverse": 1
+        },
+        {
+          "family": "Anthropic",
+          "index": 1,
+          "forward": 1,
+          "reverse": 1
+        },
+        {
+          "family": "Moonshot",
+          "index": 0,
+          "forward": 2,
+          "reverse": 1
+        },
+        {
+          "family": "Moonshot",
+          "index": 1,
+          "forward": 2,
+          "reverse": 1
+        },
+        {
+          "family": "xAI",
+          "index": 0,
+          "forward": 1,
+          "reverse": 1
+        },
+        {
+          "family": "xAI",
+          "index": 1,
+          "forward": 2,
+          "reverse": 1
+        }
+      ]
+    },
+    {
+      "label": "C",
+      "submission": "W1",
+      "tally": {
+        "eligible": [
+          "OpenAI",
+          "Anthropic",
+          "Moonshot",
+          "xAI"
+        ],
+        "dropped": [],
+        "winsByFamily": {
+          "OpenAI": 0,
+          "Anthropic": 0,
+          "Moonshot": 0,
+          "xAI": 0
+        },
+        "totalWins": 0,
+        "needed": 7,
+        "beatsChampion": false,
+        "trial": false
+      },
+      "sessions": [
+        {
+          "family": "OpenAI",
+          "index": 0,
+          "forward": 2,
+          "reverse": 1
+        },
+        {
+          "family": "OpenAI",
+          "index": 1,
+          "forward": 2,
+          "reverse": 1
+        },
+        {
+          "family": "Anthropic",
+          "index": 0,
+          "forward": 2,
+          "reverse": 1
+        },
+        {
+          "family": "Anthropic",
+          "index": 1,
+          "forward": 2,
+          "reverse": 1
+        },
+        {
+          "family": "Moonshot",
+          "index": 0,
+          "forward": 2,
+          "reverse": 1
+        },
+        {
+          "family": "Moonshot",
+          "index": 1,
+          "forward": 2,
+          "reverse": 1
+        },
+        {
+          "family": "xAI",
+          "index": 0,
+          "forward": 1,
+          "reverse": 1
+        },
+        {
+          "family": "xAI",
+          "index": 1,
+          "forward": 1,
+          "reverse": 1
+        }
+      ]
+    }
+  ]
+}

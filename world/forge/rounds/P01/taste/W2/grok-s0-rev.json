@@ -1,0 +1,23 @@
+{
+  "candidate": "W2",
+  "judge": "grok",
+  "family": "xAI",
+  "session": 0,
+  "order": "rev",
+  "ok": true,
+  "error": null,
+  "attempts": 1,
+  "decisive_pick": 1,
+  "verdict": {
+    "picks": {
+      "q1": 1,
+      "q2": 2
+    },
+    "quotes": {
+      "q1": "折片汤的蒸汽混着培养蛋白片的淡香先到了走廊，温芮的胃比眼睛先知道午饭。",
+      "q2": "陈颂在旁边笑了一声，很轻，把汤碗往前推了推，像是要给谁让出位置，其实桌前没人。"
+    }
+  },
+  "served_model": "grok-4.7-build",
+  "version": "grok 1.0.41 (4220f3b224a6)"
+}

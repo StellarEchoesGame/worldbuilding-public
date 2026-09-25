@@ -1,0 +1,17 @@
+{
+  "label": "taste-W3-kimi-s0-fwd-a1",
+  "backend": "kimi",
+  "family": "Moonshot",
+  "requested_model": "kimi-code/k3",
+  "served_model": null,
+  "version": "0.34.0",
+  "ok": true,
+  "error": null,
+  "ms": 53447,
+  "tokens_in": null,
+  "tokens_out": null,
+  "cost_usd": null,
+  "prompt_sha256": "c0b2aac5223859ff759187459ba7a2a505d1f9a9bf89893ddbb7e0754103f8dc",
+  "output_sha256": "44184be3088920d397a6d0773eac1492d27b16b32bad0cd9b753bb697b61ed86",
+  "at": "2026-09-25T06:05:48.477Z"
+}

@@ -9,3 +9,54 @@
 {"at":"2026-09-25T06:03:47.606Z","step":"write","status":"done","detail":"W3"}
 {"at":"2026-09-25T06:03:47.612Z","step":"gate","status":"done","detail":"W1:通过 W2:通过 W3:通过 BASE:通过"}
 {"at":"2026-09-25T06:03:47.619Z","step":"taste","status":"start","detail":"48 次评委调用"}
+{"at":"2026-09-25T06:04:08.810Z","step":"taste","status":"info","detail":"taste-W1-kimi-s0-fwd"}
+{"at":"2026-09-25T06:04:18.454Z","step":"taste","status":"info","detail":"taste-W1-codex-s0-rev"}
+{"at":"2026-09-25T06:04:18.822Z","step":"taste","status":"info","detail":"taste-W1-kimi-s1-fwd"}
+{"at":"2026-09-25T06:04:19.745Z","step":"taste","status":"info","detail":"taste-W1-codex-s1-fwd"}
+{"at":"2026-09-25T06:04:20.498Z","step":"taste","status":"info","detail":"taste-W1-codex-s0-fwd"}
+{"at":"2026-09-25T06:04:23.840Z","step":"taste","status":"info","detail":"taste-W1-kimi-s1-rev"}
+{"at":"2026-09-25T06:04:33.620Z","step":"taste","status":"info","detail":"taste-W2-kimi-s0-fwd"}
+{"at":"2026-09-25T06:04:34.853Z","step":"taste","status":"info","detail":"taste-W1-kimi-s0-rev"}
+{"at":"2026-09-25T06:04:47.551Z","step":"taste","status":"info","detail":"taste-W2-codex-s0-rev"}
+{"at":"2026-09-25T06:04:50.811Z","step":"taste","status":"info","detail":"taste-W1-codex-s1-rev"}
+{"at":"2026-09-25T06:04:51.719Z","step":"taste","status":"info","detail":"taste-W2-codex-s0-fwd"}
+{"at":"2026-09-25T06:04:55.027Z","step":"taste","status":"info","detail":"taste-W2-kimi-s1-fwd"}
+{"at":"2026-09-25T06:04:55.064Z","step":"taste","status":"info","detail":"taste-W2-kimi-s1-rev"}
+{"at":"2026-09-25T06:05:06.183Z","step":"taste","status":"info","detail":"taste-W2-kimi-s0-rev"}
+{"at":"2026-09-25T06:05:13.799Z","step":"taste","status":"info","detail":"taste-W2-codex-s1-fwd"}
+{"at":"2026-09-25T06:05:15.634Z","step":"taste","status":"info","detail":"taste-W2-codex-s1-rev"}
+{"at":"2026-09-25T06:05:25.377Z","step":"taste","status":"info","detail":"taste-W3-codex-s0-fwd"}
+{"at":"2026-09-25T06:05:30.462Z","step":"taste","status":"info","detail":"taste-W1-grok-s0-rev"}
+{"at":"2026-09-25T06:05:34.886Z","step":"taste","status":"info","detail":"taste-W1-claude-s0-rev"}
+{"at":"2026-09-25T06:05:41.938Z","step":"taste","status":"info","detail":"taste-W3-codex-s0-rev"}
+{"at":"2026-09-25T06:05:48.478Z","step":"taste","status":"info","detail":"taste-W3-kimi-s0-fwd"}
+{"at":"2026-09-25T06:05:49.741Z","step":"taste","status":"info","detail":"taste-W3-codex-s1-rev"}
+{"at":"2026-09-25T06:05:52.365Z","step":"taste","status":"info","detail":"taste-W3-codex-s1-fwd"}
+{"at":"2026-09-25T06:06:00.849Z","step":"taste","status":"info","detail":"taste-W3-kimi-s0-rev"}
+{"at":"2026-09-25T06:06:04.528Z","step":"taste","status":"info","detail":"taste-W1-claude-s0-fwd"}
+{"at":"2026-09-25T06:06:04.609Z","step":"taste","status":"info","detail":"taste-W3-kimi-s1-rev"}
+{"at":"2026-09-25T06:06:09.698Z","step":"taste","status":"info","detail":"taste-W1-grok-s1-fwd"}
+{"at":"2026-09-25T06:06:14.140Z","step":"taste","status":"info","detail":"taste-W1-grok-s0-fwd"}
+{"at":"2026-09-25T06:06:27.881Z","step":"taste","status":"info","detail":"taste-W3-kimi-s1-fwd"}
+{"at":"2026-09-25T06:06:57.274Z","step":"taste","status":"info","detail":"taste-W1-claude-s1-rev"}
+{"at":"2026-09-25T06:07:23.977Z","step":"taste","status":"info","detail":"taste-W1-grok-s1-rev"}
+{"at":"2026-09-25T06:07:25.454Z","step":"taste","status":"info","detail":"taste-W1-claude-s1-fwd"}
+{"at":"2026-09-25T06:07:50.933Z","step":"taste","status":"info","detail":"taste-W2-claude-s0-fwd"}
+{"at":"2026-09-25T06:07:51.376Z","step":"taste","status":"info","detail":"taste-W2-grok-s0-fwd"}
+{"at":"2026-09-25T06:07:58.717Z","step":"taste","status":"info","detail":"taste-W2-grok-s0-rev"}
+{"at":"2026-09-25T06:08:15.710Z","step":"taste","status":"info","detail":"taste-W2-claude-s0-rev"}
+{"at":"2026-09-25T06:09:04.509Z","step":"taste","status":"info","detail":"taste-W2-grok-s1-rev"}
+{"at":"2026-09-25T06:09:35.128Z","step":"taste","status":"info","detail":"taste-W3-grok-s0-fwd"}
+{"at":"2026-09-25T06:09:44.323Z","step":"taste","status":"info","detail":"taste-W2-claude-s1-rev"}
+{"at":"2026-09-25T06:10:04.909Z","step":"taste","status":"info","detail":"taste-W2-grok-s1-fwd"}
+{"at":"2026-09-25T06:10:11.304Z","step":"taste","status":"info","detail":"taste-W2-claude-s1-fwd"}
+{"at":"2026-09-25T06:10:27.388Z","step":"taste","status":"info","detail":"taste-W3-claude-s0-fwd"}
+{"at":"2026-09-25T06:10:52.417Z","step":"taste","status":"info","detail":"taste-W3-grok-s0-rev"}
+{"at":"2026-09-25T06:11:14.528Z","step":"taste","status":"info","detail":"taste-W3-claude-s0-rev"}
+{"at":"2026-09-25T06:11:34.701Z","step":"taste","status":"info","detail":"taste-W3-claude-s1-fwd"}
+{"at":"2026-09-25T06:11:44.884Z","step":"taste","status":"info","detail":"taste-W3-grok-s1-rev"}
+{"at":"2026-09-25T06:12:11.258Z","step":"taste","status":"info","detail":"taste-W3-claude-s1-rev"}
+{"at":"2026-09-25T06:12:26.155Z","step":"taste","status":"info","detail":"taste-W3-grok-s1-fwd"}
+{"at":"2026-09-25T06:12:26.157Z","step":"tally","status":"done","detail":"A:2/7 B:0/7 C:0/7"}
+{"at":"2026-09-25T06:12:26.157Z","step":"audit-set","status":"done","detail":"3 对盲审"}
+{"at":"2026-09-25T06:12:26.157Z","step":"round","status":"done","detail":"可以在 UI 中盲审和决策"}

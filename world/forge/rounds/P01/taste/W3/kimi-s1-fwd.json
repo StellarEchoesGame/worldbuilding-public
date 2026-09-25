@@ -1,0 +1,23 @@
+{
+  "candidate": "W3",
+  "judge": "kimi",
+  "family": "Moonshot",
+  "session": 1,
+  "order": "fwd",
+  "ok": true,
+  "error": null,
+  "attempts": 1,
+  "decisive_pick": 2,
+  "verdict": {
+    "picks": {
+      "q1": 2,
+      "q2": 2
+    },
+    "quotes": {
+      "q1": "加热加甜请自便，但别来跟我说难喝",
+      "q2": "温芮没问，只是把桌上的盐碟往她那边推了一点。"
+    }
+  },
+  "served_model": null,
+  "version": "0.34.0"
+}

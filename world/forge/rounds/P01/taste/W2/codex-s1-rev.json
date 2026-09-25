@@ -1,0 +1,23 @@
+{
+  "candidate": "W2",
+  "judge": "codex",
+  "family": "OpenAI",
+  "session": 1,
+  "order": "rev",
+  "ok": true,
+  "error": null,
+  "attempts": 1,
+  "decisive_pick": 1,
+  "verdict": {
+    "picks": {
+      "q1": 1,
+      "q2": 2
+    },
+    "quotes": {
+      "q1": "温芮没问，只是把桌上的盐碟往她那边推了一点。",
+      "q2": "她现在想要的东西很小：让走廊干到明天，让留饭签上的字立起来，让她晚上回到台子前的时候手不抖。"
+    }
+  },
+  "served_model": null,
+  "version": "codex-cli 0.156.0"
+}
