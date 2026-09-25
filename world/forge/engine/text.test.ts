@@ -37,3 +37,9 @@ test('quoteIn accepts punctuation-insensitive substrings and rejects short or ab
   assert.equal(quoteIn('新水壶', text), false);
   assert.equal(quoteIn('水壶', text), false);
 });
+
+test('quoteIn enforces a caller-supplied minimum length', () => {
+  const text = '温芮把旧水壶放回架上，“明天再修。”';
+  assert.equal(quoteIn('旧水壶放回', text, 8), false);
+  assert.equal(quoteIn('把旧水壶放回架上明天', text, 8), true);
+});

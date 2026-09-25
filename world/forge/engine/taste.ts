@@ -10,6 +10,7 @@ export interface Question {
 export interface Benchmark {
   version: string;
   decisive: string;
+  minQuoteChars: number;
   role: string;
   instructions: string;
   questions: Question[];
@@ -39,7 +40,8 @@ export function parseBenchmark(value: unknown): Result<Benchmark> {
     questions.push({ id, text });
   }
   if (!questions.some((q) => q.id === decisive)) return err(`benchmark: decisive question ${decisive} is not defined`);
-  return ok({ version, decisive, role, instructions, questions });
+  const minQuoteChars = readNumber(value, 'min_quote_chars') ?? 8;
+  return ok({ version, decisive, minQuoteChars, role, instructions, questions });
 }
 
 export function tastePrompt(bench: Benchmark, text1: string, text2: string): string {
@@ -81,7 +83,7 @@ export function parseVerdict(raw: string, bench: Benchmark, text1: string, text2
     const pick = Number.isFinite(pickNum) ? pickNum : null;
     if (!isPick(pick)) return err(`${q.id}: pick must be 1 or 2`);
     const quote = readString(answer, 'quote') ?? '';
-    if (!quoteIn(quote, pick === 1 ? text1 : text2)) return err(`${q.id}: quote is not a verbatim passage of text ${pick}`);
+    if (!quoteIn(quote, pick === 1 ? text1 : text2, bench.minQuoteChars)) return err(`${q.id}: quote is not a verbatim passage of text ${pick} with at least ${bench.minQuoteChars} characters`);
     picks[q.id] = pick;
     quotes[q.id] = quote;
   }

@@ -6,7 +6,12 @@ import type { ParsedOutput } from './judges.ts';
 
 /** Reads one variable from a dotenv-style file. The value is returned to the caller and never logged. */
 export function readEnvValue(path: string, key: string): string | null {
-  const text = readFileSync(path, 'utf8');
+  let text: string;
+  try {
+    text = readFileSync(path, 'utf8');
+  } catch {
+    return null;
+  }
   for (const line of text.split('\n')) {
     const m = /^\s*(?:export\s+)?([A-Za-z_][A-Za-z0-9_]*)\s*=\s*(.*)\s*$/u.exec(line);
     if (m === null || m[1] !== key) continue;
@@ -40,7 +45,7 @@ export function parseChatCompletion(body: unknown): ParsedOutput {
 async function callGateway(local: LocalConfig, slot: WriterSlot, prompt: string, opts: CallOptions): Promise<CallResult> {
   const started = Date.now();
   const key = readEnvValue(local.gatewayEnvFile, local.gatewayKeyVar);
-  if (key === null) return failure(`${local.gatewayKeyVar} not found in the gateway env file`, 0, '', null);
+  if (key === null) return failure(`could not read ${local.gatewayKeyVar} from the gateway env file (check local.json gateway.env_file)`, 0, '', null);
   let status = 0;
   let bodyText = '';
   try {

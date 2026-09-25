@@ -13,7 +13,7 @@ const cell: Cell = {
   id: 'C1', rowId: 'SHIP', title: '测试', entity: '实体', time: '时间', layers: ['物件'], settingNotes: [], protagonists: ['温芮'], forbidden: [],
   stances: [{ id: 's1', text: '立场一' }, { id: 's2', text: '立场二' }, { id: 's3', text: '立场三' }],
 };
-const bench: Benchmark = { version: 'v0', decisive: 'q1', role: '评委', instructions: 'JSON', questions: [{ id: 'q1', text: '哪篇？' }] };
+const bench: Benchmark = { version: 'v0', decisive: 'q1', minQuoteChars: 8, role: '评委', instructions: 'JSON', questions: [{ id: 'q1', text: '哪篇？' }] };
 
 function writerText(body: string, facts: boolean): string {
   const claims = facts ? `[{"id":"A-01","kind":"author_fact","claim":"c","status":"状态与路径实例","row_id":"SHIP","attaches_to":"04","extends":"F07","misuse":"m","source_quote":"${body.slice(0, 12)}","register":true}]` : '[]';
@@ -80,5 +80,20 @@ test('a rerun resumes: only the deleted taste call is repeated', async () => {
   const again = deps(root);
   await runRound(again, 'P01');
   assert.equal(again.judgeCalls(), 1);
+  rmSync(root, { recursive: true });
+});
+
+test('a rerun retries recorded voids but not recorded successes', async () => {
+  const root = mkdtempSync(join(tmpdir(), 'forge-round-'));
+  const first = deps(root);
+  const flaky = first.judges[3];
+  assert.ok(flaky !== undefined);
+  flaky.backend = fakeBackend('j3', 'xAI', () => ({ error: 'rate limited' }));
+  const tallies = await runRound(first, 'P01');
+  assert.deepEqual(tallies.find((t) => t.submission === 'W1')?.tally.dropped, ['xAI']);
+  const again = deps(root);
+  const rerun = await runRound(again, 'P01');
+  assert.equal(again.judgeCalls(), 2 * 2 * 2);
+  assert.deepEqual(rerun.find((t) => t.submission === 'W1')?.tally.dropped, []);
   rmSync(root, { recursive: true });
 });

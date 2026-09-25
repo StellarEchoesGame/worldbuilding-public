@@ -3,14 +3,14 @@ import assert from 'node:assert/strict';
 import { parseBenchmark, parseVerdict, tastePrompt, type Benchmark } from './taste.ts';
 
 const bench: Benchmark = {
-  version: 'v0', decisive: 'q1', role: '评委', instructions: '只输出 JSON',
+  version: 'v0', decisive: 'q1', minQuoteChars: 8, role: '评委', instructions: '只输出 JSON',
   questions: [{ id: 'q1', text: '更想待在哪一篇？' }, { id: 'q2', text: '更记得住哪个人？' }],
 };
 const t1 = '温芮把旧水壶放回架上，炉子还热着。';
 const t2 = '林澈在走廊尽头停下，听见循环泵换了节拍。';
 
 test('parseBenchmark reads the committed v0 shape', () => {
-  const r = parseBenchmark({ version: 'v0', decisive: 'q1', role: 'r', instructions: 'i', questions: [{ id: 'q1', text: 't' }] });
+  const r = parseBenchmark({ version: 'v0', decisive: 'q1', minQuoteChars: 8, role: 'r', instructions: 'i', questions: [{ id: 'q1', text: 't' }] });
   assert.equal(r.ok, true);
   assert.equal(parseBenchmark({ version: 'v0', decisive: 'q9', role: 'r', instructions: 'i', questions: [{ id: 'q1', text: 't' }] }).ok, false);
 });

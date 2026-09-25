@@ -32,3 +32,14 @@ test('parseChatCompletion flags empty content and API errors', () => {
   assert.match(parseChatCompletion({ choices: [{ message: { content: '' }, finish_reason: 'length' }] }).error ?? '', /empty content.*length/);
   assert.match(parseChatCompletion({ error: { message: 'quota' } }).error ?? '', /quota/);
 });
+
+test('a missing env file becomes a failed call, not a thrown error', async () => {
+  const { gatewayBackend } = await import('./gateway.ts');
+  const backend = gatewayBackend({ id: 'W1', model: 'm', maxTokens: 10, temperature: 1 }, 'DeepSeek', {
+    gatewayBaseUrl: 'https://gateway.example.invalid', gatewayEnvFile: '/nonexistent/forge.env', gatewayKeyVar: 'API_KEY',
+    binaries: { codex: 'codex', claude: 'claude', kimi: 'kimi', grok: 'grok' }, codexAuth: '', kimiHome: '', privatePhrases: [],
+  });
+  const r = await backend.call('p', { role: 'r', timeoutMs: 1000 });
+  assert.equal(r.ok, false);
+  assert.match(r.error ?? '', /env file/);
+});

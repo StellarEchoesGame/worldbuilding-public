@@ -1,6 +1,7 @@
 import { spawn, spawnSync } from 'node:child_process';
 import { randomBytes } from 'node:crypto';
-import { resolve } from 'node:path';
+import { mkdirSync, writeFileSync } from 'node:fs';
+import { join, resolve } from 'node:path';
 
 /** Environment variables that only exist inside an agent session (not in the owner's own terminal). */
 export const AGENT_MARKERS = ['CLAUDECODE', 'CLAUDE_CODE_ENTRYPOINT', 'CODEX_SANDBOX', 'CODEX_SANDBOX_NETWORK_DISABLED', 'CODEX_THREAD_ID'];
@@ -10,6 +11,20 @@ export function agentMarkers(env: NodeJS.ProcessEnv): string[] {
 }
 
 export const UI_PORT = 4391;
+
+/** Polls until the URL answers with any HTTP status (401 counts as up) or the timeout passes. */
+export async function waitForServer(url: string, timeoutMs: number): Promise<boolean> {
+  const deadline = Date.now() + timeoutMs;
+  while (Date.now() < deadline) {
+    try {
+      await fetch(url, { redirect: 'manual', signal: AbortSignal.timeout(1000) });
+      return true;
+    } catch {
+      await new Promise((r) => setTimeout(r, 200));
+    }
+  }
+  return false;
+}
 
 export async function launchUi(root: string, args: readonly string[]): Promise<void> {
   const dataIndex = args.indexOf('--data');
@@ -32,19 +47,23 @@ export async function launchUi(root: string, args: readonly string[]): Promise<v
     env: { ...process.env, FORGE_DATA_DIR: dataDir, FORGE_UI_TOKEN: token, HOST: '127.0.0.1', PORT: String(UI_PORT) },
     stdio: ['ignore', 'pipe', 'inherit'],
   });
-  let opened = false;
-  child.stdout.on('data', (chunk: Buffer) => {
-    const text = chunk.toString('utf8');
-    process.stdout.write(text.replaceAll(token, '<token>'));
-    if (!opened && /listening/iu.test(text)) {
-      opened = true;
-      const url = `http://127.0.0.1:${UI_PORT}/login?t=${token}`;
-      if (args.includes('--no-open')) process.stdout.write('forge ui: 未自动打开浏览器（--no-open）。\n');
-      else {
-        process.stdout.write(`forge ui: 已在浏览器中打开 http://127.0.0.1:${UI_PORT}/（按 Ctrl+C 停止）\n`);
-        spawn('open', [url], { stdio: 'ignore' }).unref();
-      }
-    }
-  });
+  child.stdout.on('data', (chunk: Buffer) => process.stdout.write(chunk.toString('utf8').replaceAll(token, '<token>')));
+  const base = `http://127.0.0.1:${UI_PORT}`;
+  if (!(await waitForServer(`${base}/login`, 30_000))) {
+    process.stderr.write('forge ui: 服务器 30 秒内没有就绪。\n');
+    child.kill('SIGTERM');
+    process.exit(1);
+  }
+  const url = `${base}/login?t=${token}`;
+  if (args.includes('--no-open')) {
+    const dir = resolve(root, '.runs');
+    mkdirSync(dir, { recursive: true });
+    const file = join(dir, 'ui-login-url.txt');
+    writeFileSync(file, `${url}\n`, { mode: 0o600 });
+    process.stdout.write(`forge ui: 没有自动打开浏览器；登录地址写在 ${file}（仅本人可读）。\n`);
+  } else {
+    spawn('open', [url], { stdio: 'ignore' }).unref();
+    process.stdout.write(`forge ui: 已在浏览器中打开 ${base}/（按 Ctrl+C 停止）\n`);
+  }
   await new Promise<void>((done) => child.on('close', () => done()));
 }

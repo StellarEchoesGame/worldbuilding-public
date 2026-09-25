@@ -1,10 +1,11 @@
-import type { Backend, CallResult } from './adapters/types.ts';
+import type { Backend } from './adapters/types.ts';
 import { baselinePrompt, cellToJson, WRITER_ROLE, writerPrompt, type Canon, type Cell } from './brief.ts';
 import type { Family } from './config.ts';
 import { mechanicalGate, type GateResult } from './gate.ts';
 import { readBoolean, readNumber, readString } from './json.ts';
-import { err, ok, type Result } from './result.ts';
-import { progress, readJson, roundPaths, seeded, seededShuffle, sha256, writeJson, writeText, type RoundPaths } from './store.ts';
+import { callWithRetry, limiter } from './calls.ts';
+import { err, ok } from './result.ts';
+import { progress, readJson, roundPaths, seeded, seededShuffle, writeJson, type RoundPaths } from './store.ts';
 import { tallyChampionPair, type PairTally, type SessionPair } from './tally.ts';
 import { parseVerdict, tastePrompt, type Benchmark, type Pick, type Verdict } from './taste.ts';
 import { stripMarkdown } from './text.ts';
@@ -42,75 +43,6 @@ export interface LoadedSubmission {
   ok: boolean;
   error: string | null;
   output: WriterOutput | null;
-}
-
-function limiter(n: number): <T>(fn: () => Promise<T>) => Promise<T> {
-  let active = 0;
-  const queue: Array<() => void> = [];
-  return async <T>(fn: () => Promise<T>): Promise<T> => {
-    while (active >= n) await new Promise<void>((resolve) => queue.push(resolve));
-    active += 1;
-    try {
-      return await fn();
-    } finally {
-      active -= 1;
-      queue.shift()?.();
-    }
-  };
-}
-
-function recordCall(paths: RoundPaths, label: string, backend: Backend, prompt: string, r: CallResult): void {
-  writeJson(`${paths.calls}/${label}.json`, {
-    label,
-    backend: backend.id,
-    family: backend.family,
-    requested_model: backend.model,
-    served_model: r.servedModel,
-    version: r.version,
-    ok: r.ok,
-    error: r.error,
-    ms: r.ms,
-    tokens_in: r.tokensIn,
-    tokens_out: r.tokensOut,
-    cost_usd: r.costUsd,
-    prompt_sha256: sha256(prompt),
-    output_sha256: sha256(r.text),
-    at: new Date().toISOString(),
-  });
-  writeText(`${paths.runs}/${label}.txt`, `${r.raw}\n\n=== prompt ===\n${prompt}\n`);
-}
-
-interface Attempted<T> {
-  value: T | null;
-  error: string | null;
-  attempts: number;
-  last: CallResult | null;
-}
-
-async function callWithRetry<T>(
-  paths: RoundPaths,
-  backend: Backend,
-  label: string,
-  prompt: string,
-  role: string,
-  timeoutMs: number,
-  validate: (text: string) => Result<T>,
-): Promise<Attempted<T>> {
-  let error: string | null = null;
-  let last: CallResult | null = null;
-  for (let attempt = 1; attempt <= 2; attempt += 1) {
-    const r = await backend.call(prompt, { role, timeoutMs });
-    last = r;
-    recordCall(paths, `${label}-a${attempt}`, backend, prompt, r);
-    if (!r.ok) {
-      error = r.error;
-      continue;
-    }
-    const v = validate(r.text);
-    if (v.ok) return { value: v.value, error: null, attempts: attempt, last };
-    error = v.error;
-  }
-  return { value: null, error, attempts: 2, last };
 }
 
 function loadSubmission(paths: RoundPaths, id: string): LoadedSubmission | null {
@@ -212,7 +144,7 @@ async function tasteStep(deps: RoundDeps, paths: RoundPaths, candidates: LoadedS
         for (const order of ['fwd', 'rev']) {
           const path = `${paths.taste}/${cand.id}/${judge.backend.id}-s${s}-${order}.json`;
           const existing = loadTaste(path);
-          if (existing !== null) continue;
+          if (existing !== null && existing.ok) continue;
           const [t1, t2] = order === 'fwd' ? [candText, championText] : [championText, candText];
           const prompt = tastePrompt(deps.bench, t1, t2);
           tasks.push(
@@ -263,7 +195,7 @@ function tallyStep(deps: RoundDeps, paths: RoundPaths, candidates: LoadedSubmiss
   for (const [label, id] of Object.entries(labels)) {
     const cand = candidates.find((c) => c.id === id);
     if (cand === undefined) continue;
-    const families: Family[] = deps.judges.map((j) => j.backend.family).filter((f) => f !== cand.family && f !== champion.family);
+    const families: Family[] = [...new Set(deps.judges.map((j) => j.backend.family))].filter((f) => f !== cand.family && f !== champion.family);
     const sessions: SessionPair[] = [];
     for (const judge of deps.judges) {
       if (!families.includes(judge.backend.family)) continue;
@@ -324,10 +256,6 @@ export async function runRound(deps: RoundDeps, roundId: string): Promise<Candid
   auditStep(deps, paths, tallies);
   progress(paths, 'round', 'done', '可以在 UI 中盲审和决策');
   return tallies;
-}
-
-export function readRoundFile(root: string, roundId: string, name: string): unknown {
-  return readJson(`${roundPaths(root, roundId).dir}/${name}`);
 }
 
 export function submissionFor(root: string, roundId: string, id: string): LoadedSubmission | null {

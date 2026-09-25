@@ -62,9 +62,9 @@ export function normalizeForQuote(text: string): string {
   return text.normalize('NFKC').replace(/[\s\p{P}\p{S}]/gu, '');
 }
 
-/** True when `quote` (≥4 significant characters) occurs in `text`, ignoring width, whitespace and punctuation. */
-export function quoteIn(quote: string, text: string): boolean {
+/** True when `quote` (≥ minChars significant characters) occurs in `text`, ignoring width, whitespace and punctuation. */
+export function quoteIn(quote: string, text: string, minChars = 4): boolean {
   const q = normalizeForQuote(quote);
-  if ([...q].length < 4) return false;
+  if ([...q].length < minChars) return false;
   return normalizeForQuote(text).includes(q);
 }

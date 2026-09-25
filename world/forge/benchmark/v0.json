@@ -1,7 +1,8 @@
 {
-  "version": "v0-prototype",
+  "version": "v0.1-prototype",
   "note": "Hand-written for the F1-00 prototype. The benchmark maintainer writes v1 in round 0 and owns later versions.",
   "decisive": "q1",
+  "min_quote_chars": 8,
   "role": "你是一位盲评评委。你只看到两篇匿名的小说式现场，不知道作者是谁、来自哪里。你不使用任何工具，也不读取任何文件，只根据给出的文字作答。",
   "questions": [
     { "id": "q1", "text": "如果能走进其中一篇里的地方，多待一个小时，你更想待在哪一篇？" },
