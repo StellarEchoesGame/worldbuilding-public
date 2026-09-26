@@ -1,0 +1,48 @@
+---
+import type { Heatmap } from '../lib/views/topic.ts';
+
+interface Props {
+  map: Heatmap;
+  /** Cells to mark (offered candidates, the chosen cell). */
+  marks?: Array<{ row_id: string; layer: string; mark: string }>;
+}
+const { map, marks = [] } = Astro.props;
+const max = Math.max(1, ...map.rows.flatMap((r) => r.cells.map((c) => c.priority)));
+const shade = (priority: number): string => `hsl(18 80% ${97 - Math.round((priority / max) * 38)}%)`;
+const markOf = (rowId: string, layer: string): string => marks.filter((m) => m.row_id === rowId && m.layer === layer).map((m) => m.mark).join(' ');
+const kindLabel: Record<string, string> = { area: '区域', ship: '舰船', civilization: '文明', character: '人物' };
+---
+{map.errors.length > 0 && <p class="error">热力图无法计算：{map.errors.join('；')}</p>}
+{map.errors.length === 0 && (
+  <>
+    <p class="muted">
+      每格：厚度 0–3（正典里能对上的标注引文数）· 优先级 = 游戏需求 × (3 − 厚度) × (1 + 上一轮评委引文提及)。颜色越深越该补。
+      {!map.tagged && ' 还没有 map/tags.json：所有厚度按 0 计，只有游戏需求在排序。'}
+    </p>
+    <div style="overflow-x:auto">
+      <table class="heat">
+        <thead>
+          <tr><th>行</th><th>需求</th><th>连接度</th>{map.layers.map((l) => <th>{l.label}</th>)}</tr>
+        </thead>
+        <tbody>
+          {map.rows.map((r) => (
+            <tr>
+              <td><b>{r.primary}</b><div class="muted" style="font-size:.8rem">{r.rowId} · {kindLabel[r.kind] ?? r.kind}</div></td>
+              <td>{r.gameNeed}</td>
+              <td>{r.connectivity}</td>
+              {r.cells.map((c) => (
+                <td style={`background:${shade(c.priority)};text-align:center`} title={`厚度 ${c.value} · 优先级 ${c.priority}`}>
+                  <span class="marks">{c.value}</span><span class="muted" style="font-size:.78rem"> / {c.priority}</span>
+                  {markOf(r.rowId, c.layer) !== '' && <div><span class="pill warn">{markOf(r.rowId, c.layer)}</span></div>}
+                </td>
+              ))}
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  </>
+)}
+<style>
+  table.heat td, table.heat th { white-space: nowrap; }
+</style>

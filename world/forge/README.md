@@ -1,6 +1,6 @@
 # Echo Forge (WB-F1)
 
-Local system that grows the Stellar Echoes canon one scene at a time: gateway writers draft scenes, a mechanical fact gate checks them, four judge CLIs (Codex, Claude Code, Kimi Code, Grok) compare each draft blind against the row champion, and the owner decides in a local UI. Design: epic [#1](https://github.com/StellarEchoesGame/worldbuilding-public/issues/1). Slices so far: prototype [#2](https://github.com/StellarEchoesGame/worldbuilding-public/issues/2), protocol and offline engine core [#4](https://github.com/StellarEchoesGame/worldbuilding-public/issues/4), round orchestrator [#6](https://github.com/StellarEchoesGame/worldbuilding-public/issues/6) (in progress).
+Local system that grows the Stellar Echoes canon one scene at a time: gateway writers draft scenes, a mechanical fact gate checks them, four judge CLIs (Codex, Claude Code, Kimi Code, Grok) compare each draft blind against the row champion, and the owner decides in a local UI. Design: epic [#1](https://github.com/StellarEchoesGame/worldbuilding-public/issues/1). Slices so far: prototype [#2](https://github.com/StellarEchoesGame/worldbuilding-public/issues/2), protocol and offline engine core [#4](https://github.com/StellarEchoesGame/worldbuilding-public/issues/4), round orchestrator [#6](https://github.com/StellarEchoesGame/worldbuilding-public/issues/6), review UI [#7](https://github.com/StellarEchoesGame/worldbuilding-public/issues/7) (in progress).
 
 The executable rules live in [`PROTOCOL.md`](PROTOCOL.md) (Chinese). Its fenced `json protocol:<name>` blocks are what the engine reads: gate limits, forbidden words, negations, merge constants, maintainer activation classes and bars, calibration and agreement numbers. `judges.json` also names the maintainer and the merge editor (`merge_editor`, a fresh `claude -p` Opus session). `PROTOCOL.md`, `families.json` and `judges.json` form the protocol bundle; `forge protocol hash` prints its hash.
 
@@ -90,10 +90,38 @@ npm run forge -- calib build --requal xAI --reason calibration_fail   # Qnn on f
 Run from your own terminal (the launcher refuses to serve the real data directory from inside an agent session):
 
 ```bash
-npm run ui
+npm run ui                                  # = node engine/cli.ts ui
+npm run ui -- --no-open                     # no browser; the login URL goes to .runs/ui-login-url.txt (mode 0600)
+npm run ui -- --host localhost              # loopback only: 127.0.0.0/8, localhost or ::1; anything else exits 1
+npm run ui -- --data /path/to/forge-root    # serve another forge root (a fixture copy); the default is this directory
 ```
 
-It builds the Astro app, starts it on 127.0.0.1:4391 and opens the browser with a one-time token. Order per round: blind audit → results → decision. Owner files (`audit.json`, `decision.json`, `owner-log.jsonl`) are written only by the UI and cannot be overwritten.
+`forge ui` builds the Astro app (`astro build --root ui`), starts `ui/dist/server/entry.mjs` on port 4391 with a fresh per-launch token and opens `/login?t=<token>`, which sets an HttpOnly cookie. The token is never printed.
+
+Pages (nav 总览 · 选题 · 轮次 · 校准 · 基准 · 配置 · 镜像; 选题 and 轮次 open the active round when there is one):
+
+- **总览 `/`**: the active round and its progress, owner to-dos, cost to date, judge health (agreement, voids, served models), the effective and head benchmark, and pending mirrors.
+- **选题 `/topic`, `/topic/<R>`, `/game-need`**: the thin-map heat map; the round's top-3 offer (one pick, read-only once `topic.json` exists); earlier rounds' wild seeds (read-only); the one-time game-need weights editor.
+- **轮次 `/rounds`, `/rounds/<R>`**: the round list and results. `/rounds/<R>/audit` is the blind audit. `/rounds/<R>/decide` redirects to the audit until the audit is answered, and allows at most 6 facts. `/rounds/<R>/redecide` offers a form only while the latest decision's re-gate record is a rejection and the engine has rewound to 09b. `/rounds/<R>/final` (定稿) shows the approval diff, summary, maintainer outcome and PR body; the approval logs the SHA-256 that was shown.
+- **校准 `/calibration`, `/calibration/<set>`**: one blind pair per page (keys 1 / ← and 2 / →), one answer per POST, resumable; pinned sets are read-only.
+- **基准 `/benchmark`, `/benchmark/<v>`**: versions, effective / head, pending approvals, rollback, and the protocol bundle (per-file SHA-256, bundle hash, last approved hash). Opening a version page logs `bench_diff_viewed` once per file SHA-256.
+- **配置 `/config`**: writer slot models (`writers.json`, locked while a frozen round is unfinished) with the gateway model list and family warnings; judges and prices are read-only. The gateway host is never rendered.
+- **镜像 `/mirror`**: pending GitHub mirror posts per round; the retry runs `forge mirror --round <R>` (real data only).
+
+Owner-only files (`owner-log.jsonl`, `rounds/*/audit.json`, `rounds/*/decision*.json`, `calibration/owner-answers.json`) are written only by `ui/src/lib/owner.ts`: append-only or write-once, and each change is logged. The UI writes no engine file except `writers.json` (配置) and `map/game-need.json` (选题, once).
+
+Guards (`ui/src/middleware.ts`, `ui/src/lib/{bind,guard}.ts`): a request without the token cookie gets 401. A POST whose `Origin` is missing or foreign gets 403. A non-loopback `HOST` or request `Host` gets 403 on every path, `/login` included. The server itself refuses the real data directory when an agent marker is set (`CLAUDECODE`, `CLAUDE_CODE_ENTRYPOINT`, or any `CODEX_*`, `KIMI_*`, `GROK_*` variable). `forge ui` refuses the same markers before building, so such a variable in your own terminal also blocks `npm run ui` on real data.
+
+Agent hook: the repository's `.claude/settings.json` runs `node "$CLAUDE_PROJECT_DIR/world/forge/hooks/owner-files.ts"` before every Edit, Write, MultiEdit, NotebookEdit and Bash call of a Claude Code session opened on this repository. It denies writes to owner-only files in any path form or case, also through a symlink or a glob (a malformed glob counts as a match): redirects, `tee`, `sed -i`, `cp` / `mv` / `rm`, `git checkout|restore|rm|mv` (with `-C <dir>` or a pathspec glob too), interpreter or shell code that writes them (one-liners, here-documents, here-strings, code piped into `python3` / `bash` when the pipeline names an owner file), wrapped commands (`sudo -u`, `nice -n`, `timeout`, `stdbuf`, …), removing or moving a directory that holds them (`rm -rf r*` included), and links to them or to such a directory (`ln`, `ln -s`, `cp -s` / `-l`, `link`). A write target built from a command substitution (`rm $(…)`) and the input of an `xargs` / `parallel` writer are denied when that command text names an owner file, `rounds/`, `calibration/` or a directory holding owner files, or lists one (`$(ls)`, `$(pwd)`, `find . |`, `git ls-files |`). `git apply` and `patch` are denied when their patch (a file argument, `-i`, a here-document, a `<` file or `cat <file> |`) names an owner file on a diff header line, when `patch` targets one directly (file operand, `-o`, `-r`), or when the patch is piped from any other program in a work tree holding owner files. Archive tools are denied when they extract into a directory holding owner files (`tar -x` with `-C` / `--directory`, `unzip -d`, `7z x -o`; with no destination, the cwd), extract with `tar -P`, write an archive onto an owner file, run `tar --remove-files` over one, or compress / decompress one in place (`gzip`, `bzip2`, `xz`, `zstd`, …). Git commands that stash away, revert or delete a whole work tree are denied when that tree holds owner files, which in this repository means everywhere: `git stash` (push without a pathspec, `-u`, `-a`, `save`, `pop`, `apply`, …), `git clean` (dry runs excepted), `git reset --hard|--merge|--keep`, `git checkout -f` and `git switch -f|--discard-changes`. `git stash push -- <path>` and `git clean` limited to a directory without owner files stay allowed, as do `git status`, `diff`, `log`, `show` and `git stash list|show`. Any error while analysing a call denies it. It does not detect scripts run from files, variable-only targets (a patch or path list held in a variable included), `xargs -a <file>` lists, git aliases, `git am` / merges, or hard links made before the session.
+
+Open Claude Code in `worldbuilding/` for forge work. The hook is registered only in this repository's `.claude/settings.json`, so a session opened in the `galaxy/` container gets no owner-file hook unless the owner adds a user-level (`~/.claude/settings.json`) or galaxy-level (`galaxy/.claude/settings.json`) entry that calls the hook by absolute path. `galaxy/` is not a git repository, so that entry cannot be checked in; with a user-level entry the hook runs twice in `worldbuilding/` sessions, which is harmless.
+
+```json
+{"hooks":{"PreToolUse":[{"matcher":"Edit|Write|MultiEdit|NotebookEdit|Bash",
+  "hooks":[{"type":"command","command":"node \"$HOME/Developments/galaxy/worldbuilding/world/forge/hooks/owner-files.ts\""}]}]}}
+```
+
+Server tests: `ui/src/test/server.ts` builds the UI once per source state (`ui/dist/.forge-build.sha256`, serialised by `ui/.forge-build.lock`). It starts `entry.mjs` on a free 127.0.0.1 port against a temporary fixture forge root, with `FORGE_DATA_DIR`, a random token, and `FORGE_UI_CLOCK_FILE` so owner entries carry the engine's fake clock (fixture data only). `guards.test.ts` and `walkthrough.test.ts` drive the scripted fixture round (`engine/testing/round-script.ts`) through the CLI command functions to 09b and to 12b, and post every owner action to the server. `bench-calib.test.ts` covers the benchmark view, approval and rollback and resumable calibration answers. They run inside `npm test` in a few seconds.
 
 ## Offline tools
 
@@ -115,7 +143,7 @@ npm run forge -- mergecheck --decision merge-decision.json --base main   # check
 `engine/e2e.test.ts` is the issue #6 acceptance: one fixture world driven only through the CLI command functions (fake GitHub, git, clock, entropy, assembler and model backends; test helpers in `engine/testing/`), from round 0 (v1 behind the protocol gate, calibration C00, the R00 cycle leaving v2 pending) through R01 (blocked probe mirror, a killed run resumed without a repeated paid call, a void session pair giving |E| = 3, both owner waits, a failed re-gate back to 09b, the merge to reference 8.2, a replay-rejected v3, the diff approval), R02 (pick none on the approved v2) and R03 up to its freeze, which pins v1 after the owner's rollback. The guards after every call check the owner files, the gateway host and sealed forecast values. It runs in a few seconds.
 
 ```bash
-npm test          # node:test for engine and UI logic
+npm test          # node:test for the engine, UI logic, the built UI server and the hook
 npm run typecheck # tsc strict for the engine + astro check for the UI
 (cd ../current/reference && python3 -m unittest test_assemble_reference)   # reference bundle reproduces byte for byte
 ```

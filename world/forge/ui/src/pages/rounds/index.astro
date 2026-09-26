@@ -1,0 +1,58 @@
+---
+import { existsSync } from 'node:fs';
+import { join } from 'node:path';
+import { readStatus } from '../../../../engine/runner.ts';
+import Base from '../../layouts/Base.astro';
+import { dataDir, listRounds } from '../../lib/data.ts';
+import { todoHref } from '../../lib/views/overview.ts';
+
+const root = dataDir();
+const stateText: Record<string, string> = { running: '运行中', waiting: '等待中', done: '已完成', integrity: '完整性错误', blocked: '受阻', failed: '失败' };
+const statePill: Record<string, string> = { running: 'warn', waiting: 'warn', done: 'ok', integrity: 'bad', blocked: 'bad', failed: 'bad' };
+const waitText: Record<string, string> = {
+  protocol_approval: '批准协议包', benchmark_approval: '批准基准版本', topic: '选题', audit: '盲审', decision: '决策', diff_approval: '批准定稿差异', calib_answers: '校准作答',
+};
+const rows = listRounds(root).reverse().map((r) => {
+  const dir = join(root, 'rounds', r.id);
+  const st = existsSync(join(dir, 'status.json')) ? readStatus(root, r.id) : null;
+  return {
+    ...r,
+    status: st !== null && st.ok ? st.value : null,
+    statusError: st !== null && !st.ok ? st.error : null,
+    hasBrief: existsSync(join(dir, 'brief.json')),
+    hasTopic: existsSync(join(dir, 'topic-offer.json')) || existsSync(join(dir, 'topic.json')),
+    hasFinal: existsSync(join(dir, 'final.json')),
+  };
+});
+const running = rows.some((r) => r.status?.state === 'running');
+---
+<Base title="轮次" refresh={running}>
+  <h1>轮次</h1>
+  {rows.length === 0 && <p class="muted">还没有轮次。在终端运行 <code>npm run forge -- round start R01</code>。</p>}
+  {rows.length > 0 && (
+    <table>
+      <thead><tr><th>轮次</th><th>单元格</th><th>状态</th><th>步骤</th><th>待你处理</th><th>页面</th><th>最近事件</th></tr></thead>
+      <tbody>
+        {rows.map((r) => (
+          <tr>
+            <td>{r.hasBrief ? <a href={`/rounds/${r.id}`}>{r.id}</a> : r.id}</td>
+            <td>{r.title}</td>
+            <td>
+              {r.status !== null && <span class={`pill ${statePill[r.status.state] ?? ''}`}>{stateText[r.status.state] ?? r.status.state}</span>}
+              {r.statusError !== null && <span class="pill bad" title={r.statusError}>状态无法读取</span>}
+              {r.status === null && r.statusError === null && <span class="muted">—</span>}
+            </td>
+            <td class="muted">{r.status?.step ?? '—'}</td>
+            <td>{r.status !== null && r.status.state === 'waiting' && r.status.waiting_for !== null ? <a href={todoHref(r.status.waiting_for, r.id)}>{waitText[r.status.waiting_for] ?? r.status.waiting_for}</a> : '—'}</td>
+            <td>
+              {r.hasTopic && <a href={`/topic/${r.id}`}>选题</a>}{' '}
+              {r.hasFinal && <a href={`/rounds/${r.id}/final`}>定稿</a>}
+            </td>
+            <td class="muted">{r.last === null ? '' : `${r.last.at.slice(11, 19)} ${r.last.step} ${r.last.status} ${r.last.detail}`.slice(0, 90)}</td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  )}
+  {running && <p class="muted">页面每 20 秒自动刷新。</p>}
+</Base>

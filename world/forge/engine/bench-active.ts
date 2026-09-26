@@ -24,6 +24,9 @@ export interface ResolveInputs {
   autoDelayMs: number;
 }
 
+/** What rollback eligibility needs: everything but the file reader. */
+export type TimingInputs = Omit<ResolveInputs, 'files'>;
+
 /** 24 h: an `activate` entry becomes effective at min(first matching view, posted notice + 24 h). */
 export const AUTO_DELAY_MS = 86_400_000;
 
@@ -74,7 +77,7 @@ function firstOwner(owner: readonly OwnerLogEntry[], action: 'bench_diff_viewed'
 }
 
 /** When an `activate` line takes effect: the first matching view or the posted notice + delay, never before it was logged. */
-function activateEffective(inputs: ResolveInputs, ref: VersionRef, logged: Moment): Moment | null {
+function activateEffective(inputs: TimingInputs, ref: VersionRef, logged: Moment): Moment | null {
   const viewed = firstOwner(inputs.owner, 'bench_diff_viewed', ref, logged.ms);
   const notice = earliest(inputs.posted.filter((p) => p.version === ref.version).map((p) => moment(p.createdAt)));
   const autoMs = notice === null ? null : latest(logged, notice).ms + inputs.autoDelayMs;
@@ -84,28 +87,38 @@ function activateEffective(inputs: ResolveInputs, ref: VersionRef, logged: Momen
 }
 
 /**
- * Owner rollbacks that count: the target was once active (an `activate` line effective no later than the click) or
- * approved (a `pending_owner` line approved no later than the click), and the owner's sha256 equals the logged one.
- * Others are ignored.
+ * The log line a rollback to `version` targets (its first activate / pending_owner line), when that line was once
+ * active (an `activate` line effective no later than `at`) or approved (a `pending_owner` line approved no later than
+ * `at`); null otherwise.
  */
+function onceActive(inputs: TimingInputs, version: string, at: Moment): { ref: VersionRef; logIndex: number; logged: Moment } | null {
+  const logIndex = inputs.log.findIndex((e) => e.version === version && (e.outcome === 'activate' || e.outcome === 'pending_owner'));
+  const target = inputs.log[logIndex];
+  const ref = target === undefined ? null : refOf(target);
+  const logged = target === undefined ? null : moment(target.at);
+  if (target === undefined || ref === null || logged === null || logged.ms > at.ms) return null;
+  const since = target.outcome === 'pending_owner' ? firstOwner(inputs.owner, 'bench_approved', ref, logged.ms) : activateEffective(inputs, ref, logged);
+  return since === null || since.ms > at.ms ? null : { ref, logIndex, logged };
+}
+
+/**
+ * The version a rollback clicked at `at` would restore (the one line resolveBenchmark counts), or null when the
+ * resolver would ignore such a rollback. The UI offers and accepts only these targets.
+ */
+export function rollbackEligible(inputs: TimingInputs, version: string, at: string): VersionRef | null {
+  const when = moment(at);
+  return when === null ? null : (onceActive(inputs, version, when)?.ref ?? null);
+}
+
+/** Owner rollbacks that count: onceActive at the click, and the owner's sha256 equals the logged one. Others are ignored. */
 function validRollbacks(inputs: ResolveInputs): Candidate[] {
   const out: Candidate[] = [];
   for (const [order, o] of inputs.owner.entries()) {
     const at = moment(o.at);
     if (o.action !== 'rollback' || o.version === null || at === null) continue;
-    const logIndex = inputs.log.findIndex((e) => e.version === o.version && (e.outcome === 'activate' || e.outcome === 'pending_owner'));
-    const target = inputs.log[logIndex];
-    const ref = target === undefined ? null : refOf(target);
-    const logged = target === undefined ? null : moment(target.at);
-    if (target === undefined || ref === null || logged === null || logged.ms > at.ms || ref.sha256 !== o.sha256) continue;
-    if (target.outcome === 'pending_owner') {
-      const approved = firstOwner(inputs.owner, 'bench_approved', ref, logged.ms);
-      if (approved === null || approved.ms > at.ms) continue;
-    } else {
-      const effective = activateEffective(inputs, ref, logged);
-      if (effective === null || effective.ms > at.ms) continue;
-    }
-    out.push({ ref, via: 'rollback', moment: at, order, logIndex, loggedMs: logged.ms });
+    const target = onceActive(inputs, o.version, at);
+    if (target === null || target.ref.sha256 !== o.sha256) continue;
+    out.push({ ref: target.ref, via: 'rollback', moment: at, order, logIndex: target.logIndex, loggedMs: target.logged.ms });
   }
   return out;
 }

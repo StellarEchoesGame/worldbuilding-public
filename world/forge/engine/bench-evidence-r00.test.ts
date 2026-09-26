@@ -137,9 +137,10 @@ const DECOY_3 = { decoy_recipe: { details: 3, instructions: '把现任稿中最�
 test('collectEvidence (bench-r00): C00 ledger, status, pin, visible texts and verdicts only; owner rollback keys and pending versions', () => {
   const h = harness();
   // v2 pending, then the owner rolls back to v1 (superseding v2), then v3 pending (unapproved, unsuperseded).
-  logVersion(h, 'R00-init', 'pending_owner', 'v2', DECOY_3);
+  // one cycle each: appendBenchLogOnce skips a line whose cycle is already logged (v1 is R00-init)
+  logVersion(h, 'R00', 'pending_owner', 'v2', DECOY_3);
   h.sim.rollback('v1', 'v2');
-  logVersion(h, 'R00', 'pending_owner', 'v3', { cliche_list: ['仿佛'] });
+  logVersion(h, 'R01', 'pending_owner', 'v3', { cliche_list: ['仿佛'] });
   const r = collectEvidence(h.ctx(), head(h.root));
   assert.ok(r.ok, r.ok ? '' : r.error);
   const input = r.value;

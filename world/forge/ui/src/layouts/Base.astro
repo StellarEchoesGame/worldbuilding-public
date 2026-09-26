@@ -1,9 +1,13 @@
 ---
+import { dataDir } from '../lib/data.ts';
+import { navLinks } from '../lib/nav.ts';
+
 interface Props {
   title: string;
   refresh?: boolean;
 }
 const { title, refresh = false } = Astro.props;
+const links = navLinks(dataDir(), Astro.url.pathname);
 ---
 <!doctype html>
 <html lang="zh-CN">
@@ -19,6 +23,9 @@ const { title, refresh = false } = Astro.props;
       header.top { display: flex; gap: 1.5rem; align-items: baseline; padding: .8rem 2rem; background: #16202b; color: #e8edf2; }
       header.top a { color: #e8edf2; text-decoration: none; }
       header.top .brand { font-weight: 600; letter-spacing: .05em; }
+      header.top nav { display: flex; gap: 1.1rem; }
+      header.top nav a { opacity: .78; }
+      header.top nav a.current { opacity: 1; border-bottom: 2px solid #e8edf2; }
       main { max-width: 1180px; margin: 0 auto; padding: 1.5rem 2rem 4rem; }
       h1 { font-size: 1.5rem; margin: .2rem 0 1rem; }
       h2 { font-size: 1.15rem; margin: 2rem 0 .8rem; }
@@ -46,8 +53,10 @@ const { title, refresh = false } = Astro.props;
   <body>
     <header class="top">
       <a class="brand" href="/">回响工坊 · WB-F1</a>
-      <a href="/">总览</a>
-      <span class="muted" style="margin-left:auto">原型 F1-00 · 仅本机</span>
+      <nav>
+        {links.map((l) => <a href={l.href} class:list={[{ current: l.current }]}>{l.label}</a>)}
+      </nav>
+      <span class="muted" style="margin-left:auto">F1-04 · 仅本机</span>
     </header>
     <main>
       <slot />

@@ -1,10 +1,9 @@
 import { readFileSync } from 'node:fs';
-import { fileURLToPath } from 'node:url';
 import type { ChampionKind } from './champions.ts';
 import { isFamily, type Family } from './config.ts';
 import { isRecord, readArray, readRecord } from './json.ts';
 import type { FamilySessions, SessionCall } from './pairs.ts';
-import { loadSchema, validate, type Schema } from './schema.ts';
+import { loadSchema, type Schema, schemaFile, validate } from './schema.ts';
 import type { GateOutcome } from './tasks/gate-judge.ts';
 import type { SurpriseStatus } from './tasks/surprise.ts';
 import { IntegrityError } from './task.ts';
@@ -407,7 +406,7 @@ function schemaOf(file: string, path: readonly string[]): Schema {
   const id = `${file}#${path.join('/')}`;
   const cached = schemaCache.get(id);
   if (cached !== undefined) return cached;
-  let raw: unknown = JSON.parse(readFileSync(fileURLToPath(new URL(`../schema/${file}`, import.meta.url)), 'utf8'));
+  let raw: unknown = JSON.parse(readFileSync(schemaFile(file), 'utf8'));
   for (const key of path) raw = isRecord(raw) ? raw[key] : null;
   const schema = loadSchema(raw);
   if (!schema.ok) throw new Error(`schema/${file} ${path.join('.')}: ${schema.error}`);

@@ -4,12 +4,16 @@ import { CHAMPION_ID, submissionFor } from '../../../engine/round.ts';
 import { isRecord, readArray, readNumber, readRecord, readString, type JsonRecord } from '../../../engine/json.ts';
 import {
   OWNER_ANSWERS, OWNER_LOG, PROTOCOL_BUNDLE_FILE, calibSet, decisionFiles, gateRejection, readOwnerLog, sha256Bytes, staleDecisionPin,
-  type OwnerAction,
+  ownerInputs, type OwnerAction, type OwnerLogEntry,
 } from '../../../engine/owner-inputs.ts';
+import { pendingVersions } from '../../../engine/bench-evidence.ts';
 import { loadProtocolBundle } from '../../../engine/rules.ts';
-import { readBenchLog } from '../../../engine/bench-log.ts';
+import { AUTO_DELAY_MS, resolveBenchmark, rollbackEligible } from '../../../engine/bench-active.ts';
+import { readBenchLog, type BenchLogEntry } from '../../../engine/bench-log.ts';
+import { postedBenchNotices } from '../../../engine/mirror-log.ts';
 import { latestFrozenRound } from '../../../engine/freeze.ts';
 import { appendRecords, createExclusive, readJson, roundPaths, writeJson } from '../../../engine/store.ts';
+import { IntegrityError } from '../../../engine/task.ts';
 
 export type OwnerResult = { ok: true; file: string } | { ok: false; status: 400 | 404 | 409; error: string };
 
@@ -87,10 +91,26 @@ function logOwner(root: string, action: OwnerAction, roundId: string, file: stri
   appendOwnerLog(root, action, roundId, relPath(root, file), fileSha(file), now, {});
 }
 
+/**
+ * Re-logs an owner file written by an earlier POST whose log line never landed (a crash between file and log):
+ * when no `action` entry for (round, file) exists, appends one with the file's current SHA-256. The engine reads
+ * such a file as `repair` (owner-inputs checkLogged); an entry with another hash stays `invalid` and is not touched.
+ * Returns the message to add to the refusal when it re-logged, else ''.
+ */
+function relogOwnerFile(root: string, action: OwnerAction, roundId: string, file: string, now: string): string {
+  const log = readOwnerLog(root);
+  if (!log.ok) return '';
+  const rel = relPath(root, file);
+  const matches = (e: OwnerLogEntry): boolean => e.action === action && e.round === roundId && (action !== 'decision' || e.file === rel);
+  if (log.value.some(matches)) return '';
+  logOwner(root, action, roundId, file, now);
+  return '之前的提交已写入文件但没有记入 owner 日志，现已补记。';
+}
+
 export function submitAudit(root: string, roundId: string, answers: Record<string, string>, now: string): OwnerResult {
   const paths = roundPaths(root, roundId);
   const file = join(paths.dir, 'audit.json');
-  if (existsSync(file)) return { ok: false, status: 409, error: '这一轮的盲审已经提交过，不能覆盖。' };
+  if (existsSync(file)) return { ok: false, status: 409, error: `这一轮的盲审已经提交过，不能覆盖。${relogOwnerFile(root, 'audit', roundId, file, now)}` };
   const pairs = readAuditSet(root, roundId);
   if (pairs.length === 0) return { ok: false, status: 404, error: '这一轮还没有盲审对。' };
   const out: Array<{ pair: string; left: string; right: string; choice: string; chosen: string }> = [];
@@ -149,7 +169,7 @@ export function submitDecision(root: string, roundId: string, input: DecisionInp
   const paths = roundPaths(root, roundId);
   const file = join(paths.dir, 'decision.json');
   if (!existsSync(join(paths.dir, 'audit.json'))) return { ok: false, status: 409, error: '请先完成盲审。' };
-  if (existsSync(file)) return { ok: false, status: 409, error: '这一轮已经做过决定，不能覆盖。' };
+  if (existsSync(file)) return { ok: false, status: 409, error: `这一轮已经做过决定，不能覆盖。${relogOwnerFile(root, 'decision', roundId, file, now)}` };
   const built = decisionRecord(root, roundId, input, now, null);
   if (!built.ok) return built;
   writeJson(file, built.record);
@@ -167,6 +187,8 @@ export function submitRedecision(root: string, roundId: string, input: DecisionI
   if (!chain.ok) return { ok: false, status: 409, error: `决策链有问题：${chain.error}` };
   const prevRel = chain.value.at(-1);
   if (prevRel === undefined) return { ok: false, status: 409, error: '这一轮还没有决策，请先提交第一份决策。' };
+  const relogged = chain.value.map((rel) => relogOwnerFile(root, 'decision', roundId, join(root, rel), now)).join('');
+  if (relogged !== '') return { ok: false, status: 409, error: `决策链中有文件没有记入 owner 日志。${relogged}请刷新后重新核对。` };
   const prevSha = fileSha(join(root, prevRel));
   if (gateRejection(root, roundId, prevSha).kind !== 'rejected') return { ok: false, status: 409, error: '当前决策没有未通过的过门记录，不能追加新决策。' };
   if (!staleDecisionPin(root, roundId, prevSha)) return { ok: false, status: 409, error: '引擎还没有把这一轮退回 9b，请先运行引擎。' };
@@ -222,7 +244,7 @@ function benchLines(root: string): { ok: true; lines: BenchLine[] } | Refusal {
 }
 
 /** The logged version file, re-hashed; refuses when it differs from what the owner was shown or from the log. */
-function shownVersion(root: string, line: BenchLine, shownSha256: string): { ok: true; sha: string } | Refusal {
+function shownVersion(root: string, line: Pick<BenchLine, 'path' | 'sha256'>, shownSha256: string): { ok: true; sha: string } | Refusal {
   const file = join(root, line.path);
   if (!existsSync(file)) return { ok: false, status: 404, error: `基准文件 ${line.path} 不存在。` };
   const sha = fileSha(file);
@@ -269,44 +291,75 @@ export function submitBenchApproval(root: string, version: string, shownSha256: 
   return { ok: true, file: appendOwnerLog(root, 'bench_approved', null, line.path, shown.sha, now, { version }) };
 }
 
-/** Logs rollback (round = latest round with a freeze.json); the target must once have been active or approved. */
+/** resolveBenchmark(…, now, 'effective') as benchView runs it; unresolved or an edited version file → 409. */
+function effectiveVersion(root: string, log: readonly BenchLogEntry[], owner: readonly OwnerLogEntry[], now: string): { ok: true; version: string } | Refusal {
+  const files = (path: string): string | null => (existsSync(join(root, path)) ? readFileSync(join(root, path), 'utf8') : null);
+  try {
+    const r = resolveBenchmark({ log, owner, posted: postedBenchNotices(root), files, autoDelayMs: AUTO_DELAY_MS }, now, 'effective');
+    return r.ok ? { ok: true, version: r.value.version } : { ok: false, status: 409, error: `当前没有生效的基准，不能回滚：${r.error}` };
+  } catch (e) {
+    if (e instanceof IntegrityError) return { ok: false, status: 409, error: `基准文件需要修复：${e.message}` };
+    throw e;
+  }
+}
+
+/**
+ * Logs rollback (round = latest round with a freeze.json). The target must be one resolveBenchmark would restore
+ * (bench-active rollbackEligible at `now`: an activate line already effective, or a pending_owner line approved);
+ * anything else is refused rather than logged as a rollback the resolver ignores. `from` must be the version
+ * effective at `now` or an unapproved, unsuperseded pending version (bench-evidence pendingVersions); else 409.
+ */
 export function submitRollback(root: string, input: RollbackInput, now: string): OwnerResult {
   if (!VERSION.test(input.version) || !VERSION.test(input.from) || input.version === input.from) return { ok: false, status: 400, error: '回滚的目标版本与当前版本必须是两个不同的基准版本。' };
   const log = readOwnerLog(root);
   if (!log.ok) return { ok: false, status: 409, error: `owner 日志需要修复：${log.error}` };
-  const approved = (l: BenchLine): boolean =>
-    log.value.some((e) => e.action === 'bench_approved' && e.version === l.version && (l.sha256 === null || e.sha256 === l.sha256));
-  const bench = benchLines(root);
-  if (!bench.ok) return bench;
-  const lines = bench.lines.filter((l) => l.version === input.version && (l.outcome === 'activate' || (l.outcome === 'pending_owner' && approved(l))));
-  const line = lines.at(-1);
-  if (line === undefined) return { ok: false, status: 409, error: `只能回滚到曾经生效或已批准的版本，${input.version} 不是。` };
-  const shown = shownVersion(root, line, input.sha256);
+  const bench = readBenchLog(root);
+  if (!bench.ok) return { ok: false, status: 409, error: `基准日志需要修复：${bench.error}` };
+  const target = rollbackEligible({ log: bench.value, owner: log.value, posted: postedBenchNotices(root), autoDelayMs: AUTO_DELAY_MS }, input.version, now);
+  if (target === null) return { ok: false, status: 409, error: `只能回滚到曾经生效或已批准的版本，${input.version} 不是。` };
+  const shown = shownVersion(root, target, input.sha256);
   if (!shown.ok) return shown;
-  const file = appendOwnerLog(root, 'rollback', latestFrozenRound(root), line.path, shown.sha, now, { version: input.version, from: input.from });
+  // `from` must be the version effective now, or a pending version the rollback supersedes: rollbackHolds diffs it
+  // against the target, so an unlogged `from` would fail every later check and a stale one would hold too few keys
+  const effective = effectiveVersion(root, bench.value, log.value, now);
+  if (!effective.ok) return effective;
+  const pending = pendingVersions(bench.value, ownerInputs(root)).some((p) => p.version === input.from);
+  if (effective.version !== input.from && !pending) return { ok: false, status: 409, error: '基准已经变化，请刷新后重新核对。' };
+  const file = appendOwnerLog(root, 'rollback', latestFrozenRound(root), target.path, shown.sha, now, { version: input.version, from: input.from });
   return { ok: true, file };
 }
 
 /**
- * Appends answers to calibration/owner-answers.json and logs calib_answers with the answered slots (plus any
- * earlier slots of the set that no log line covers yet, i.e. a POST that crashed between file and log).
+ * Calibration slots of owner-answers.json that no calib_answers line covers, per set (a POST that crashed between
+ * the file write and its log line), each re-logged with the file's current SHA-256. Runs before any refusal, so
+ * a crash on a set's last slot or before an answer in another set is repaired by the next calibration POST.
  */
+function relogCalibAnswers(root: string, sets: JsonRecord, log: readonly OwnerLogEntry[], now: string): void {
+  const file = join(root, OWNER_ANSWERS);
+  for (const [set, record] of Object.entries(sets)) {
+    const logged = new Set(log.flatMap((e) => (e.action === 'calib_answers' && e.set === set ? (e.slots ?? []) : [])));
+    const slots = (readArray(record, 'answers') ?? []).map((a) => readNumber(a, 'slot')).filter((n) => n !== null).filter((n) => !logged.has(n));
+    if (slots.length > 0) appendOwnerLog(root, 'calib_answers', null, OWNER_ANSWERS, fileSha(file), now, { set, slots: slots.sort((x, y) => x - y) });
+  }
+}
+
+/** Appends answers to calibration/owner-answers.json and logs calib_answers with the answered slots. */
 export function submitCalibAnswers(root: string, set: string, answers: readonly CalibAnswerInput[], now: string): OwnerResult {
-  const pairs = calibSet(root, set);
-  if (!pairs.ok) return { ok: false, status: 404, error: `校准组 ${set} 不存在：${pairs.error}` };
-  if (answers.length === 0) return { ok: false, status: 400, error: '没有要提交的答案。' };
   const log = readOwnerLog(root);
   if (!log.ok) return { ok: false, status: 409, error: `owner 日志需要修复：${log.error}` };
   const file = join(root, OWNER_ANSWERS);
   const current = readJson(file);
   if (existsSync(file) && !isRecord(current)) return { ok: false, status: 409, error: '校准答案文件无法读取。' };
   const sets: JsonRecord = { ...(readRecord(current, 'sets') ?? {}) };
+  relogCalibAnswers(root, sets, log.value, now);
+  const pairs = calibSet(root, set);
+  if (!pairs.ok) return { ok: false, status: 404, error: `校准组 ${set} 不存在：${pairs.error}` };
+  if (answers.length === 0) return { ok: false, status: 400, error: '没有要提交的答案。' };
   const existing = readRecord(sets, set);
   if (existing !== null && readString(existing, 'pairs_sha256') !== pairs.value.pairsSha256) return { ok: false, status: 409, error: '校准对已经变化，不能继续提交。' };
   const prior = readArray(existing, 'answers') ?? [];
   const priorSlots = prior.map((a) => readNumber(a, 'slot')).filter((n) => n !== null);
-  const logged = new Set(log.value.flatMap((e) => (e.action === 'calib_answers' && e.set === set ? (e.slots ?? []) : [])));
-  const slots: number[] = priorSlots.filter((s) => !logged.has(s));
+  const slots: number[] = [];
   const added: JsonRecord[] = [];
   for (const a of answers) {
     const d = pairs.value.display.get(a.slot);
@@ -333,11 +386,16 @@ export function submitDiffApproval(root: string, roundId: string, shownDiffSha25
   return { ok: true, file: appendOwnerLog(root, 'diff_approved', roundId, relPath(root, diffFile), shownDiffSha256, now, {}) };
 }
 
+/** topic.json written by the UI (engine-written auto_default / fixed topics carry no owner-log entry). */
+function uiTopic(file: string): boolean {
+  return readString(readJson(file), 'source') === 'ui';
+}
+
 /** Creates topic.json exclusively (`wx`, source ui) and logs topic; 409 when a topic exists. */
 export function submitTopic(root: string, roundId: string, input: TopicInput, now: string): OwnerResult {
   const paths = roundPaths(root, roundId);
   const file = join(paths.dir, 'topic.json');
-  if (existsSync(file)) return { ok: false, status: 409, error: '这一轮的选题已经确定，不能覆盖。' };
+  if (existsSync(file)) return { ok: false, status: 409, error: `这一轮的选题已经确定，不能覆盖。${uiTopic(file) ? relogOwnerFile(root, 'topic', roundId, file, now) : ''}` };
   const top3 = readArray(readJson(join(paths.dir, 'topic-offer.json')), 'top3');
   if (top3 === null) return { ok: false, status: 404, error: '这一轮还没有选题候选。' };
   if (!top3.some((t) => readString(t, 'row_id') === input.row_id && readString(t, 'layer') === input.layer)) return { ok: false, status: 400, error: '选题不在候选之中。' };

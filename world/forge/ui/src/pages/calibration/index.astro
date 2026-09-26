@@ -1,0 +1,31 @@
+---
+import Base from '../../layouts/Base.astro';
+import { dataDir } from '../../lib/data.ts';
+import { calibSets } from '../../lib/views/calib.ts';
+
+const sets = calibSets(dataDir());
+const KIND: Record<string, string> = { round0: '第 0 轮校准', requal: '复核校准', gate: '门控复测' };
+---
+<Base title="校准">
+  <h1>校准</h1>
+  <p class="muted">每组是一串盲测对：两篇短文并排，选你更想多待一小时的那一篇。页面不显示作者、模型或配对编号；一次只出一题，答完自动进入下一题，关掉页面后回来会从没答的那题继续。答案提交后不能修改。</p>
+  {sets.length === 0 && <p class="muted">还没有需要你回答的校准组。在终端运行 <code>npm run forge -- calib build</code> 生成第 0 轮校准。</p>}
+  {sets.length > 0 && (
+    <table>
+      <thead><tr><th>校准组</th><th>类型</th><th>进度</th><th>状态</th><th></th></tr></thead>
+      <tbody>
+        {sets.map((s) => (
+          <tr>
+            <td>{s.set}</td>
+            <td>{KIND[s.kind] ?? s.kind}</td>
+            <td>{s.answered} / {s.total}</td>
+            <td>
+              {s.pinned ? <span class="pill ok">已锁定</span> : s.complete ? <span class="pill ok">已答完</span> : s.answered > 0 ? <span class="pill warn">答了一部分</span> : <span class="pill">未开始</span>}
+            </td>
+            <td>{!s.complete && !s.pinned ? <a class="btn" href={`/calibration/${s.set}`}>{s.answered > 0 ? '继续' : '开始'}</a> : <a href={`/calibration/${s.set}`}>查看</a>}</td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  )}
+</Base>

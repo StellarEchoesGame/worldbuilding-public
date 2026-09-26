@@ -9,7 +9,7 @@ import { err, ok, type Result } from '../result.ts';
 import type { StepDef, StepOutcome } from '../runner.ts';
 import { isIsoTimestamp } from '../store.ts';
 import { IntegrityError } from '../task.ts';
-import { computeThinmap, DEFAULT_GAME_NEED, LAYER_LABELS, LAYERS, parseGameNeed, type Layer } from '../thinmap.ts';
+import { computeThinmap, DEFAULT_GAME_NEED, LAYER_LABELS, LAYERS, parseGameNeed, type Layer, type ThinmapResult } from '../thinmap.ts';
 import { FACT_STATUS_FILE, loadAliasFile, loadRowAliases, loadRows, REF_07, rowNames } from './brief.ts';
 
 /** Engine default after the offer has waited this long (fake clock in tests). */
@@ -112,25 +112,28 @@ export function parseTopicOffer(value: unknown): Result<TopicOffer> {
   return ok({ round, offered_at: offeredAt, top3 });
 }
 
-/** The top 3 thin-map cells (tags, canon, 07 §8 connectivity, game need, alias mentions of the previous round). */
-export function offerTopics(ctx: StepContext): Result<TopicOffer['top3']> {
-  const rows = loadRows(ctx.root);
+/**
+ * The thin map over `root` (map/rows.json, map/aliases.json, map/tags.json, map/game-need.json or DEFAULT_GAME_NEED,
+ * fact-status.json) and `repo`'s canon (07 §8 connectivity), with alias mentions from `prevRound`'s taste quotes
+ * (null → none). Shared by 01-topic and the UI 选题 heat map.
+ */
+export function thinmapFor(root: string, repo: string, prevRound: string | null): Result<ThinmapResult> {
+  const rows = loadRows(root);
   if (!rows.ok) return err(rows.error);
-  const aliases = loadAliasFile(ctx.root);
+  const aliases = loadAliasFile(root);
   if (!aliases.ok) return err(aliases.error);
-  const tags = readJson(join(ctx.root, 'map/tags.json'), 'map/tags.json');
+  const tags = readJson(join(root, 'map/tags.json'), 'map/tags.json');
   if (tags !== null && !tags.ok) return err(tags.error);
-  const need = readJson(join(ctx.root, 'map/game-need.json'), 'map/game-need.json');
+  const need = readJson(join(root, 'map/game-need.json'), 'map/game-need.json');
   if (need !== null && !need.ok) return err(need.error);
   const gameNeed = need === null ? ok(DEFAULT_GAME_NEED) : parseGameNeed(need.value);
   if (!gameNeed.ok) return err(`map/game-need.json: ${gameNeed.error}`);
-  const status = readJson(join(ctx.root, FACT_STATUS_FILE), FACT_STATUS_FILE);
+  const status = readJson(join(root, FACT_STATUS_FILE), FACT_STATUS_FILE);
   if (status === null) return err(`${FACT_STATUS_FILE} missing`);
   const factRows = status.ok ? factRowsFrom(status.value) : status;
   if (!factRows.ok) return err(factRows.error);
-  const canon = canonFiles(ctx.repo);
-  const prev = previousRound(ctx.roundId);
-  const result = computeThinmap({
+  const canon = canonFiles(repo);
+  return ok(computeThinmap({
     rows: rows.value,
     aliases: aliases.value,
     tags: tags === null ? { cells: {} } : tags.value,
@@ -138,9 +141,15 @@ export function offerTopics(ctx: StepContext): Result<TopicOffer['top3']> {
     registered: parseRegister07(canon[REF_07] ?? ''),
     factRows: factRows.value,
     gameNeed: gameNeed.value,
-    mentions: prev === null ? {} : aliasMentions(ctx.root, prev),
-  });
-  const top = result.ranking.slice(0, 3).map((c) => ({ row_id: c.rowId, layer: c.layer, priority: c.priority }));
+    mentions: prevRound === null ? {} : aliasMentions(root, prevRound),
+  }));
+}
+
+/** The top 3 thin-map cells (tags, canon, 07 §8 connectivity, game need, alias mentions of the previous round). */
+export function offerTopics(ctx: StepContext): Result<TopicOffer['top3']> {
+  const result = thinmapFor(ctx.root, ctx.repo, previousRound(ctx.roundId));
+  if (!result.ok) return err(result.error);
+  const top = result.value.ranking.slice(0, 3).map((c) => ({ row_id: c.rowId, layer: c.layer, priority: c.priority }));
   return top.length === 0 ? err('thin map has no cells to offer') : ok(top);
 }
 

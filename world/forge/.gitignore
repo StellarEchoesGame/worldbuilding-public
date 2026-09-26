@@ -10,3 +10,5 @@ ui/.astro/
 .forge.lock.*.tmp
 .forge.lock.*.stale
 rounds/*/mirror.jsonl
+# Build lock of the UI server tests (ui/src/test/server.ts ensureBuilt).
+ui/.forge-build.lock

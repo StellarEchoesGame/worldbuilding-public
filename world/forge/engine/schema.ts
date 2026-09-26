@@ -1,5 +1,24 @@
+import { existsSync } from 'node:fs';
+import { dirname, join } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { isRecord } from './json.ts';
 import { err, ok, type Result } from './result.ts';
+
+/**
+ * Absolute path of `schema/<file>` under the forge root: the nearest ancestor of `from` (default: this module's
+ * directory) that holds it. Works from engine/ and from the UI's Vite bundle (ui/dist/server/chunks) alike, so no
+ * module resolves schemas with a path relative to its own bundled location.
+ */
+export function schemaFile(file: string, from: string = dirname(fileURLToPath(import.meta.url))): string {
+  let dir = from;
+  for (;;) {
+    const candidate = join(dir, 'schema', file);
+    if (existsSync(candidate)) return candidate;
+    const up = dirname(dir);
+    if (up === dir) throw new Error(`schema/${file} not found above ${from}`);
+    dir = up;
+  }
+}
 
 /** The JSON Schema subset the forge uses; loadSchema rejects any other keyword so schemas never silently under-validate. */
 export type SchemaType = 'object' | 'array' | 'string' | 'number' | 'integer' | 'boolean' | 'null';

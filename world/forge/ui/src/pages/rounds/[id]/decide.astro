@@ -2,12 +2,14 @@
 import Base from '../../../layouts/Base.astro';
 import { dataDir, loadRound } from '../../../lib/data.ts';
 import { REASONS } from '../../../lib/owner.ts';
+import { redecideView } from '../../../lib/views/redecide.ts';
 
 const id = Astro.params.id ?? '';
 const view = /^[A-Z]\d{2}$/u.test(id) ? loadRound(dataDir(), id) : null;
 if (view === null) return new Response('没有这一轮', { status: 404 });
 if (view.audit === null) return Astro.redirect(`/rounds/${id}/audit`, 303);
-if (view.decision !== null) return Astro.redirect(`/rounds/${id}`, 303);
+// A decision exists: a gate rejection that rewound the round to 09b is answered on the redecide page.
+if (view.decision !== null) return Astro.redirect(redecideView(dataDir(), id).allowed ? `/rounds/${id}/redecide` : `/rounds/${id}`, 303);
 const error = Astro.url.searchParams.get('error');
 const glossary: Record<string, string> = { 平: '可信但记不住', 假: '违和，不像这个世界', 乱: '信息过载或与正典冲突', 偏: '没写出选题要的东西' };
 ---
@@ -22,6 +24,9 @@ const glossary: Record<string, string> = { 平: '可信但记不住', 假: '违�
         <label class="choice"><input type="radio" name="pick" value={c.label} required /> 候选 {c.label}　<span class="muted">{c.totalWins ?? '—'}/{c.needed ?? '—'} {c.trial ? '试验对' : c.beats ? '胜擂' : '未胜擂'}</span></label>
       ))}
       <label class="choice"><input type="radio" name="pick" value="none" /> 都不选（本轮不产出）</label>
+      <h3 style="margin-top:1rem">底稿（默认就是所选的那篇）</h3>
+      <label class="choice"><input type="radio" name="base" value="" checked /> 同所选</label>
+      {view.candidates.map((c) => <label class="choice"><input type="radio" name="base" value={c.label} /> 候选 {c.label}</label>)}
     </div>
     <div class="card">
       <h3>登记哪些事实（最多 6 条，可跨稿）</h3>

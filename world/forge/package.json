@@ -7,7 +7,7 @@
     "node": ">=26"
   },
   "scripts": {
-    "test": "node --test \"engine/**/*.test.ts\" \"ui/src/**/*.test.ts\"",
+    "test": "node --test \"engine/**/*.test.ts\" \"ui/src/**/*.test.ts\" \"hooks/**/*.test.ts\"",
     "typecheck": "tsc --noEmit -p tsconfig.json && astro check --root ui",
     "forge": "node engine/cli.ts",
     "ui": "node engine/cli.ts ui"

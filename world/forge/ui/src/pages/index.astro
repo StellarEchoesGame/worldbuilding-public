@@ -1,28 +1,112 @@
 ---
 import Base from '../layouts/Base.astro';
-import { dataDir, listRounds } from '../lib/data.ts';
+import { uiNow } from '../lib/clock.ts';
+import { dataDir } from '../lib/data.ts';
+import { overviewView } from '../lib/views/overview.ts';
 
-const rounds = listRounds(dataDir());
-const running = rounds.some((r) => !r.done);
+const root = dataDir();
+const view = overviewView(root, uiNow());
+const running = view.active?.status?.state === 'running';
+const statePill: Record<string, string> = { running: 'warn', waiting: 'warn', done: 'ok', integrity: 'bad', blocked: 'bad', failed: 'bad' };
+const stateText: Record<string, string> = { running: '运行中', waiting: '等待中', done: '已完成', integrity: '完整性错误', blocked: '受阻', failed: '失败' };
+const agreementPill: Record<string, string> = { ok: 'ok', flagged: 'warn', suspended: 'bad' };
+const agreementText: Record<string, string> = { ok: '正常', flagged: '标记', suspended: '暂停' };
+const todoText: Record<string, string> = {
+  protocol_approval: '批准协议包', benchmark_approval: '批准基准版本', topic: '选题', audit: '盲审', decision: '决策', diff_approval: '批准定稿差异', calib_answers: '校准作答', owner_log_repair: '修复 owner 日志',
+};
+const pct = (x: number): string => `${Math.round(x * 100)}%`;
+const mirrorsPending = view.mirrors.reduce((n, m) => n + m.count, 0);
+const mirrorErrors = view.mirrors.filter((m) => m.error !== null).length;
+const a = view.active;
 ---
 <Base title="总览" refresh={running}>
   <h1>总览</h1>
-  {rounds.length === 0 && <p class="muted">还没有轮次。在终端运行 <code>npm run forge -- round run P01 --cell cells/R1-mothership.json</code>。</p>}
-  <table>
-    <thead><tr><th>轮次</th><th>单元格</th><th>进度</th><th>评委调用</th><th>盲审</th><th>决策</th><th>最近事件</th></tr></thead>
-    <tbody>
-      {rounds.map((r) => (
-        <tr>
-          <td><a href={`/rounds/${r.id}`}>{r.id}</a></td>
-          <td>{r.title}</td>
-          <td>{r.done ? <span class="pill ok">已完成</span> : <span class="pill warn">进行中</span>}{r.errors > 0 && <span class="pill bad">错误 {r.errors}</span>}</td>
-          <td>{r.judged}</td>
-          <td>{r.audited ? '✔' : r.done ? <a href={`/rounds/${r.id}/audit`}>去盲审</a> : '—'}</td>
-          <td>{r.decided ? '✔' : r.audited ? <a href={`/rounds/${r.id}/decide`}>去决策</a> : '—'}</td>
-          <td class="muted">{r.last === null ? '' : `${r.last.at.slice(11, 19)} ${r.last.step} ${r.last.status} ${r.last.detail}`.slice(0, 90)}</td>
-        </tr>
-      ))}
-    </tbody>
-  </table>
+
+  {view.todos.length > 0 && (
+    <div class="card">
+      <h3>待你处理</h3>
+      <ul style="margin:0;padding-left:1.2rem">
+        {view.todos.map((t) => <li><a href={t.href}>{t.round === null ? '' : `${t.round} · `}{todoText[t.kind] ?? t.kind}</a> <span class="muted">{t.kind === 'protocol_approval' ? t.detail.replace(/[0-9a-f]{64}/u, (m) => `${m.slice(0, 12)}…`) : t.detail}</span></li>)}
+      </ul>
+    </div>
+  )}
+
+  <div class="grid2">
+    <div class="card">
+      <h3>当前轮次</h3>
+      {a === null ? <p class="muted">没有未完成的轮次。</p> : (
+        <div>
+          <p><a href={`/rounds/${a.round}`}>{a.round}</a>{' '}
+            {a.status !== null && <span class={`pill ${statePill[a.status.state] ?? ''}`}>{stateText[a.status.state] ?? a.status.state}</span>}
+            {a.status !== null && a.status.step !== null && <span class="muted"> 步骤 {a.status.step}</span>}
+            {a.status !== null && a.status.waiting_for !== null && <span class="muted"> · 等待 {todoText[a.status.waiting_for] ?? a.status.waiting_for}</span>}
+          </p>
+          {a.statusError !== null && <p class="error">{a.statusError}</p>}
+          <p><progress max={a.totalSteps} value={a.doneSteps}></progress> <span class="muted">{a.doneSteps} / {a.totalSteps} 步</span></p>
+          {a.status !== null && a.status.detail !== '' && <p class="muted">{a.status.detail}</p>}
+          {a.recent.length > 0 && (
+            <table><tbody>{a.recent.map((e) => <tr><td class="muted">{e.at.slice(5, 19).replace('T', ' ')}</td><td>{e.step}</td><td>{e.status}</td><td class="muted">{e.detail.slice(0, 80)}</td></tr>)}</tbody></table>
+          )}
+        </div>
+      )}
+    </div>
+    <div class="card">
+      <h3>成本与基准</h3>
+      <p>累计成本 <b>${view.cost.totalUsd.toFixed(2)}</b> <span class="muted">（{view.cost.rounds} 轮有成本记录{view.cost.unpricedCalls > 0 && `；${view.cost.unpricedCalls} 次调用未计价，只按 token 统计`}）</span></p>
+      <p>生效基准：{view.benchmark.effective === null ? <span class="muted">无</span> : <span><b>{view.benchmark.effective.version}</b> <span class="muted">（{view.benchmark.effective.via}，自 {view.benchmark.effective.since}）</span></span>}</p>
+      <p>最新基准（下一次提议的基础）：{view.benchmark.head === null ? <span class="muted">无</span> : <b>{view.benchmark.head.version}</b>}</p>
+      {view.benchmark.error !== null && <p class="muted">{view.benchmark.error === 'no active benchmark' ? '还没有生效的基准版本。' : view.benchmark.error}</p>}
+      {view.benchmark.pending.length > 0 && <p>待批准：{view.benchmark.pending.map((p) => <a href={`/benchmark/${p.version}`} style="margin-right:.5rem">{p.version}</a>)}</p>}
+      <p>镜像：{mirrorsPending === 0 && mirrorErrors === 0 ? <span class="muted">没有待补发的评论</span> : <a href="/mirror">{mirrorsPending} 条待补发{mirrorErrors > 0 && `，${mirrorErrors} 轮读取出错`}</a>}</p>
+    </div>
+  </div>
+
+  <h2>评委健康</h2>
+  {view.trustError !== null && <p class="error">{view.trustError}</p>}
+  {view.judges.length === 0 && view.trustError === null && <p class="muted">还没有信任状态（calibration/status.json），先完成第 0 轮校准。</p>}
+  {view.judges.length > 0 && (
+    <table>
+      <thead><tr><th>家族</th><th>资格</th><th>门评</th><th>一致性</th><th>盲审标签 n</th><th>后验均值</th><th>90% 区间</th><th>低于阈值概率</th></tr></thead>
+      <tbody>
+        {view.judges.map((j) => (
+          <tr>
+            <td>{j.family}</td>
+            <td>{j.qualified ? '✔' : '✖'}</td>
+            <td>{j.gateJudge ? '✔' : '—'}</td>
+            <td><span class={`pill ${agreementPill[j.state] ?? ''}`}>{agreementText[j.state] ?? j.state}</span>{j.suspendedAt !== null && <span class="muted"> 自 {j.suspendedAt}</span>}</td>
+            <td>{j.n}</td>
+            <td>{pct(j.mean)}</td>
+            <td class="muted">{pct(j.ci90[0])}–{pct(j.ci90[1])}</td>
+            <td class="muted">{pct(j.pBelow)}</td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  )}
+  {view.voids !== null && (
+    <p class="muted">
+      {view.voids.round}：{view.voids.calls} 次付费调用，作废任务 {view.voids.voidTasks}，重跑会话 {view.voids.sessionReruns}，退出家族 {view.voids.droppedFamilies}；
+      诱饵偏好 {view.voids.decoyPreferred} / {view.voids.tasteCalls} 次有效品味调用（不含作废调用和影子家族）{view.voids.tasteCalls > 0 && `（${pct(view.voids.decoyPreferred / view.voids.tasteCalls)}）`}。
+    </p>
+  )}
+  {view.voids !== null && view.voids.familiesError !== null && <p class="error">{view.voids.familiesError}</p>}
+  {view.voids !== null && view.voids.families.length > 0 && (
+    <p class="muted">按家族（冠军场次 · 作废 · 选中诱饵）：{view.voids.families.map((f) => `${f.family} ${f.sessionPairs} · ${f.void} · ${f.decoyFail}`).join('；')}。</p>
+  )}
+
+  <h2>CLI 与实际模型</h2>
+  <p class="muted">forge doctor 不保存结果：doctor 状态 未检测。下面是最近一轮调用记录里每个后端最后一次的实际模型和 CLI 版本。</p>
+  {view.backends.length === 0 ? <p class="muted">未检测（还没有调用记录）。</p> : (
+    <table>
+      <thead><tr><th>后端</th><th>家族</th><th>请求模型</th><th>实际模型</th><th>CLI 版本</th><th>时间</th></tr></thead>
+      <tbody>
+        {view.backends.map((b) => <tr><td>{b.backend}</td><td>{b.family ?? '—'}</td><td><code>{b.requested ?? '—'}</code></td><td><code>{b.served ?? '未检测'}</code></td><td>{b.version ?? '未检测'}</td><td class="muted">{b.at}</td></tr>)}
+      </tbody>
+    </table>
+  )}
+
+  <h2>全部轮次</h2>
+  <p>每一轮的状态、步骤和待办见 <a href="/rounds">轮次</a> 页。{a === null && <span class="muted">没有未完成的轮次时，在终端运行 <code>npm run forge -- round start R01</code> 开始下一轮。</span>}</p>
+
   {running && <p class="muted">页面每 20 秒自动刷新。</p>}
 </Base>
