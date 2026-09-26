@@ -1,0 +1,339 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "evidence.schema.json",
+  "title": "WB-F1 benchmark evidence packet",
+  "description": "benchmark/evidence/RNN.json, written only by the engine (engine/bench-evidence.ts, step 11f); bytes = JSON.stringify(packet, null, 2) + LF. Items are a union by kind; parseEvidencePacket checks the per-kind fields, the id rule E-<round>-<CODE>[-<subject>], code-unit id order and that ceilings lists exactly the saturation items with ceiling true. inputs maps forge-root-relative paths to SHA-256 (values checked by parseEvidencePacket); files below a round sub-directory are one aggregate key rounds/RNN/<dir>/*, so no pair or submission id (reserve pairs included) is serialised.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "round",
+    "benchmark_version",
+    "head_version",
+    "inputs",
+    "items",
+    "ceilings"
+  ],
+  "properties": {
+    "round": {
+      "type": "string",
+      "pattern": "^R\\d{2}$"
+    },
+    "benchmark_version": {
+      "type": "string",
+      "pattern": "^v[1-9]\\d*$"
+    },
+    "head_version": {
+      "type": "string",
+      "pattern": "^v[1-9]\\d*$"
+    },
+    "inputs": {
+      "description": "Every file collectEvidence read except the append-only owner and bench logs. Files in calibration/, benchmark/ or directly in rounds/RNN/ keep their own path; the files below rounds/RNN/<dir>/ (taste pair dirs incl. aux, calls, gate, submissions) fold into the key rounds/RNN/<dir>/* = SHA-256 over their code-unit-sorted '<path>:<sha256>' LF-terminated lines.",
+      "type": "object"
+    },
+    "items": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "kind"
+        ],
+        "description": "One item; the fields besides id and kind depend on kind (checked by parseEvidencePacket). agree / n are integers on agreement items and family x family matrices on family_matrix; rounds is the point list on saturation and a round count on reason_codes.",
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^E-[A-Za-z0-9-]+$"
+          },
+          "kind": {
+            "enum": [
+              "agreement",
+              "order_consistency",
+              "void_decoy",
+              "family_matrix",
+              "saturation",
+              "reason_codes",
+              "disagreement",
+              "stagnation",
+              "defect_catch",
+              "cost",
+              "rollback",
+              "pending",
+              "reserve_count"
+            ]
+          },
+          "family": {
+            "type": "string",
+            "minLength": 1
+          },
+          "n": {
+            "type": [
+              "integer",
+              "array"
+            ],
+            "minimum": 0,
+            "items": {
+              "type": "array",
+              "items": {
+                "type": "integer",
+                "minimum": 0
+              }
+            }
+          },
+          "agree": {
+            "type": [
+              "integer",
+              "array"
+            ],
+            "minimum": 0,
+            "items": {
+              "type": "array",
+              "items": {
+                "type": "integer",
+                "minimum": 0
+              }
+            }
+          },
+          "mean": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1
+          },
+          "ci90": {
+            "type": "array",
+            "minItems": 2,
+            "maxItems": 2,
+            "items": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1
+            }
+          },
+          "state": {
+            "enum": [
+              "ok",
+              "flagged",
+              "suspended"
+            ]
+          },
+          "calls": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "consistent": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "session_pairs": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "void": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "decoy_fail": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "families": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "measure": {
+            "enum": [
+              "taste",
+              "hook",
+              "skin_swap",
+              "cold_reader",
+              "surprise"
+            ]
+          },
+          "rounds": {
+            "type": [
+              "array",
+              "integer"
+            ],
+            "minimum": 0,
+            "maxItems": 2,
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "round",
+                "n",
+                "top"
+              ],
+              "properties": {
+                "round": {
+                  "type": "string",
+                  "pattern": "^R\\d{2}$"
+                },
+                "n": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "top": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              }
+            }
+          },
+          "ceiling": {
+            "type": "boolean"
+          },
+          "counts": {
+            "type": "object"
+          },
+          "label": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9-]+$"
+          },
+          "texts": {
+            "type": "array",
+            "minItems": 2,
+            "maxItems": 2,
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "text_id",
+                "text"
+              ],
+              "properties": {
+                "text_id": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "text": {
+                  "type": "string",
+                  "maxLength": 2500
+                }
+              }
+            }
+          },
+          "owner": {
+            "enum": [
+              0,
+              1
+            ]
+          },
+          "panel": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "family",
+                "choice",
+                "quotes"
+              ],
+              "properties": {
+                "family": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "choice": {
+                  "enum": [
+                    0,
+                    1,
+                    "inconsistent"
+                  ]
+                },
+                "quotes": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "maxLength": 200
+                  }
+                }
+              }
+            }
+          },
+          "row_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "rounds_without_beat": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "champion_kind": {
+            "enum": [
+              "baseline",
+              "owner_pick",
+              "golden"
+            ]
+          },
+          "flagged": {
+            "type": "boolean"
+          },
+          "injected": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "caught": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "usd": {
+            "type": "number",
+            "minimum": 0
+          },
+          "p50_ms": {
+            "type": "number",
+            "minimum": 0
+          },
+          "p90_ms": {
+            "type": "number",
+            "minimum": 0
+          },
+          "at": {
+            "type": "string",
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(\\.\\d+)?Z$"
+          },
+          "version": {
+            "type": "string",
+            "pattern": "^v[1-9]\\d*$"
+          },
+          "from": {
+            "type": "string",
+            "pattern": "^v[1-9]\\d*$"
+          },
+          "keys": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "since": {
+            "type": "string",
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(\\.\\d+)?Z$"
+          },
+          "activation": {
+            "const": "owner"
+          },
+          "visible": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "reserve": {
+            "type": "integer",
+            "minimum": 0
+          }
+        }
+      }
+    },
+    "ceilings": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^E-[A-Za-z0-9-]+$"
+      }
+    }
+  }
+}

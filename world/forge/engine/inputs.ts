@@ -1,4 +1,4 @@
-import { readdirSync, readFileSync, statSync } from 'node:fs';
+import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs';
 import { join } from 'node:path';
 import { isRecord, readArray, readString, stringArray } from './json.ts';
 import type { MergeDecision, MergeSource } from './mergecheck.ts';
@@ -83,13 +83,39 @@ export function parseMergeDecision(value: unknown): Result<MergeDecision> {
   return ok({ round, baseLabel, title, rows, registered });
 }
 
-/** Every labelled candidate of a round plus its baseline, as mergecheck sources. */
+/**
+ * `kind` of `rounds/RNN/champion.json`; null when the file is absent (a prototype round). A present file that is not
+ * JSON, not an object or has no string `kind` is an error: a torn snapshot must not pass for a baseline round.
+ */
+function championKind(dir: string, roundId: string): Result<string | null> {
+  const path = join(dir, 'champion.json');
+  const rel = `rounds/${roundId}/champion.json`;
+  if (!existsSync(path)) return ok(null);
+  let raw: unknown;
+  try {
+    raw = JSON.parse(readFileSync(path, 'utf8'));
+  } catch {
+    return err(`${rel}: not valid JSON`);
+  }
+  if (!isRecord(raw)) return err(`${rel}: expected an object`);
+  const kind = raw['kind'];
+  return typeof kind === 'string' ? ok(kind) : err(`${rel}: kind must be a string`);
+}
+
+/**
+ * Every labelled candidate of a round plus its baseline, as mergecheck sources. A round judged against an earlier
+ * round's champion (`champion.json` kind owner_pick / golden) has no baseline submission, so BASE is left out; a
+ * baseline round (or a prototype round without the snapshot) must have it.
+ */
 export function sourcesFromRound(root: string, roundId: string): Result<MergeSource[]> {
-  const labels = readJson(join(roundPaths(root, roundId).dir, 'labels.json'));
+  const dir = roundPaths(root, roundId).dir;
+  const labels = readJson(join(dir, 'labels.json'));
   if (!isRecord(labels)) return err(`round ${roundId}: labels.json is missing`);
   const entries: Array<[string, string]> = [];
   for (const [label, id] of Object.entries(labels)) if (typeof id === 'string') entries.push([label, id]);
-  entries.push([CHAMPION_ID, CHAMPION_ID]);
+  const champion = championKind(dir, roundId);
+  if (!champion.ok) return champion;
+  if (champion.value === null || champion.value === 'baseline') entries.push([CHAMPION_ID, CHAMPION_ID]);
   const out: MergeSource[] = [];
   for (const [label, id] of entries) {
     const sub = submissionFor(root, roundId, id);

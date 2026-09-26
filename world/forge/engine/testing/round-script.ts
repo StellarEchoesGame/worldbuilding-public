@@ -1,8 +1,8 @@
-import { existsSync, mkdtempSync, readdirSync, readFileSync, statSync } from 'node:fs';
+import { existsSync, mkdtempSync, readdirSync, readFileSync, statSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join, relative, sep } from 'node:path';
 import type { FakeReply } from '../adapters/fake.ts';
-import type { ForgeRoots } from '../cli-round.ts';
+import { gatewayId, type ForgeRoots } from '../cli-round.ts';
 import { loadConfig, type Family } from '../config.ts';
 import type { EngineDeps, RoundBackends, RunHooks } from '../context.ts';
 import { isRecord, readArray, readRecord, readString } from '../json.ts';
@@ -12,7 +12,9 @@ import { FORECAST_COUNT, FORECAST_SLOTS } from '../tasks/forecast.ts';
 import { splitSentences } from '../text.ts';
 import { fakeAssembler } from './fake-assembler.ts';
 import { fakePorts, type FakePorts } from './fakes.ts';
-import { DEFAULT_FIXTURE, FIXTURE_GATEWAY_HOST, FIXTURE_WRITER_MODEL, fixtureWorld, type FixtureWorld } from './fixture-world.ts';
+import {
+  DEFAULT_FIXTURE, FIXTURE_GATEWAY_HOST, FIXTURE_WRITER_MODEL, addCalibrationPassages, assembleFixtureReference, fixtureWorld, type FixtureOptions, type FixtureWorld,
+} from './fixture-world.ts';
 import { ownerSim, type OwnerSim } from './owner-sim.ts';
 import { callLog, fakeRouter, type FakeCallMeta, type FakeRouter, type Route } from './scripted.ts';
 
@@ -21,12 +23,24 @@ import { callLog, fakeRouter, type FakeCallMeta, type FakeRouter, type Route } f
  * CLI; steps/merge-pipeline.test.ts: on through `forge merge` and 11a–11e). fixtureWorld with fake ports and one fake
  * router per backend, routed on the task-id kind: writers (optionally with one registerable fact each), baseline,
  * decoy, defect, forecasters, gate / taste / measure / surprise judges, merge gate judges, the tagger and reviewer,
- * and the merge editor. Test-only: imported by `*.test.ts` files.
+ * and the merge editor. RoundScriptOptions add (for testing/e2e-script.ts) fixture options, calibration passages, extra
+ * judge / maintainer / calibration-gateway routes; the default world is unchanged. Test-only: imported by
+ * `*.test.ts` files (and e2e-script.ts).
  */
 
 /** RoundScript world options: `claims` gives every writer one registerable fact (A-01, row SHIP, attached to 05). */
 export interface RoundScriptOptions {
   claims: boolean;
+  /** fixtureWorld options (default: DEFAULT_FIXTURE without champions, protocol unapproved). */
+  fixture?: FixtureOptions;
+  /** addCalibrationPassages before the fake ports read `main`, REFERENCE.md / hashes.json reassembled (a C00 build needs them). */
+  calibPassages?: boolean;
+  /** Extra judge routes (merged over the defaults), e.g. `calib` and `replay` (e2e-script.ts). */
+  judgeRoutes?: (script: Script, family: Family) => Record<string, Route>;
+  /** Maintainer routes (default: none, so every proposal is void → no_change_invalid). */
+  maintainer?: Record<string, Route>;
+  /** Calibration gateway backends of build.json models (`calibGateway` keyed by model). */
+  calibGateway?: ReadonlyArray<{ model: string; family: Family; routes: Record<string, Route> }>;
 }
 
 export const START_ISO = '2026-10-01T00:00:00.000Z';
@@ -129,6 +143,8 @@ export interface Script {
   questions: readonly string[];
   /** Merge gate judges (10a `regate`, 10e `postmerge`) find a contradiction when this returns true. */
   mergeContradiction: (kind: string, family: Family) => boolean;
+  /** The family that prefers the decoy in W1 s1 and its rerun (default DECOY_LOVER). */
+  decoyLover?: Family;
 }
 
 /** Honest gate judge: flags every sentence holding the trap or the defect mark; the blind family misses the copy. */
@@ -153,10 +169,14 @@ export function uniqueWindow(text: string, sentence: string): string {
   return '';
 }
 
-/** Decoy writer: one unique four-character detail of each of the first two sentences becomes a generic phrase. */
+/**
+ * Decoy writer: one unique four-character detail of each of the first n sentences becomes a generic phrase, n = the
+ * recipe's detail count the prompt states (`恰好 n 条替换`, 2 when absent).
+ */
 export function decoyReply(prompt: string): FakeReply {
   const text = unwrap(prompt, '文本甲') ?? '';
-  const originals = splitSentences(text).slice(0, 2).map((s) => uniqueWindow(text, s));
+  const n = Number(/恰好 (\d+) 条替换/u.exec(prompt)?.[1] ?? '2');
+  const originals = splitSentences(text).slice(0, n).map((s) => uniqueWindow(text, s));
   return fence({ replacements: originals.map((original, i) => ({ original, generic: DECOY_GENERICS[i] ?? '某处', kind: '其他' })) });
 }
 
@@ -171,7 +191,8 @@ export function tasteRoute(script: Script, family: Family): Route {
     const t4 = unwrap(prompt, '文本丁');
     if (t3 === null || t4 === null) return fence({ answers });
     const decoyAt = t3.includes(DECOY_GENERICS[0] ?? '') ? 3 : 4;
-    const lover = family === DECOY_LOVER && meta.taskId.startsWith(`taste-W1-${DECOY_LOVER}-s1`);
+    const loverFamily = script.decoyLover ?? DECOY_LOVER;
+    const lover = family === loverFamily && meta.taskId.startsWith(`taste-W1-${loverFamily}-s1`);
     const decoyPick = lover ? decoyAt : 7 - decoyAt;
     return fence({ answers, decoy: { pick: decoyPick, quote: head(decoyPick === 3 ? t3 : t4) } });
   };
@@ -253,14 +274,25 @@ export interface World {
   script: Script;
 }
 
+/** Question ids of benchmark/v1.json ([] while v1 does not exist yet: an e2e world gets v1 from its round 0). */
 export function benchQuestions(root: string): string[] {
+  if (!existsSync(join(root, 'benchmark', 'v1.json'))) return [];
   const bench: unknown = JSON.parse(readFileSync(join(root, 'benchmark', 'v1.json'), 'utf8'));
   return (readArray(readRecord(bench, 'taste'), 'questions') ?? []).map((q) => readString(q, 'id') ?? '').filter((id) => id !== '');
 }
 
 export function world(opts: RoundScriptOptions = { claims: false }): World {
   const dir = mkdtempSync(join(tmpdir(), 'forge-pipeline-'));
-  const w = fixtureWorld(dir, { ...DEFAULT_FIXTURE, champions: 'none', protocolApproved: false });
+  const w = fixtureWorld(dir, opts.fixture ?? { ...DEFAULT_FIXTURE, champions: 'none', protocolApproved: false });
+  if (opts.calibPassages === true) {
+    addCalibrationPassages(w);
+    const assembled = assembleFixtureReference(join(w.repo, 'world', 'current'));
+    const files: Array<[string, string]> = [['world/current/reference/REFERENCE.md', assembled.reference], ['world/current/reference/hashes.json', `${JSON.stringify(assembled.hashes, null, 2)}\n`]];
+    for (const [rel, text] of files) {
+      writeFileSync(join(w.repo, rel), text);
+      w.main[rel] = text;
+    }
+  }
   const config = loadConfig(w.root, { requireLocal: true });
   if (!config.ok) throw new Error(config.error);
   // the TS assembler over the temp repo (10c); the stub of fakePorts writes nothing
@@ -280,6 +312,7 @@ export function world(opts: RoundScriptOptions = { claims: false }): World {
       ...measureRoutes(),
       ...surpriseRoutes(),
       ...mergeRoutes(script, j.family),
+      ...(opts.judgeRoutes === undefined ? {} : opts.judgeRoutes(script, j.family)),
     }, { id: j.id, family: j.family, model: j.model })),
     concurrency: j.concurrency,
   }));
@@ -298,19 +331,26 @@ export function world(opts: RoundScriptOptions = { claims: false }): World {
     defect: add(fakeRouter({ defect: (prompt) => defectReply(prompt) }, { id: 'defect', family: 'DeepSeek', model: FIXTURE_WRITER_MODEL })),
     judges,
     forecasters: [...judges.map((j) => j.backend), gateway],
-    maintainer: idle('maintainer'),
+    maintainer: opts.maintainer === undefined ? idle('maintainer') : add(fakeRouter(opts.maintainer, { id: 'maintainer', family: 'Anthropic', model: 'maintainer-fixture' })),
     mergeEditor: add(fakeRouter({ merge: (prompt) => editorReply(prompt) }, { id: 'merge_editor', family: 'Anthropic', model: 'editor-fixture' })),
-    calibGateway: new Map(),
+    calibGateway: new Map((opts.calibGateway ?? []).map((g) => [g.model, add(fakeRouter(g.routes, { id: gatewayId(g.model), family: g.family, model: g.model }))])),
   };
   return { dir, w, at: { root: w.root, repo: w.repo }, ports, sim: ownerSim(w.root, ports.clock), backends, routers, logs: [], script };
 }
 
 /**
- * Every paid call starts one fake second later (beforeCall), so writer, defect and decoy calls start strictly after
- * the probe was mirrored, as on a real clock (07a's ordering check refuses a call stamped at the mirror instant).
+ * Every paid call starts one fake second later (beforeCall, then the caller's own beforeCall), so writer, defect and
+ * decoy calls start strictly after the probe was mirrored, as on a real clock (07a's ordering check refuses a call
+ * stamped at the mirror instant).
  */
 export function deps(x: World, pid: number, hooks: RunHooks = {}): EngineDeps {
-  const tick: RunHooks = { ...hooks, beforeCall: () => x.ports.clock.advance(1000) };
+  const tick: RunHooks = {
+    ...hooks,
+    beforeCall: (taskId, attempt) => {
+      x.ports.clock.advance(1000);
+      hooks.beforeCall?.(taskId, attempt);
+    },
+  };
   return { ports: x.ports, backends: () => x.backends, hooks: tick, env: {}, pid, isAlive: (p) => p === pid, log: (line) => x.logs.push(line) };
 }
 

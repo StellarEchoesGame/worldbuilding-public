@@ -9,16 +9,16 @@ import type { Backend } from './adapters/types.ts';
 import { parseCell, type Canon } from './brief.ts';
 import { familyOf, loadConfig, type ForgeConfig, type JudgeSpec, type LocalConfig, type WriterSlot } from './config.ts';
 import { isRecord, readString } from './json.ts';
-import { validateBenchmark } from './bench-validate.ts';
 import { canarySummary, mergeCanaryResults, runCanary, type CanaryRun } from './canary.ts';
 import { parsePrices, withPrices, type Prices } from './cost.ts';
 import { canonFiles, factRowsFrom, parseRegister07 } from './inputs.ts';
 import { prototypeRoundRefusal, runPrototypeRound } from './prototype.ts';
+import { benchCommand, benchValidateCommand } from './cli-bench.ts';
 import { calibCommand } from './cli-calib.ts';
 import { mergeCommand, mergecheckCommand, mirrorCommand, postMergeCommand } from './cli-merge.ts';
 import { freezeCommand, productionDeps, roundCommand, type ForgeRoots } from './cli-round.ts';
 import type { EngineDeps } from './context.ts';
-import { benchContext, findBenchmark, loadProtocolBundle, parseRollbacks, roundRules, type ProtocolBundle } from './rules.ts';
+import { loadProtocolBundle, roundRules, type ProtocolBundle } from './rules.ts';
 import { readJson, readLines, roundPaths, sha256, writeJson, writeText } from './store.ts';
 import { parseBenchmark } from './taste.ts';
 import { checkTags, computeThinmap, DEFAULT_GAME_NEED, formatThinmap, parseAliases, parseGameNeed, parseRows, type Alias, type Row } from './thinmap.ts';
@@ -186,37 +186,6 @@ function protocolHash(): void {
   process.stdout.write(`Protocol version: ${bundle.protocol.version}\nbundle sha256: ${bundle.bundleSha256}\n`);
 }
 
-function benchValidate(args: readonly string[]): void {
-  const candidatePath = args[0];
-  if (candidatePath === undefined) fail('usage: forge bench validate <candidate.json> [--parent <parent.json>] [--round <n>] [--rollbacks <file>]');
-  const bundle = protocolBundle();
-  const candidateFile = resolve(process.cwd(), candidatePath);
-  const candidate = parseJsonText(readText(candidateFile), candidateFile);
-  const parentArg = option(args, '--parent');
-  const namedParent = readString(candidate, 'parent');
-  let parent: unknown = null;
-  if (parentArg !== null) {
-    const parentFile = resolve(process.cwd(), parentArg);
-    parent = parseJsonText(readText(parentFile), parentFile);
-  } else if (namedParent !== null) {
-    const found = findBenchmark(ROOT, namedParent);
-    if (!found.ok) fail(`candidate names parent ${namedParent}: ${found.error}`);
-    process.stderr.write(`parent ${namedParent}: ${found.value.path}\n`);
-    parent = found.value.value;
-  }
-  const roundArg = option(args, '--round') ?? '0';
-  const round = Number(roundArg);
-  if (!Number.isInteger(round) || round < 0) fail(`--round must be a non-negative integer, got ${roundArg}`);
-  const rollbacksArg = option(args, '--rollbacks');
-  const rollbacks = rollbacksArg === null ? null : parseRollbacks(jsonFile(resolve(process.cwd(), rollbacksArg)));
-  if (rollbacks !== null && !rollbacks.ok) fail(rollbacks.error);
-  const ctx = benchContext(ROOT, bundle.protocol, round, rollbacks === null ? [] : rollbacks.value);
-  if (!ctx.ok) fail(ctx.error);
-  const v = validateBenchmark(candidate, parent, ctx.value);
-  process.stdout.write(`${JSON.stringify(v, null, 2)}\n`);
-  if (!v.ok) process.exitCode = 1;
-}
-
 function jsonFile(path: string): unknown {
   return parseJsonText(readText(path), path);
 }
@@ -323,7 +292,14 @@ async function main(): Promise<void> {
   if (cmd === 'mirror') return engineCommand((deps) => mirrorCommand(args, deps, ROOTS));
   if (cmd === 'calib') return engineCommand((deps) => calibCommand(args, deps, ROOTS));
   if (cmd === 'protocol' && sub === 'hash') return protocolHash();
-  if (cmd === 'bench' && sub === 'validate') return benchValidate(rest);
+  if (cmd === 'bench' && sub === 'validate' && rest[0] !== undefined && !/^R\d{2}$/u.test(rest[0])) {
+    process.exitCode = benchValidateCommand(rest, ROOTS, process.cwd(), {
+      out: (line) => process.stdout.write(`${line}\n`),
+      err: (line) => process.stderr.write(`${line}\n`),
+    });
+    return;
+  }
+  if (cmd === 'bench') return engineCommand((deps) => benchCommand(args, deps, ROOTS));
   if (cmd === 'thinmap') return thinmap(args);
   if (cmd === 'mergecheck') {
     process.exitCode = await mergecheckCommand(args, ROOTS, gitPort(REPO, runProcess), {
@@ -351,7 +327,14 @@ async function main(): Promise<void> {
       '  forge calib run [--set <id>] [--only <c2-gate-dryrun|c3-owner-answers|c4-judge>] [--quota-budget-min <n>]',
       '  forge calib score [--set <id>]',
       '  forge protocol hash',
+      '  forge bench evidence <RNN>',
+      '  forge bench propose <RNN> [--quota-budget-min <n>]',
+      '  forge bench propose R00 --initial [--quota-budget-min <n>]',
+      '  forge bench validate <RNN>',
       '  forge bench validate <candidate.json> [--parent <parent.json>] [--round <n>] [--rollbacks <file>]',
+      '  forge bench replay <RNN> [--quota-budget-min <n>]',
+      '  forge bench activate <RNN>',
+      '  forge bench activate --status',
       '  forge thinmap [--top <n>] [--aliases <file>] [--tags <file>] [--game-need <file>]',
       '  forge mergecheck --decision <merge-decision.json> [--base <git-ref>]',
       '  forge ui',

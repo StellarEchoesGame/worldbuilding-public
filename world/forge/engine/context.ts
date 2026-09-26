@@ -144,7 +144,7 @@ export interface StepContext {
   log(message: string): void;
   /** Appends to progress.jsonl, stamped with ports.clock.now(). */
   progress(step: string, status: ProgressStatus, detail: string): void;
-  /** freeze.json.seed, else start.json.seed (calibration: the pairs.json set seed). */
+  /** freeze.json.seed, else start.json.seed (calibration: the pairs.json set seed; bench-r00: the C00 set seed). */
   seed(): string;
   /** Throws before 00-start is marked. */
   start(): StartRecord;
@@ -559,10 +559,11 @@ export function buildContext(input: ContextInput): Result<StepContext> {
       files.appendLine(paths.progress, { at: ports.clock.now(), step, status, detail: redact(detail) });
     },
     seed(): string {
-      if (pipeline === 'calibration') {
+      if (pipeline === 'calibration' || pipeline === 'bench-r00') {
+        const set = pipeline === 'calibration' ? roundId : 'C00';
         const raw = readJsonOrThrow(join(root, 'calibration', 'pairs.json'), 'calibration/pairs.json');
-        const seed = readString(readRecord(readRecord(raw, 'sets'), roundId), 'seed');
-        if (seed === null || seed === '') throw new IntegrityError(`calibration/pairs.json has no seed for ${roundId}`);
+        const seed = readString(readRecord(readRecord(raw, 'sets'), set), 'seed');
+        if (seed === null || seed === '') throw new IntegrityError(`calibration/pairs.json has no seed for ${set}`);
         return seed;
       }
       if (pipeline === 'round' && isDone(ctx, '02c-freeze')) {

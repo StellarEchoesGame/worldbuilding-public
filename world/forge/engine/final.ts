@@ -2,7 +2,7 @@ import { existsSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import type { StepContext } from './context.ts';
 import { isRecord, readBoolean, readRecord, readString, stringArray } from './json.ts';
-import { sha256Bytes } from './marker.ts';
+import { isDone, sha256Bytes } from './marker.ts';
 import { APPLY_FILE, CANON_DIR, EDIT_FILE, mergeAttempt, MERGECHECK_FILE, PLAN_FILE, POSTMERGE_GATE_FILE, readMergePointer, type MergePointer } from './merge.ts';
 import { APPROVAL_DIFF_COMMAND } from './ports-cli.ts';
 import { checkPostMerge, POST_MERGE_FILE, readPostMerge } from './postmerge.ts';
@@ -12,6 +12,7 @@ import { readUnsealFile } from './steps/surprise.ts';
 import { readJson } from './store.ts';
 import { IntegrityError } from './task.ts';
 import { RECHECK_FILE, THINMAP_DELTA_FILE } from './bookkeeping.ts';
+import { OUTCOME_FILE, readOutcome } from './bench-cycle.ts';
 
 /**
  * Step 12 preparation (plan §4 rows 41–42, §8, s5 §7; PR-D group D4; registered by PR-E). 12a writes the approval
@@ -135,6 +136,12 @@ function code(text: string): string {
   return `\`${text}\``;
 }
 
+function maintainerLine(m: FinalJson['maintainer']): string {
+  if (m === null) return 'the benchmark cycle did not run';
+  const cited = m.evidence_ids.length === 0 ? 'no evidence cited' : `cites ${m.evidence_ids.map(code).join(', ')}`;
+  return `${m.outcome}${m.version === null ? '' : ` (${m.version})`}, ${cited}; the cycle files are under \`bench/\` and the log line in \`benchmark/log.jsonl\``;
+}
+
 /** English PR body: summary, reviewer checklist with evidence paths / hashes, `Closes`-free (the session links the issue). */
 export function prBody(final: FinalJson, issue: number, evidence: readonly string[]): string {
   const r = final.round;
@@ -153,7 +160,7 @@ export function prBody(final: FinalJson, issue: number, evidence: readonly strin
     `- [ ] Post-merge gate split: ${yesNo(final.postmerge_split)}; merge editor: ${final.editor ?? 'n/a'}${final.editor === 'fallback' ? ' (deterministic fallback plan: read the scene closely)' : ''}.`,
     `- [ ] Unseal: ${final.unseal.status}, remote probe ${final.unseal.remote}.`,
     `- [ ] Thin map: ${thinmapLine(final.thinmap)}.`,
-    `- [ ] Benchmark maintainer: ${final.maintainer === null ? 'not in this build' : `${final.maintainer.outcome}${final.maintainer.version === null ? '' : ` (${final.maintainer.version})`}`}.`,
+    `- [ ] Benchmark maintainer: ${maintainerLine(final.maintainer)}.`,
     `- [ ] Marker hash chain verifies: \`forge round status ${r} --verify\`.`,
   ];
   return [
@@ -232,6 +239,20 @@ function thinmapOf(ctx: StepContext): FinalJson['thinmap'] {
   return { all_targets_above: above, snapshot };
 }
 
+/**
+ * FinalJson.maintainer from 11j's `bench/outcome.json` (the cycle's logged line): null only when the cycle did not run
+ * (no 11j marker, e.g. a step test); a marked 11j without a readable outcome.json is an integrity error.
+ */
+function maintainerOf(ctx: StepContext): FinalJson['maintainer'] {
+  const read = readOutcome(ctx.paths);
+  if (read === null) {
+    if (isDone(ctx, '11j-bench-outcome')) throw new IntegrityError(`rounds/${ctx.roundId}/bench/${OUTCOME_FILE} is missing although 11j-bench-outcome is marked`);
+    return null;
+  }
+  if (!read.ok) throw new IntegrityError(read.error);
+  return { outcome: read.value.outcome, version: read.value.version, evidence_ids: [...read.value.evidence_ids] };
+}
+
 /** 1-based owner-log line of the latest `action` entry for this round (the reader keeps one entry per line). */
 function ownerLogLine(ctx: StepContext, action: string): number | null {
   const entries = ctx.owner.entries();
@@ -277,7 +298,7 @@ export const prepareFinalStep: StepDef = {
       postmerge_split: merged?.split ?? false,
       editor: merged?.editor ?? null,
       thinmap: thinmapOf(ctx),
-      maintainer: null,
+      maintainer: maintainerOf(ctx),
       unseal: unsealOf(ctx),
     };
     const dir = `rounds/${ctx.roundId}`;
@@ -286,7 +307,8 @@ export const prepareFinalStep: StepDef = {
       const line = ownerLogLine(ctx, action);
       return line === null ? [] : [`\`owner-log.jsonl\` line ${line}: ${action}`];
     });
-    const recorded = ['merge.json', ...(merged?.files ?? []), 'unseal.json', RECHECK_FILE, THINMAP_DELTA_FILE].filter((f) => existsSync(join(ctx.paths.dir, f)));
+    const outcomeRel = `bench/${OUTCOME_FILE}`;
+    const recorded = ['merge.json', ...(merged?.files ?? []), 'unseal.json', RECHECK_FILE, THINMAP_DELTA_FILE, outcomeRel].filter((f) => existsSync(join(ctx.paths.dir, f)));
     const evidence = [
       `\`${dir}/${APPROVAL_DIFF_FILE}\` (sha256 ${code(diff.value.sha256)})`,
       `\`${dir}/${FINAL_FILE}\``,
@@ -301,7 +323,9 @@ export const prepareFinalStep: StepDef = {
       ctx.files.writeText(join(ctx.paths.dir, PR_BODY_FILE), prBody(final, start.issue.number, evidence)),
     ];
     ctx.progress('12a-prepare', 'info', `${final.status}; approval diff ${diff.value.sha256.slice(0, 12)} (${diff.value.text.length} chars)`);
-    return { kind: 'done', inputs: [decision.file], outputs, external: [] };
+    const outcomePath = join(ctx.paths.dir, outcomeRel);
+    const inputs = [decision.file, ...(existsSync(outcomePath) ? [ctx.files.rel(outcomePath)] : [])];
+    return { kind: 'done', inputs, outputs, external: [] };
   },
 };
 

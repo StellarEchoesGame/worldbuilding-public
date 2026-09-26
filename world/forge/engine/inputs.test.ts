@@ -77,3 +77,43 @@ test('sourcesFromRound reports a round without labels', () => {
   assert.equal(r.ok, false);
   rmSync(root, { recursive: true });
 });
+
+test('sourcesFromRound leaves BASE out when the round was judged against an earlier champion (champion.json kind owner_pick); a baseline round still needs it', () => {
+  const root = mkdtempSync(join(tmpdir(), 'forge-inputs-'));
+  const dir = join(root, 'rounds', 'R01');
+  mkdirSync(join(dir, 'submissions'), { recursive: true });
+  writeFileSync(join(dir, 'labels.json'), JSON.stringify({ A: 'W1' }));
+  submission(dir, 'W1', '温芮把旧水壶放回架上。', '[]');
+  writeFileSync(join(dir, 'champion.json'), JSON.stringify({ kind: 'owner_pick' }));
+  const r = sourcesFromRound(root, 'R01');
+  assert.ok(r.ok, r.ok ? '' : r.error);
+  assert.deepEqual(r.value.map((s) => s.label), ['A']);
+  writeFileSync(join(dir, 'champion.json'), JSON.stringify({ kind: 'baseline' }));
+  const missing = sourcesFromRound(root, 'R01');
+  assert.ok(!missing.ok && /submission BASE is missing/u.test(missing.error));
+  rmSync(root, { recursive: true });
+});
+
+test('sourcesFromRound: an absent champion.json means a prototype round (BASE is a source); a torn or malformed one is reported, not read as absent', () => {
+  const root = mkdtempSync(join(tmpdir(), 'forge-inputs-'));
+  const dir = join(root, 'rounds', 'R01');
+  mkdirSync(join(dir, 'submissions'), { recursive: true });
+  writeFileSync(join(dir, 'labels.json'), JSON.stringify({ A: 'W1' }));
+  submission(dir, 'W1', '温芮把旧水壶放回架上。', '[]');
+  const absent = sourcesFromRound(root, 'R01');
+  assert.ok(!absent.ok && /submission BASE is missing/u.test(absent.error), 'no snapshot: BASE is required');
+  const cases: Array<[string, RegExp]> = [
+    ['{"kind": "owner_pi', /not valid JSON/u],
+    ['["owner_pick"]', /expected an object/u],
+    ['{"kind": 3}', /kind must be a string/u],
+    ['{}', /kind must be a string/u],
+  ];
+  for (const [body, want] of cases) {
+    writeFileSync(join(dir, 'champion.json'), body);
+    const r = sourcesFromRound(root, 'R01');
+    assert.ok(!r.ok, body);
+    assert.match(r.error, /^rounds\/R01\/champion\.json: /u, body);
+    assert.match(r.error, want, body);
+  }
+  rmSync(root, { recursive: true });
+});
