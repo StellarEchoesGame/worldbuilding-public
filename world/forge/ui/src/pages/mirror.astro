@@ -1,0 +1,67 @@
+---
+import Base from '../layouts/Base.astro';
+import { uiNow } from '../lib/clock.ts';
+import { dataDir, isRealData } from '../lib/data.ts';
+import { mirrorView } from '../lib/views/mirror.ts';
+
+const view = mirrorView(dataDir(), uiNow(), isRealData());
+const error = Astro.url.searchParams.get('error');
+const result = Astro.url.searchParams.get('result');
+const kinds: Record<string, string> = { probe: '探针哈希', card: '结果卡', decision: '决策', bench_notice: '基准通知', diff_approval: '定稿批准' };
+const short = (key: string): string => (/^[0-9a-f]{64}$/u.test(key) ? `${key.slice(0, 12)}…` : key);
+const pendingTotal = view.rounds.reduce((n, r) => n + r.items.length, 0);
+---
+<Base title="镜像">
+  <h1>镜像</h1>
+  <p class="muted">轮次子 issue 上的 GitHub 评论（结果卡、决策、基准通知、定稿批准）。失败的镜像排队重试，从不阻塞轮次；引擎每次运行都会自动补发，这里可以手动触发一次。</p>
+  {error !== null && <p class="error">{error}</p>}
+  {result !== null && <p class="pill ok">{result}</p>}
+  {view.retryDisabled !== null && <p class="muted">{view.retryDisabled}</p>}
+  {view.rounds.length === 0 && <p class="muted">还没有任何镜像记录。</p>}
+  {view.rounds.length > 0 && <p>待补发 {pendingTotal} 条。</p>}
+  {view.rounds.map((r) => (
+    <div class="card">
+      <h2 style="margin-top:0">{r.round}</h2>
+      {r.error !== null && <p class="error">{r.error}</p>}
+      {r.items.length > 0 && (
+        <table>
+          <thead><tr><th>类型</th><th>键</th><th>失败次数</th><th>下次尝试</th><th>最近错误</th></tr></thead>
+          <tbody>
+            {r.items.map((m) => (
+              <tr>
+                <td>{kinds[m.kind] ?? m.kind}</td>
+                <td><code>{short(m.key)}</code></td>
+                <td>{m.failures}</td>
+                <td>{m.nextAttemptAt === null ? <span class="pill bad">不自动重试（公开内容扫描拒绝）</span> : m.nextAttemptAt}</td>
+                <td class="muted">{m.lastError ?? '—'}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      )}
+      {r.items.map((m) => (
+        <details><summary>{kinds[m.kind] ?? m.kind} {short(m.key)} 正文预览</summary><pre class="prose" style="font-size:.85rem">{m.preview}</pre></details>
+      ))}
+      {r.items.length > 0 && (
+        <form method="post" action="/api/mirror/retry" style="margin-top:.6rem">
+          <input type="hidden" name="round" value={r.round} />
+          <button class="btn" type="submit" disabled={view.retryDisabled !== null}>重试 {r.round}</button>
+          <span class="muted">运行 forge mirror --round {r.round}（最多 2 分钟）；引擎锁被占用时会提示。</span>
+        </form>
+      )}
+      {r.posted.length > 0 && (
+        <details>
+          <summary>已发布 {r.posted.length} 条</summary>
+          <table>
+            <thead><tr><th>类型</th><th>键</th><th>发布时间</th><th>链接</th></tr></thead>
+            <tbody>
+              {r.posted.map((p) => (
+                <tr><td>{kinds[p.kind] ?? p.kind}</td><td><code>{short(p.key)}</code></td><td>{p.createdAt ?? '—'}</td><td>{p.url === null ? '—' : <a href={p.url} rel="noreferrer">评论</a>}</td></tr>
+              ))}
+            </tbody>
+          </table>
+        </details>
+      )}
+    </div>
+  ))}
+</Base>

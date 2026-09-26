@@ -1,12 +1,11 @@
 import { existsSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
-import { fileURLToPath } from 'node:url';
 import { isFamily, type Family, type JudgeSpec } from './config.ts';
 import type { FreezeFlag } from './freeze.ts';
 import { isRecord, readArray, readBoolean, readNumber, readRecord, readString, type JsonRecord } from './json.ts';
 import type { ProtocolCalibration } from './protocol.ts';
 import { err, ok, type Result } from './result.ts';
-import { loadSchema, validate, type Schema } from './schema.ts';
+import { loadSchema, type Schema, schemaFile, validate } from './schema.ts';
 
 export type AgreementState = 'ok' | 'flagged' | 'suspended';
 
@@ -77,7 +76,7 @@ let cachedSchema: Schema | null = null;
 /** The engine's copy of schema/calib-status.schema.json (module-relative, so temp forge roots need no schema dir). */
 function statusSchema(): Schema {
   if (cachedSchema !== null) return cachedSchema;
-  const raw: unknown = JSON.parse(readFileSync(fileURLToPath(new URL('../schema/calib-status.schema.json', import.meta.url)), 'utf8'));
+  const raw: unknown = JSON.parse(readFileSync(schemaFile('calib-status.schema.json'), 'utf8'));
   const schema = loadSchema(raw);
   if (!schema.ok) throw new Error(`schema/calib-status.schema.json: ${schema.error}`);
   cachedSchema = schema.value;

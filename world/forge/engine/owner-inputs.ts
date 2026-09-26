@@ -1,12 +1,11 @@
 import { createHash } from 'node:crypto';
 import { existsSync, readdirSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
-import { fileURLToPath } from 'node:url';
 import type { StepContext } from './context.ts';
 import { isRecord, readArray, readBoolean, readNumber, readRecord, readString, type JsonRecord } from './json.ts';
 import { err, ok, type Result } from './result.ts';
 import type { StepOutcome } from './runner.ts';
-import { loadSchema, validate, type Schema } from './schema.ts';
+import { loadSchema, type Schema, schemaFile, validate } from './schema.ts';
 import { canonicalJson } from './seal.ts';
 
 export type OwnerAction =
@@ -186,7 +185,7 @@ const schemaCache = new Map<OwnerSchemaName, Schema>();
 function ownerSchema(name: OwnerSchemaName): Schema {
   const cached = schemaCache.get(name);
   if (cached !== undefined) return cached;
-  const path = fileURLToPath(new URL(`../schema/${name}.schema.json`, import.meta.url));
+  const path = schemaFile(`${name}.schema.json`);
   const raw: unknown = JSON.parse(readFileSync(path, 'utf8'));
   const schema = loadSchema(raw);
   if (!schema.ok) throw new Error(`schema/${name}.schema.json: ${schema.error}`);

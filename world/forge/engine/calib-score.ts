@@ -1,6 +1,5 @@
 import { existsSync, readdirSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
-import { fileURLToPath } from 'node:url';
 import { readBenchLog } from './bench-log.ts';
 import { PAIRS_FILE, readCalibSet, type CalibPairRecord, type CalibSetRecord, type DisplayRecord, type RequalReason, type SetId, type SetKind } from './calib-build.ts';
 import { dryrunPath, jobsFor, PIN_FILE, readDryrunVerdicts, readPin, readVerdicts, type CalibPin, type DryrunVerdictRecord, type VerdictRecord } from './calib-run.ts';
@@ -12,7 +11,7 @@ import { OWNER_ANSWERS, OWNER_LOG, sha256Bytes, type CalibAnswer } from './owner
 import type { CalibCategory, ProtocolCalibration } from './protocol.ts';
 import { err, ok, type Result } from './result.ts';
 import type { StepDef, StepOutcome } from './runner.ts';
-import { loadSchema, validate, type Schema } from './schema.ts';
+import { loadSchema, type Schema, schemaFile, validate } from './schema.ts';
 import { canonicalJson } from './seal.ts';
 import { sha256 } from './store.ts';
 import { IntegrityError } from './task.ts';
@@ -241,7 +240,7 @@ let cachedSchema: Schema | null = null;
 /** The engine's copy of schema/calib-report.schema.json (module-relative, so temp forge roots need no schema dir). */
 function reportSchema(): Schema {
   if (cachedSchema !== null) return cachedSchema;
-  const raw: unknown = JSON.parse(readFileSync(fileURLToPath(new URL('../schema/calib-report.schema.json', import.meta.url)), 'utf8'));
+  const raw: unknown = JSON.parse(readFileSync(schemaFile('calib-report.schema.json'), 'utf8'));
   const schema = loadSchema(raw);
   if (!schema.ok) throw new Error(`schema/calib-report.schema.json: ${schema.error}`);
   cachedSchema = schema.value;

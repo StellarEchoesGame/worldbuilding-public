@@ -1,0 +1,93 @@
+---
+import Base from '../layouts/Base.astro';
+import { dataDir } from '../lib/data.ts';
+import { configModels, configView, MODEL_LIST_TIMEOUT_MS, type ModelList } from '../lib/views/config.ts';
+
+const root = dataDir();
+const view = configView(root);
+const models: ModelList = view.local.present ? await configModels(root, globalThis.fetch, MODEL_LIST_TIMEOUT_MS) : { ok: false, error: '没有 local.json：无法读取网关的实时模型列表，可以直接输入模型编号。' };
+const listed = models.ok ? models.models : [];
+const error = Astro.url.searchParams.get('error');
+const canEdit = view.locked === null && view.writers.error === null && view.writers.slots.length > 0;
+---
+<Base title="配置">
+  <h1>配置</h1>
+  <p class="muted">写手槽位的模型写进 <code>writers.json</code>，从下一轮冻结起生效。评委与维护者（<code>judges.json</code>）属于协议包，这里只读。</p>
+  {error !== null && <p class="error">{error}</p>}
+  {view.locked !== null && <p class="error">{view.locked}</p>}
+
+  <h2>写手槽位</h2>
+  {view.writers.error !== null && <p class="error">{view.writers.error}</p>}
+  {!view.writers.present && <p class="muted">没有 writers.json。</p>}
+  <form method="post" action="/api/config/writers" class="card">
+    <fieldset disabled={!canEdit} style="border:0;padding:0;margin:0">
+      <table>
+        <thead><tr><th>槽位</th><th>模型</th><th>家族</th><th>提示</th></tr></thead>
+        <tbody>
+          {view.writers.slots.map((s) => (
+            <tr>
+              <td>{s.id}</td>
+              <td><input name={s.id} value={s.model} list="gateway-models" required maxlength="120" size="36" autocomplete="off" /></td>
+              <td>{s.family ?? <span class="pill warn">未知</span>}</td>
+              <td>{s.warning === null ? <span class="muted">—</span> : <span class="pill warn">{s.warning}</span>}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+      <datalist id="gateway-models">
+        {listed.map((m) => <option value={m.id}>{m.family ?? '未知家族'}{m.warning === null ? '' : ' ⚠'}</option>)}
+      </datalist>
+      <p><button class="btn" type="submit">保存到 writers.json</button> <span class="muted">只改模型；max_tokens、temperature、超时和基线保持不变。</span></p>
+    </fieldset>
+  </form>
+
+  {view.writers.baseline !== null && (
+    <div class="card">
+      <h3>基线（只读）</h3>
+      <p>{view.writers.baseline.id}：<code>{view.writers.baseline.model}</code>　家族 {view.writers.baseline.family ?? '未知'}{view.writers.baseline.warning !== null && <span class="pill warn">{view.writers.baseline.warning}</span>}</p>
+      <p class="muted">基线、诱饵和缺陷写手都用这个模型。换基线要走 owner 批准的基线重建，不在这里改。</p>
+    </div>
+  )}
+
+  <h2>网关模型列表</h2>
+  {models.ok ? (
+    <details class="card">
+      <summary>网关当前提供 {listed.length} 个模型（家族按 families.json 前缀判断）</summary>
+      <table>
+        <thead><tr><th>模型</th><th>家族</th><th>提示</th></tr></thead>
+        <tbody>
+          {listed.map((m) => <tr><td><code>{m.id}</code></td><td>{m.family ?? '未知'}</td><td class="muted">{m.warning ?? ''}</td></tr>)}
+        </tbody>
+      </table>
+    </details>
+  ) : (
+    <p class="muted">模型列表为空：{models.error}</p>
+  )}
+  <p class="muted">local.json：{view.local.present ? '已配置' : '未配置'}{view.local.error !== null && <span class="error">　{view.local.error}</span>}（内容不在页面上显示）</p>
+  {view.judgeFamilies.length > 0 && <p class="muted">评委与维护者家族：{view.judgeFamilies.join('、')}。写手用这些家族的模型时，该家族的评委在这个写手的配对里回避。</p>}
+
+  <h2>评委（judges.json，只读）</h2>
+  {view.judges.error !== null && <p class="error">{view.judges.error}</p>}
+  {view.judges.list.length > 0 && (
+    <table>
+      <thead><tr><th>编号</th><th>家族</th><th>CLI</th><th>模型</th><th>强度</th><th>并发</th><th>接受的实际模型</th></tr></thead>
+      <tbody>
+        {view.judges.list.map((j) => (
+          <tr><td>{j.id}</td><td>{j.family}</td><td>{j.cli}</td><td><code>{j.model}</code></td><td>{j.effort}</td><td>{j.concurrency}</td><td class="muted">{j.acceptedServed.join('、') || '—'}</td></tr>
+        ))}
+      </tbody>
+    </table>
+  )}
+  <p class="muted">改评委要改协议包，并在 <a href="/benchmark">基准</a> 页重新批准。</p>
+
+  <h2>价格（prices.json）</h2>
+  {view.prices.error !== null && <p class="error">{view.prices.error}</p>}
+  {!view.prices.present && <p class="muted">没有 prices.json：成本只按 token 统计。</p>}
+  {view.prices.present && view.prices.models.length === 0 && view.prices.error === null && <p class="muted">prices.json 没有价格条目：没有自报成本的调用只按 token 统计。</p>}
+  {view.prices.models.length > 0 && (
+    <table>
+      <thead><tr><th>模型</th><th>输入（美元 / 百万 token）</th><th>输出（美元 / 百万 token）</th></tr></thead>
+      <tbody>{view.prices.models.map((p) => <tr><td><code>{p.model}</code></td><td>{p.input}</td><td>{p.output}</td></tr>)}</tbody>
+    </table>
+  )}
+</Base>

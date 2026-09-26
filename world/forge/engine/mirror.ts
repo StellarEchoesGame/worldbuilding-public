@@ -1,6 +1,5 @@
 import { existsSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
-import { fileURLToPath } from 'node:url';
 import { readBenchLog, type BenchLogEntry } from './bench-log.ts';
 import type { CardJson } from './card.ts';
 import { isFamily } from './config.ts';
@@ -11,7 +10,7 @@ import { appendMirrorEntry, readMirrorLog, type MirrorEntry, type MirrorKind, ty
 import { ownerInputs, sha256Bytes, type Decision, type OwnerInputs } from './owner-inputs.ts';
 import { isTrustedAuthor, type GitHubComment } from './ports.ts';
 import { err, ok, type Result } from './result.ts';
-import { loadSchema, validate, type Schema } from './schema.ts';
+import { loadSchema, type Schema, schemaFile, validate } from './schema.ts';
 import { canonicalJson } from './seal.ts';
 import { roundPaths } from './store.ts';
 import { loadSubmission } from './submission.ts';
@@ -99,7 +98,7 @@ function schemaOf(file: string, path: readonly string[]): Schema {
   const id = `${file}#${path.join('/')}`;
   const cached = schemaCache.get(id);
   if (cached !== undefined) return cached;
-  let raw: unknown = JSON.parse(readFileSync(fileURLToPath(new URL(`../schema/${file}`, import.meta.url)), 'utf8'));
+  let raw: unknown = JSON.parse(readFileSync(schemaFile(file), 'utf8'));
   for (const key of path) raw = isRecord(raw) ? raw[key] : null;
   const schema = loadSchema(raw);
   if (!schema.ok) throw new Error(`schema/${file} ${path.join('.')}: ${schema.error}`);

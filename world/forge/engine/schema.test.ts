@@ -1,6 +1,9 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { loadSchema, validate, type Schema } from './schema.ts';
+import { existsSync, mkdtempSync, rmSync } from 'node:fs';
+import { join, resolve } from 'node:path';
+import { fileURLToPath } from 'node:url';
+import { loadSchema, schemaFile, validate, type Schema } from './schema.ts';
 
 const person: Schema = {
   type: 'object',
@@ -45,4 +48,18 @@ test('loadSchema rejects keywords the validator does not implement', () => {
   assert.equal(r.ok, false);
   if (!r.ok) assert.match(r.error, /oneOf/);
   assert.equal(loadSchema(person).ok, true);
+});
+
+test('schemaFile finds schema/<file> above the engine source and above a bundle-like directory', () => {
+  const forge = resolve(fileURLToPath(new URL('..', import.meta.url)));
+  const fromSource = schemaFile('marker.schema.json');
+  assert.equal(fromSource, join(forge, 'schema', 'marker.schema.json'));
+  assert.ok(existsSync(fromSource));
+  const deep = mkdtempSync(join(forge, '.runs', 'schema-walk-'));
+  try {
+    assert.equal(schemaFile('marker.schema.json', join(deep, 'server', 'chunks')), fromSource);
+  } finally {
+    rmSync(deep, { recursive: true, force: true });
+  }
+  assert.throws(() => schemaFile('no-such.schema.json'), /schema\/no-such\.schema\.json not found/u);
 });

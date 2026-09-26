@@ -315,7 +315,8 @@ test('calibration answers: changed pairs → invalid; unlogged answers → repai
   assert.ok(submitCalibAnswers(root, 'C00', [{ slot: 3, choice: 'right', ms: null }], '2026-09-25T00:00:09.000Z').ok);
   const healed = owner.calibAnswers();
   assert.ok(healed.state === 'ok' && healed.value.sets['C00']?.answers.length === 3);
-  assert.deepEqual(owner.entries().at(-1)?.slots, [2, 3]);
+  // the crashed slot 2 is re-logged on its own line before the new answer's line
+  assert.deepEqual(owner.entries().slice(-2).map((e) => e.slots), [[2], [3]]);
   const pairs = readFileSync(join(root, 'calibration/pairs.json'), 'utf8');
   put(root, 'calibration/pairs.json', pairs.replace('"C00-P02"', '"C00-P09"'));
   assert.equal(owner.calibAnswers().state, 'invalid');

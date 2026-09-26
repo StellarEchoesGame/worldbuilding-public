@@ -1,6 +1,5 @@
 import { existsSync, readdirSync, readFileSync } from 'node:fs';
 import { join, relative, sep } from 'node:path';
-import { fileURLToPath } from 'node:url';
 import { roundNumber } from './bench-check.ts';
 import { BENCH_LOG, readBenchLog, VERSION_ID, type BenchLogEntry, type VersionRef } from './bench-log.ts';
 import { EVIDENCE_DIR, evidencePath } from './bench-log.ts';
@@ -18,7 +17,7 @@ import { isRecord, readArray, readBoolean, readNumber, readRecord, readString, t
 import { sha256Bytes, type OwnerInputs } from './owner-inputs.ts';
 import { pairDir, pairVerdicts, pairsFilePath, readPairsFile, sessionVoid, type FamilySessions } from './pairs.ts';
 import { err, ok, type Result } from './result.ts';
-import { loadSchema, validate, type Schema } from './schema.ts';
+import { loadSchema, type Schema, schemaFile, validate } from './schema.ts';
 import { roundPaths, sha256 } from './store.ts';
 import { displayText } from './submission.ts';
 import { IntegrityError } from './task.ts';
@@ -861,7 +860,7 @@ let cachedSchema: Schema | null = null;
 /** The engine's copy of schema/evidence.schema.json (module-relative, so temp forge roots need no schema dir). */
 function evidenceSchema(): Schema {
   if (cachedSchema !== null) return cachedSchema;
-  const raw: unknown = JSON.parse(readFileSync(fileURLToPath(new URL('../schema/evidence.schema.json', import.meta.url)), 'utf8'));
+  const raw: unknown = JSON.parse(readFileSync(schemaFile('evidence.schema.json'), 'utf8'));
   const schema = loadSchema(raw);
   if (!schema.ok) throw new Error(`schema/evidence.schema.json: ${schema.error}`);
   cachedSchema = schema.value;

@@ -1,0 +1,95 @@
+---
+import Base from '../../layouts/Base.astro';
+import { uiNow } from '../../lib/clock.ts';
+import { dataDir } from '../../lib/data.ts';
+import { benchVersionPage } from '../../lib/views/bench.ts';
+
+const page = benchVersionPage(dataDir(), Astro.params.version ?? '', uiNow());
+if (page === null) return new Response('没有这个基准版本（或基准日志需要修复，见 /benchmark）', { status: 404 });
+const v = page.version;
+const error = Astro.url.searchParams.get('error');
+const intact = v.fileSha256 !== null && (v.sha256 === null || v.sha256 === v.fileSha256);
+---
+<Base title={`基准 ${v.version}`}>
+  <p class="muted"><a href="/benchmark">基准</a> · {v.version}</p>
+  <h1>基准 {v.version}：相对 {v.parent ?? '空白（根版本）'} 的差异</h1>
+  <p class="muted">周期 {v.cycle} · 记录于 {v.at} · {v.outcome === 'pending_owner' ? '待你批准' : '直接生效类'} · 文件 {v.path} · SHA-256 <span class="marks">{v.fileSha256 ?? '文件缺失'}</span></p>
+  {error !== null && <p class="error">{error}</p>}
+  {v.fileSha256 !== null && !intact && <p class="error">文件内容与基准日志记录的 SHA-256（{v.sha256}）不一致，文件被改过。</p>}
+  {v.errors.length > 0 && <ul>{v.errors.map((e) => <li class="error">{e}</li>)}</ul>}
+
+  <div class="card">
+    {v.viewedAt !== null && <p id="view-state" class="pill ok">已于 {v.viewedAt} 记录你查看过这份差异。</p>}
+    {v.viewedAt === null && intact && v.fileSha256 !== null && (
+      <>
+        <p id="view-state" class="muted">打开本页会记录你已查看这份差异（直接生效类的版本从这一刻起生效）。</p>
+        <form method="post" action="/api/benchmark/view" id="view-form">
+          <input type="hidden" name="version" value={v.version} />
+          <input type="hidden" name="sha256" value={v.fileSha256} />
+          <button class="btn ghost" type="submit">记录已查看</button>
+        </form>
+        <script is:inline>
+          (() => {
+            const form = document.getElementById('view-form');
+            const state = document.getElementById('view-state');
+            if (!(form instanceof HTMLFormElement)) return;
+            fetch(form.action, { method: 'POST', body: new FormData(form), credentials: 'same-origin' })
+              .then((res) => {
+                if (!res.ok || new URL(res.url).searchParams.has('error')) return;
+                form.hidden = true;
+                if (state !== null) state.textContent = '已记录你查看过这份差异。';
+              })
+              .catch(() => undefined);
+          })();
+        </script>
+      </>
+    )}
+    {v.pending && v.fileSha256 !== null && intact && (
+      <form method="post" action="/api/benchmark/approve" style="margin-top:.6rem">
+        <input type="hidden" name="version" value={v.version} />
+        <input type="hidden" name="sha256" value={v.fileSha256} />
+        <button class="btn" type="submit">批准 {v.version}</button>
+      </form>
+    )}
+    {v.approvedAt !== null && <p class="pill ok">已于 {v.approvedAt} 批准。</p>}
+  </div>
+
+  <h2>改动（{page.diff.length} 处）</h2>
+  {page.diff.length === 0 && <p class="muted">与上一版没有差异。</p>}
+  {page.diff.length > 0 && (
+    <table>
+      <thead><tr><th>位置</th><th>上一版</th><th>这一版</th></tr></thead>
+      <tbody>
+        {page.diff.map((d) => (
+          <tr>
+            <td><code>{d.path === '' ? '（整体）' : d.path}</code></td>
+            <td class="marks">{d.before ?? <span class="muted">（无）</span>}</td>
+            <td class="marks">{d.after ?? <span class="muted">（删除）</span>}</td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  )}
+
+  <h2>理由与证据</h2>
+  {v.reasons.length === 0 && <p class="muted">没有记录理由。</p>}
+  {v.reasons.map((r) => (
+    <blockquote>{r.text}<br /><span class="muted">键 {r.keys.join('、') || '—'} · 证据 {r.evidence_ids.join('、') || '—'}</span></blockquote>
+  ))}
+  {v.evidenceIds.length > 0 && <p class="muted">引用的证据编号：{v.evidenceIds.join('、')}</p>}
+  {v.replay !== null && (
+    <div class="card">
+      <h3>重放 {v.replay.passed ? <span class="pill ok">通过</span> : <span class="pill bad">未通过</span>} <span class="muted">{v.replay.reason}</span></h3>
+      <p>合计：旧版 {v.replay.pooled.old} → 新版 {v.replay.pooled.new}（{v.replay.pooled.n} 对，标签 {v.replay.labels.length} 个）</p>
+      <table>
+        <thead><tr><th>评委家族</th><th>旧版</th><th>新版</th><th>对数</th><th>作废</th></tr></thead>
+        <tbody>{Object.entries(v.replay.per_family).map(([f, r]) => <tr><td>{f}</td><td>{r.old}</td><td>{r.new}</td><td>{r.n}</td><td>{r.void}</td></tr>)}</tbody>
+      </table>
+    </div>
+  )}
+
+  <details>
+    <summary>完整文件</summary>
+    <pre class="prose" style="font-family:ui-monospace,Menlo,monospace;font-size:.85rem">{page.text}</pre>
+  </details>
+</Base>

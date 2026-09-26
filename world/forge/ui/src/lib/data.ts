@@ -1,15 +1,48 @@
 import { existsSync, readdirSync } from 'node:fs';
-import { join, resolve } from 'node:path';
+import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { isRecord, readArray, readBoolean, readNumber, readRecord, readString } from '../../../engine/json.ts';
 import { CHAMPION_ID, displayText, submissionFor } from '../../../engine/round.ts';
 import { readJson, readLines, roundPaths } from '../../../engine/store.ts';
 import type { Claim, InterfaceCard } from '../../../engine/writer-output.ts';
 import { readAuditSet, readLabels, type AuditPair } from './owner.ts';
+import { sameDir } from '../../../engine/same-dir.ts';
+
+/**
+ * The forge root this code runs from: the nearest ancestor of this module holding engine/cli.ts and
+ * ui/astro.config.mjs (works from ui/src/lib and from the built ui/dist/server/chunks alike).
+ */
+export function codeRoot(): string {
+  let dir = dirname(fileURLToPath(import.meta.url));
+  for (;;) {
+    if (existsSync(join(dir, 'engine', 'cli.ts')) && existsSync(join(dir, 'ui', 'astro.config.mjs'))) return dir;
+    const up = dirname(dir);
+    if (up === dir) throw new Error('forge ui: cannot locate the forge root above the UI module');
+    dir = up;
+  }
+}
 
 export function dataDir(): string {
   const fromEnv = process.env['FORGE_DATA_DIR'];
-  return fromEnv !== undefined && fromEnv !== '' ? fromEnv : resolve(fileURLToPath(new URL('../../..', import.meta.url)));
+  return fromEnv !== undefined && fromEnv !== '' ? resolve(fromEnv) : codeRoot();
+}
+
+/** The canon repository of a forge root (`<repo>/world/forge`), real or fixture. */
+export function repoDir(): string {
+  return resolve(dataDir(), '..', '..');
+}
+
+/**
+ * `message` with every occurrence of the forge root replaced by `<forge>`: engine readers wrap Node fs errors that quote
+ * absolute paths (ENOENT / EACCES …, open '<root>/owner-log.jsonl'), and pages never show a local absolute path.
+ */
+export function redactRoot(message: string, root: string): string {
+  return root === '' ? message : message.split(root).join('<forge>');
+}
+
+/** True when the UI serves the real forge root (not a temporary fixture directory), by filesystem identity. */
+export function isRealData(): boolean {
+  return sameDir(dataDir(), codeRoot());
 }
 
 export interface ProgressEvent {

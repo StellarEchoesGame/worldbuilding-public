@@ -1,0 +1,62 @@
+---
+import Base from '../../layouts/Base.astro';
+import { dataDir } from '../../lib/data.ts';
+import { calibSets, calibView } from '../../lib/views/calib.ts';
+
+const set = Astro.params.set ?? '';
+const root = dataDir();
+const view = calibView(root, set);
+if (view === null) return new Response('没有这个校准组', { status: 404 });
+const pinned = calibSets(root).find((s) => s.set === set)?.pinned ?? false;
+const error = Astro.url.searchParams.get('error');
+const next = pinned || view.stale ? null : view.next;
+---
+<Base title={`校准 ${view.set}`}>
+  <p class="muted"><a href="/calibration">校准</a> · {view.set}</p>
+  <h1>校准 {view.set}：选你更想多待一小时的那一篇</h1>
+  <p class="muted">已答 {view.answered} / {view.total}。不显示作者、模型或配对编号，也不显示任何评委意见。每题提交后不能修改；中途离开，下次从没答的那题继续。</p>
+  {error !== null && <p class="error">{error}</p>}
+  {view.error !== null && <p class="error">{view.error}</p>}
+  {view.stale && <p class="pill bad">校准对在你作答后变过，已有答案对不上新的配对，不能继续提交。请在终端核对 calibration/pairs.json。</p>}
+  {pinned && <p class="pill ok">这一组已经锁定（评委已按你的答案开始比对），只读。</p>}
+  {!pinned && !view.stale && view.error === null && next === null && <p class="pill ok">这一组全部答完。回到终端运行 <code>npm run forge -- calib run --set {view.set}</code> 继续。</p>}
+  {next !== null && (
+    <>
+    <form method="post" action={`/api/calibration/${view.set}/answer`} id="calib-form">
+      <input type="hidden" name="slot" value={String(next.slot)} />
+      <input type="hidden" name="ms" value="" />
+      <p>第 {next.position} / {next.total} 题 · 键盘：<span class="marks">1</span> 或 <span class="marks">←</span> 选左边，<span class="marks">2</span> 或 <span class="marks">→</span> 选右边</p>
+      <div class="grid2">
+        <div class="card">
+          <button class="btn" type="submit" name="choice" value="left">选左边（1 / ←）</button>
+          <div class="prose" style="margin-top:.6rem">{next.leftText}</div>
+        </div>
+        <div class="card">
+          <button class="btn" type="submit" name="choice" value="right">选右边（2 / →）</button>
+          <div class="prose" style="margin-top:.6rem">{next.rightText}</div>
+        </div>
+      </div>
+    </form>
+    <script is:inline>
+      (() => {
+        const form = document.getElementById('calib-form');
+        if (!(form instanceof HTMLFormElement)) return;
+        const started = performance.now();
+        let busy = false;
+        form.addEventListener('submit', (event) => {
+          if (busy) { event.preventDefault(); return; }
+          busy = true;
+          form.elements.namedItem('ms').value = String(Math.round(performance.now() - started));
+        });
+        document.addEventListener('keydown', (event) => {
+          if (busy || event.altKey || event.ctrlKey || event.metaKey || event.repeat) return;
+          const choice = event.key === '1' || event.key === 'ArrowLeft' ? 'left' : event.key === '2' || event.key === 'ArrowRight' ? 'right' : null;
+          if (choice === null) return;
+          event.preventDefault();
+          form.requestSubmit(form.querySelector(`button[value="${choice}"]`));
+        });
+      })();
+    </script>
+    </>
+  )}
+</Base>

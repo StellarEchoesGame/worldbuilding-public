@@ -1,0 +1,64 @@
+---
+import Base from '../../layouts/Base.astro';
+import Heatmap from '../../components/Heatmap.astro';
+import { dataDir, repoDir } from '../../lib/data.ts';
+import { layerLabel, topicView } from '../../lib/views/topic.ts';
+
+const id = Astro.params.id ?? '';
+const view = topicView(dataDir(), repoDir(), id);
+if (view === null) return new Response('没有这一轮', { status: 404 });
+const error = Astro.url.searchParams.get('error');
+const primary = (rowId: string): string => view.heatmap.rows.find((r) => r.rowId === rowId)?.primary ?? rowId;
+const sourceText: Record<string, string> = { ui: '你在这里选定', auto_default: '24 小时内没有选择，引擎自动取了第一项', fixed: '固定单元格（round start --cell）' };
+const locked = view.topic !== null || view.topicProblem !== null;
+const marks = [
+  ...(view.offer?.top3 ?? []).map((t, i) => ({ row_id: t.row_id, layer: t.layer, mark: `候选 ${i + 1}` })),
+  ...(view.topic === null ? [] : [{ row_id: view.topic.row_id, layer: view.topic.layer, mark: '已选' }]),
+];
+---
+<Base title={`${view.round} 选题`} refresh={!locked && view.offer === null}>
+  <p class="muted">轮次 {view.round} · 选题 · <a href="/topic">全部选题</a> · <a href={`/rounds/${view.round}`}>轮次页</a></p>
+  <h1>选题</h1>
+  {error !== null && <p class="error">{error}</p>}
+  {view.topicProblem !== null && <p class="pill warn">{view.topicProblem}</p>}
+  {view.topic !== null && (
+    <div class="card">
+      <h3>本轮选题已确定</h3>
+      <p><b>{primary(view.topic.row_id)}</b>（{view.topic.row_id}）· {layerLabel(view.topic.layer)}</p>
+      <p class="muted">{sourceText[view.topic.source]}{view.topic.cell !== null && `：${view.topic.cell}`} · {view.topic.chosenAt}</p>
+    </div>
+  )}
+  {!locked && view.offerError !== null && <p class="error">选题候选无法读取：{view.offerError}</p>}
+  {!locked && view.offer === null && view.offerError === null && <p class="muted">引擎还没有给出这一轮的选题候选（页面每 20 秒刷新）。</p>}
+  {!locked && view.offer !== null && (
+    <div class="card">
+      <h3>从前三个最薄的格子里选一个</h3>
+      <p class="muted">候选给出于 {view.offer.offeredAt}；到 {view.offer.autoAt} 仍未选择，引擎自动取第一项。选定后不能更改。</p>
+      <div class="grid2">
+        {view.offer.top3.map((t, i) => (
+          <form method="post" action={`/api/rounds/${view.round}/topic`} class="card">
+            <input type="hidden" name="row_id" value={t.row_id} />
+            <input type="hidden" name="layer" value={t.layer} />
+            <h3>候选 {i + 1}：{primary(t.row_id)} · {t.layerLabel}</h3>
+            <p class="muted">{t.row_id} · 优先级 {t.priority}</p>
+            <button class="btn" type="submit">选这个</button>
+          </form>
+        ))}
+      </div>
+    </div>
+  )}
+  {view.wildRound && <p class="pill warn">这是野生轮（每 4 轮一次）。野生种子投票还没有定义，本轮仍按热力图选题。</p>}
+  {view.wildSeedsError !== null && <p class="pill warn">{view.wildSeedsError}</p>}
+  {view.wildSeeds.length > 0 && (
+    <details>
+      <summary>往轮的野生种子（{view.wildSeeds.length} 组，只读）</summary>
+      <table>
+        {view.wildSeeds.map((w) => <tr><td>{w.round}</td><td>{w.submission}</td><td>{w.seeds.join(' / ')}</td></tr>)}
+      </table>
+    </details>
+  )}
+  <h2>热力图</h2>
+  {view.gameNeed.error !== null && <p class="error">{view.gameNeed.error}</p>}
+  {!view.gameNeed.exists && <p class="muted">游戏需求权重用的是默认值，可以<a href="/game-need">设定一次</a>。</p>}
+  <Heatmap map={view.heatmap} marks={marks} />
+</Base>

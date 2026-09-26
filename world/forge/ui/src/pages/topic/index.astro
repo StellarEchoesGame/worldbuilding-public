@@ -1,0 +1,42 @@
+---
+import Base from '../../layouts/Base.astro';
+import Heatmap from '../../components/Heatmap.astro';
+import { dataDir, repoDir } from '../../lib/data.ts';
+import { gameNeedState, heatmap, latestRound, topicRounds } from '../../lib/views/topic.ts';
+
+const root = dataDir();
+const latest = latestRound(root);
+const map = heatmap(root, repoDir(), latest);
+const rounds = topicRounds(root);
+const need = gameNeedState(root);
+---
+<Base title="选题">
+  <h1>选题</h1>
+  <div class="card">
+    <h3>各轮选题</h3>
+    {rounds.length === 0 && <p class="muted">还没有轮次给出选题候选。引擎在 <code>round start</code> 的 01-topic 步写出前三候选后，这里会出现。</p>}
+    {rounds.length > 0 && (
+      <table>
+        <thead><tr><th>轮次</th><th>候选</th><th>选题</th></tr></thead>
+        <tbody>
+          {rounds.map((r) => (
+            <tr>
+              <td><a href={`/topic/${r.round}`}>{r.round}</a></td>
+              <td>{r.offered ? '已给出前三' : <span class="muted">固定单元格，无候选</span>}</td>
+              <td>{r.chosen ? <span class="pill ok">已确定</span> : <a class="btn" href={`/topic/${r.round}`}>去选题</a>}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    )}
+  </div>
+  <div class="card">
+    <h3>游戏需求权重</h3>
+    {need.error !== null && <p class="error">{need.error}</p>}
+    {need.exists
+      ? <p>已设定（<a href="/game-need">查看</a>），不能再修改。</p>
+      : <p>还没有设定，目前用默认值（远航号与 S0/S1 区域权重 2，其余 1）。<a class="btn ghost" href="/game-need">设定一次</a></p>}
+  </div>
+  <h2>下一轮的热力图{latest !== null && <span class="muted">（提及次数取自 {latest} 的评委引文）</span>}</h2>
+  <Heatmap map={map} />
+</Base>

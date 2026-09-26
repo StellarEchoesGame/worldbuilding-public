@@ -1,12 +1,14 @@
 ---
 import Base from '../../../layouts/Base.astro';
 import { dataDir, gateMark, loadRound, type CandidateView } from '../../../lib/data.ts';
+import { redecideView } from '../../../lib/views/redecide.ts';
 
 const id = Astro.params.id ?? '';
 const view = /^[A-Z]\d{2}$/u.test(id) ? loadRound(dataDir(), id) : null;
 if (view === null) return new Response('没有这一轮', { status: 404 });
 const unlocked = view.audit !== null;
 const decided = view.decision !== null;
+const redecide = decided && redecideView(dataDir(), view.id).allowed;
 const families = [...new Set(view.candidates.flatMap((c) => c.sessions.map((s) => s.family)))];
 const q = (qid: string): string => view.questions.find((x) => x.id === qid)?.text ?? qid;
 const marks = (c: CandidateView, fam: string): string =>
@@ -39,6 +41,8 @@ const gateLabel = (c: CandidateView): string => (!c.gatePass ? '未过' : flagge
     <>
       <div style="display:flex;gap:.8rem;align-items:center">
         {decided ? <span class="pill ok">已决策：选 {String(view.decision?.['pick'] ?? '')}</span> : <a class="btn" href={`/rounds/${view.id}/decide`}>去决策</a>}
+        {redecide && <a class="btn" href={`/rounds/${view.id}/redecide`}>过门退回：重新决策</a>}
+        {decided && <a class="btn ghost" href={`/rounds/${view.id}/final`}>定稿</a>}
       </div>
       <h2>对现任（零新事实基线）的成对比较</h2>
       <p class="muted">每家评委 2 个会话，每个会话正反两序各评一次；两序都选候选才算一胜。✔ 胜 · ✖ 负或前后不一致 · · 作废。四家有效时 8 胜 7 算胜擂，三家有效时需 6 胜 6。</p>

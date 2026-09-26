@@ -1,0 +1,103 @@
+---
+import Base from '../../layouts/Base.astro';
+import { uiNow } from '../../lib/clock.ts';
+import { dataDir } from '../../lib/data.ts';
+import { benchView } from '../../lib/views/bench.ts';
+
+const view = benchView(dataDir(), uiNow());
+const error = Astro.url.searchParams.get('error');
+const OUTCOME: Record<string, string> = { activate: '直接生效类', pending_owner: '待你批准' };
+const ACTIVATION: Record<string, string> = { auto: '自动（查看差异或公告满 24 小时后生效）', replay: '重放通过后生效', owner: '需要你批准' };
+const VIA: Record<string, string> = { activate: '直接生效', approved: '你已批准', rollback: '你的回滚' };
+const short = (sha: string | null): string => (sha === null ? '—' : sha.slice(0, 12));
+const effective = view.effective;
+const targets = view.versions.filter((v) => v.rollbackTarget);
+const protocol = view.protocol;
+---
+<Base title="基准">
+  <h1>基准</h1>
+  <p class="muted">评委读的基准（问题、陈词清单、门槛）每轮由维护者提议修改。直接生效类的改动在你查看差异时（或公告满 24 小时后）生效；待你批准的改动只在你批准后生效。你随时可以回滚到曾经生效或批准过的版本。</p>
+  {error !== null && <p class="error">{error}</p>}
+  {view.logError !== null && <p class="error">{view.logError}（修复前本页不提供任何操作。）</p>}
+
+  <h2>当前</h2>
+  <div class="card">
+    <p>生效版本（下一轮冻结时锁定）：{effective === null ? <span class="pill warn">无</span> : <><a href={`/benchmark/${effective.version}`}>{effective.version}</a> · {VIA[effective.via] ?? effective.via} · 自 {effective.since} · <span class="marks">{short(effective.sha256)}</span></>}</p>
+    <p>最新版本（下一次提议以它为底）：{view.head === null ? <span class="pill warn">无</span> : <><a href={`/benchmark/${view.head.version}`}>{view.head.version}</a> · {VIA[view.head.via] ?? view.head.via} · 自 {view.head.since}</>}</p>
+    {view.resolveError !== null && <p class="muted">{view.resolveError}</p>}
+  </div>
+
+  {view.pending.length > 0 && <h2>待你批准</h2>}
+  {view.pending.map((p) => {
+    const v = view.versions.find((x) => x.version === p.version);
+    return (
+      <div class="card">
+        <h3><a href={`/benchmark/${p.version}`}>{p.version}</a> <span class="pill warn">待批准</span> <span class="muted">提议于 {p.since}</span></h3>
+        {v !== undefined && v.viewedAt === null && <p class="muted">请先<a href={`/benchmark/${p.version}`}>查看它相对上一版的差异</a>再批准。</p>}
+        {v !== undefined && v.fileSha256 !== null && view.logError === null && (
+          <form method="post" action="/api/benchmark/approve">
+            <input type="hidden" name="version" value={v.version} />
+            <input type="hidden" name="sha256" value={v.fileSha256} />
+            <button class="btn" type="submit">批准 {v.version}（文件 <span class="marks">{short(v.fileSha256)}</span>）</button>
+          </form>
+        )}
+      </div>
+    );
+  })}
+
+  <h2>版本</h2>
+  {view.versions.length === 0 && view.logError === null && <p class="muted">还没有基准版本。在终端运行 <code>npm run forge -- bench propose R00 --initial</code>。</p>}
+  {view.versions.map((v) => (
+    <div class="card">
+      <h3>
+        <a href={`/benchmark/${v.version}`}>{v.version}</a>
+        <span class={`pill ${v.outcome === 'pending_owner' ? 'warn' : ''}`}>{OUTCOME[v.outcome] ?? v.outcome}</span>
+        {effective !== null && effective.version === v.version && <span class="pill ok">当前生效</span>}
+        {v.approvedAt !== null && <span class="pill ok">已批准 {v.approvedAt}</span>}
+        {v.viewedAt !== null && <span class="pill">已查看 {v.viewedAt}</span>}
+      </h3>
+      <p class="muted">周期 {v.cycle} · 记录于 {v.at} · 上一版 {v.parent ?? '无（根版本）'} · 生效方式 {v.activation === null ? '—' : (ACTIVATION[v.activation] ?? v.activation)}</p>
+      {v.fileSha256 === null && <p class="error">{v.path} 不存在。</p>}
+      {v.fileSha256 !== null && v.sha256 !== null && v.fileSha256 !== v.sha256 && <p class="error">{v.path} 的内容与基准日志记录的 SHA-256 不一致（被改过）。</p>}
+      {v.changedKeys.length > 0 && <p>改动的键：{v.changedKeys.map((k) => <code>{k} </code>)}</p>}
+      {v.reasons.map((r) => (
+        <blockquote>{r.text}<br /><span class="muted">键 {r.keys.join('、') || '—'} · 证据 {r.evidence_ids.join('、') || '—'}</span></blockquote>
+      ))}
+      {v.evidenceIds.length > 0 && <p class="muted">证据编号：{v.evidenceIds.join('、')}</p>}
+      {v.replay !== null && (
+        <p>重放：{v.replay.passed ? <span class="pill ok">通过</span> : <span class="pill bad">未通过</span>} {v.replay.reason} · 合计 旧 {v.replay.pooled.old} → 新 {v.replay.pooled.new}（{v.replay.pooled.n} 对）
+          {Object.entries(v.replay.per_family).map(([f, r]) => <span class="muted"> · {f} {r.old}→{r.new}/{r.n}{r.void > 0 ? `（作废 ${r.void}）` : ''}</span>)}</p>
+      )}
+      {v.errors.length > 0 && <ul>{v.errors.map((e) => <li class="error">{e}</li>)}</ul>}
+      {v.rollbackTarget && effective !== null && v.fileSha256 !== null && view.logError === null && (
+        <form method="post" action="/api/benchmark/rollback">
+          <input type="hidden" name="version" value={v.version} />
+          <input type="hidden" name="from" value={effective.version} />
+          <input type="hidden" name="sha256" value={v.fileSha256} />
+          <button class="btn ghost" type="submit">从 {effective.version} 回滚到 {v.version}</button>
+        </form>
+      )}
+    </div>
+  ))}
+  {targets.length === 0 && effective !== null && <p class="muted">没有可以回滚到的其他版本。</p>}
+
+  <h2>协议包</h2>
+  <div class="card">
+    <p>PROTOCOL.md、families.json、judges.json 三个文件合在一起的 SHA-256。任何一个文件变化，引擎都会停下等你在这里重新批准；具体改动请在 PR / git 里看差异。</p>
+    {protocol.error !== null && <p class="error">协议包无法读取：{protocol.error}</p>}
+    <table>
+      <tbody>
+        {protocol.files.map((f) => <tr><td>{f.name}</td><td class="marks">{f.sha256 ?? '缺失'}</td></tr>)}
+        <tr><th>当前协议包</th><td class="marks">{protocol.bundleSha256 ?? '—'}</td></tr>
+        <tr><th>上次批准的</th><td class="marks">{protocol.lastApprovedSha256 ?? '从未批准'}</td></tr>
+      </tbody>
+    </table>
+    {protocol.approvedAt !== null && <p class="pill ok">当前协议包已于 {protocol.approvedAt} 批准。</p>}
+    {protocol.approvedAt === null && protocol.bundleSha256 !== null && view.logError === null && (
+      <form method="post" action="/api/protocol/approve" style="margin-top:.8rem">
+        <input type="hidden" name="sha256" value={protocol.bundleSha256} />
+        <button class="btn" type="submit">批准协议包 <span class="marks">{short(protocol.bundleSha256)}</span></button>
+      </form>
+    )}
+  </div>
+</Base>

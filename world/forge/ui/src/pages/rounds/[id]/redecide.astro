@@ -1,0 +1,99 @@
+---
+import Base from '../../../layouts/Base.astro';
+import { dataDir, loadRound } from '../../../lib/data.ts';
+import { REASONS } from '../../../lib/owner.ts';
+import { redecideView } from '../../../lib/views/redecide.ts';
+
+const id = Astro.params.id ?? '';
+const root = dataDir();
+const round = /^[A-Z]\d{2}$/u.test(id) ? loadRound(root, id) : null;
+if (round === null) return new Response('没有这一轮', { status: 404 });
+const view = redecideView(root, id);
+const error = Astro.url.searchParams.get('error');
+const glossary: Record<string, string> = { 平: '可信但记不住', 假: '违和，不像这个世界', 乱: '信息过载或与正典冲突', 偏: '没写出选题要的东西' };
+const previous = new Set(view.current?.facts ?? []);
+const claimOf = (key: string): string => {
+  const [label, factId] = key.split(':');
+  return round.candidates.find((c) => c.label === label)?.facts.find((f) => f.id === factId)?.claim ?? '';
+};
+const statusText: Record<string, string> = { fail: '未通过', split: '评委分歧', trial: '试验对（未比较）', unverified: '无法核实' };
+---
+<Base title={`${round.id} 重新决策`}>
+  <p class="muted">轮次 {round.id} · 重新决策 · <a href={`/rounds/${round.id}`}>返回结果</a></p>
+  <h1>重新决策</h1>
+  {error !== null && <p class="error">{error}</p>}
+  {!view.allowed && (
+    <div class="card">
+      <h3>现在不能重新决策</h3>
+      <p>{view.reason}</p>
+      {view.rejectionPath !== null && <p class="muted">过门记录：{view.rejectionPath}</p>}
+      {view.unlogged.length > 0 && (
+        <form method="post" action={`/api/rounds/${round.id}/redecision`}>
+          <p class="muted">补记只把上面这些文件记入 owner 日志，不会提交新决策；补记后页面重新核对。</p>
+          <button class="btn ghost" type="submit">补记 owner 日志</button>
+        </form>
+      )}
+    </div>
+  )}
+  {view.allowed && view.current !== null && (
+    <>
+      <div class="card">
+        <h3>上一份决策被过门退回</h3>
+        <p class="muted">{view.rejectionPath}{view.rejection !== null && ` · ${statusText[view.rejection.status] ?? view.rejection.status}`}</p>
+        {view.rejection !== null && (
+          <>
+            {view.rejection.violations.length > 0 && <p>机械检查：{view.rejection.violations.join('；')}</p>}
+            {view.rejection.trialLabels.length > 0 && <p>试验对（与现任的比较未进行）：{view.rejection.trialLabels.join('、')}</p>}
+            {view.rejection.judges.map((j) => (
+              <div style="margin:.4rem 0">
+                <b>{j.family}</b> {j.status === 'void' ? `作废${j.error === null ? '' : `（${j.error}）`}` : j.yes === true ? '认为有矛盾' : '认为没有矛盾'}
+                {j.findings.map((x) => <blockquote>「{x.quote}」 ↔ {x.against}：{x.reason}</blockquote>)}
+              </div>
+            ))}
+          </>
+        )}
+        <h3 style="margin-top:1rem">上一份决策（{view.current.file}）</h3>
+        <p>选 {view.current.pick}{view.current.base !== null && `，底稿 ${view.current.base}`}</p>
+        <ul>{view.current.facts.map((k) => <li>{k} {claimOf(k)}</li>)}</ul>
+        <p class="muted">SHA-256 {view.current.sha256} · 新决策写入 {view.nextFile}，并记录它取代的是上一份。</p>
+      </div>
+      <form method="post" action={`/api/rounds/${round.id}/redecision`}>
+        <div class="card">
+          <h3>选哪一篇</h3>
+          {round.candidates.map((c) => (
+            <label class="choice"><input type="radio" name="pick" value={c.label} required checked={c.label === view.current?.pick} /> 候选 {c.label}　<span class="muted">{c.totalWins ?? '—'}/{c.needed ?? '—'} {c.trial ? '试验对' : c.beats ? '胜擂' : '未胜擂'}</span></label>
+          ))}
+          <label class="choice"><input type="radio" name="pick" value="none" checked={view.current.pick === 'none'} /> 都不选（本轮不产出）</label>
+          <h3 style="margin-top:1rem">底稿（默认就是所选的那篇）</h3>
+          <label class="choice"><input type="radio" name="base" value="" checked={view.current.base === null} /> 同所选</label>
+          {round.candidates.map((c) => <label class="choice"><input type="radio" name="base" value={c.label} checked={c.label === view.current?.base} /> 候选 {c.label}</label>)}
+        </div>
+        <div class="card">
+          <h3>登记哪些事实（最多 6 条，可跨稿；预选的是上一份决策的事实）</h3>
+          {round.candidates.map((c) => (
+            <div style="margin-bottom:.6rem">
+              <b>候选 {c.label}</b>
+              {c.facts.length === 0 && <span class="muted"> 无作者事实</span>}
+              {c.facts.map((f) => (
+                <label class="choice"><input type="checkbox" name="facts" value={`${c.label}:${f.id}`} checked={previous.has(`${c.label}:${f.id}`)} /> {f.id} {f.claim}<span class="muted">（{f.status}；延伸自 {f.extends || '无'}）</span></label>
+              ))}
+            </div>
+          ))}
+        </div>
+        <div class="card">
+          <h3>没选的稿子主要差在哪</h3>
+          {REASONS.map((r) => <label class="choice"><input type="radio" name="reason" value={r} required /> {r}：{glossary[r]}</label>)}
+        </div>
+        <div class="card">
+          <h3>个人最喜欢</h3>
+          <select name="fav">{round.candidates.map((c) => <option value={c.label}>候选 {c.label}</option>)}<option value="none">都不</option></select>
+          <h3 style="margin-top:1rem">其他</h3>
+          <label class="choice"><input type="checkbox" name="happened" /> 这是已发生事件（默认只是示例现场）</label>
+          <label class="choice"><input type="radio" name="publish" value="no" checked /> 暂不同步 Wiki</label>
+          <label class="choice"><input type="radio" name="publish" value="yes" /> 同步 Wiki</label>
+        </div>
+        <button class="btn" type="submit">提交新决策（不能修改）</button>
+      </form>
+    </>
+  )}
+</Base>

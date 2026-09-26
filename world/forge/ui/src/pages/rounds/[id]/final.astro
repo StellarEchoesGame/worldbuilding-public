@@ -1,0 +1,83 @@
+---
+import Base from '../../../layouts/Base.astro';
+import { dataDir } from '../../../lib/data.ts';
+import { finalView } from '../../../lib/views/final.ts';
+
+const id = Astro.params.id ?? '';
+const view = finalView(dataDir(), id);
+if (view === null) return new Response('没有这一轮', { status: 404 });
+const error = Astro.url.searchParams.get('error');
+const f = view.final;
+const waiting = f === null && view.finalError === null;
+const yesNo = (b: boolean): string => (b ? '是' : '否');
+const lineClass = (line: string): string =>
+  line.startsWith('+++') || line.startsWith('---') || line.startsWith('diff ') || line.startsWith('index ') ? 'meta'
+    : line.startsWith('@@') ? 'hunk' : line.startsWith('+') ? 'add' : line.startsWith('-') ? 'del' : '';
+const diffLines = (view.diffText ?? '').split('\n');
+if (diffLines.at(-1) === '') diffLines.pop();
+const unsealText: Record<string, string> = { valid: '有效', invalid: '无效' };
+const remoteText: Record<string, string> = { verified: '远端已核对', unavailable: '远端不可用', mismatch: '远端不一致' };
+const thinmapText = (t: NonNullable<typeof f>['thinmap']): string =>
+  t === null ? '未测量' : t.snapshot === 'missing' ? '缺少第 0 轮快照（F1-05），未测量' : `目标格全部高于第 0 轮快照：${yesNo(t.all_targets_above)}`;
+---
+<Base title={`${view.round} 定稿`} refresh={waiting}>
+  <p class="muted">轮次 {view.round} · 定稿 · <a href={`/rounds/${view.round}`}>返回结果</a></p>
+  <h1>定稿</h1>
+  {error !== null && <p class="error">{error}</p>}
+  {view.status !== null && <p class="muted">引擎状态：{view.status.state}{view.status.step !== null && ` · ${view.status.step}`}{view.status.waiting_for !== null && ` · 等待 ${view.status.waiting_for}`}</p>}
+  {waiting && <div class="card"><h3>等待引擎</h3><p>12a 还没有运行：合并、记账和基准周期结束后，引擎会写出定稿差异、final.json 和 PR 说明。页面每 20 秒刷新。</p></div>}
+  {view.finalError !== null && <p class="error">final.json 无法读取：{view.finalError}</p>}
+  {f !== null && (
+    <div class="card">
+      <h3>本轮结果</h3>
+      <table>
+        <tr><th>结果</th><td>{f.status === 'merged_on_branch' ? `已在分支上合并为修订 ${f.revision ?? '—'}` : '本轮不合并（仍需批准空差异）'}</td></tr>
+        <tr><th>登记事实</th><td>{f.rxx.length === 0 ? '无' : f.rxx.join('、')}</td></tr>
+        <tr><th>合并检查</th><td>{f.mergecheck === null ? '—' : f.mergecheck.ok ? <span class="pill ok">通过</span> : <span class="pill bad">{f.mergecheck.violations.join('；')}</span>}</td></tr>
+        <tr><th>参考书未变</th><td>{yesNo(f.book_sha256_unchanged)}</td></tr>
+        <tr><th>合并后核对</th><td>{f.post_merge_check.length === 0 ? '无偏差' : f.post_merge_check.join('；')}{f.postmerge_split && <span class="pill warn">合并后过门分歧（split）</span>}</td></tr>
+        <tr><th>合并编辑</th><td>{f.editor ?? '—'}</td></tr>
+        <tr><th>热力图</th><td>{thinmapText(f.thinmap)}</td></tr>
+        <tr><th>预测揭封</th><td>{unsealText[f.unseal.status]} · {remoteText[f.unseal.remote]}</td></tr>
+        <tr><th>基准维护</th><td>{f.maintainer === null ? '基准周期没有运行' : `${f.maintainer.outcome}${f.maintainer.version === null ? '' : `（${f.maintainer.version}）`}${f.maintainer.evidence_ids.length > 0 ? ` · 证据 ${f.maintainer.evidence_ids.join('、')}` : ''}`}</td></tr>
+      </table>
+      {view.outcome !== null && (
+        <details>
+          <summary>基准周期结果 {view.outcome.cycle}：{view.outcome.outcome}</summary>
+          {view.outcome.reasons.map((r) => <blockquote>{r.text}{r.keys.length > 0 && <span class="muted">（{r.keys.join('、')}）</span>}</blockquote>)}
+          {view.outcome.errors.length > 0 && <p class="muted">问题：{view.outcome.errors.join('；')}</p>}
+        </details>
+      )}
+      {view.outcomeError !== null && <p class="error">bench/outcome.json 无法读取：{view.outcomeError}</p>}
+    </div>
+  )}
+  {view.diffText !== null && (
+    <div class="card">
+      <h3>定稿差异（world/current 对本轮起点）</h3>
+      <p class="muted">SHA-256 <code>{view.diffSha256}</code>{f !== null && !view.diffMatches && <span class="pill bad">与 final.json 记录的 {f.approval_diff_sha256.slice(0, 12)} 不一致</span>}</p>
+      {diffLines.length === 0 ? <p class="muted">空差异（本轮不改正典）。</p> : (
+        <pre class="diff">{diffLines.map((l) => <span class={lineClass(l)}>{l}{'\n'}</span>)}</pre>
+      )}
+    </div>
+  )}
+  {view.prBody !== null && (
+    <details class="card">
+      <summary>PR 说明草稿（英文，批准后由会话开 PR）</summary>
+      <pre style="white-space:pre-wrap;font-size:.85rem">{view.prBody}</pre>
+    </details>
+  )}
+  {view.approvedAt !== null && <p><span class="pill ok">已批准 · {view.approvedAt}</span></p>}
+  {view.canApprove && view.diffSha256 !== null && (
+    <form method="post" action={`/api/rounds/${view.round}/diff-approval`}>
+      <input type="hidden" name="sha256" value={view.diffSha256} />
+      <button class="btn" type="submit">批准这份定稿差异（{view.diffSha256.slice(0, 12)}）</button>
+    </form>
+  )}
+</Base>
+<style>
+  pre.diff { font: .82rem/1.5 ui-monospace, Menlo, monospace; overflow-x: auto; margin: 0; }
+  pre.diff .add { color: var(--ok); background: #eef8f2; }
+  pre.diff .del { color: var(--bad); background: #fbf0f0; }
+  pre.diff .hunk { color: var(--accent); }
+  pre.diff .meta { color: var(--muted); }
+</style>

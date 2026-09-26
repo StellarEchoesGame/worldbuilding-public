@@ -1,6 +1,5 @@
 import { existsSync, readdirSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
-import { fileURLToPath } from 'node:url';
 import type { Backend } from './adapters/types.ts';
 import type { Stance } from './brief.ts';
 import { familyOf, isFamily, type Family, type PrefixRule } from './config.ts';
@@ -10,7 +9,7 @@ import { isRecord, readArray, readNumber, readRecord, readString, stringArray, t
 import { CALIB_CATEGORIES, type CalibCategory, type DefectType, type ProtocolCalibration } from './protocol.ts';
 import { err, ok, type Result } from './result.ts';
 import { runAll, type StepDef, type StepOutcome } from './runner.ts';
-import { loadSchema, validate, type Schema } from './schema.ts';
+import { loadSchema, type Schema, schemaFile, validate } from './schema.ts';
 import { canonicalJson } from './seal.ts';
 import { seededSplit } from './split.ts';
 import { CANON_AUTHOR, DEFAULT_FORBIDDEN, DEFAULT_STANCES, FACT_STATUS_FILE, FACT_STATUSES, factTable07, forbiddenRows, parseFactStatus, parseRegressionFile, REF_07, REGRESSION_FILE, type FactRow, type ForbiddenRow, type RegressionRow } from './steps/brief.ts';
@@ -311,7 +310,7 @@ let cachedSchemas: { build: Schema; set: Schema } | null = null;
 function schemas(): { build: Schema; set: Schema } {
   if (cachedSchemas !== null) return cachedSchemas;
   const load = (name: string): Schema => {
-    const raw: unknown = JSON.parse(readFileSync(fileURLToPath(new URL(`../schema/${name}`, import.meta.url)), 'utf8'));
+    const raw: unknown = JSON.parse(readFileSync(schemaFile(name), 'utf8'));
     const schema = loadSchema(raw);
     if (!schema.ok) throw new Error(`schema/${name}: ${schema.error}`);
     return schema.value;

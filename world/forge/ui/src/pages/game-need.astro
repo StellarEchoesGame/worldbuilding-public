@@ -1,0 +1,45 @@
+---
+import Base from '../layouts/Base.astro';
+import { dataDir } from '../lib/data.ts';
+import { gameNeedRows, gameNeedState } from '../lib/views/topic.ts';
+
+const root = dataDir();
+const need = gameNeedState(root);
+const rows = gameNeedRows(root);
+const error = Astro.url.searchParams.get('error');
+const weightOf = (rowId: string): number => (Object.hasOwn(need.weights, rowId) ? (need.weights[rowId] ?? 1) : 1);
+---
+<Base title="游戏需求权重">
+  <p class="muted"><a href="/topic">选题</a> · 游戏需求权重</p>
+  <h1>游戏需求权重</h1>
+  {error !== null && <p class="error">{error}</p>}
+  {need.error !== null && <p class="error">{need.error}</p>}
+  {rows.error !== null && <p class="error">行表无法读取：{rows.error}</p>}
+  <p class="muted">权重乘进热力图的优先级：越高越先被补厚。没有列出的行按 1 计。这个文件（map/game-need.json）只能设定一次，之后只读。</p>
+  {need.exists ? (
+    <div class="card">
+      <h3>已设定</h3>
+      <table>
+        <thead><tr><th>行</th><th>权重</th></tr></thead>
+        <tbody>{Object.entries(need.weights).map(([rowId, w]) => <tr><td>{rows.rows.find((r) => r.rowId === rowId)?.primary ?? rowId}<span class="muted"> {rowId}</span></td><td>{w}</td></tr>)}</tbody>
+      </table>
+    </div>
+  ) : (
+    <form method="post" action="/api/game-need" class="card">
+      <h3>设定一次（预填的是当前默认值）</h3>
+      <table>
+        <thead><tr><th>行</th><th>星系</th><th>权重（≥ 0，留空 = 1）</th></tr></thead>
+        <tbody>
+          {rows.rows.map((r) => (
+            <tr>
+              <td>{r.primary}<span class="muted"> {r.rowId}</span></td>
+              <td class="muted">{r.system}</td>
+              <td><input type="number" name={`w:${r.rowId}`} min="0" step="any" value={String(weightOf(r.rowId))} style="width:6rem" /></td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+      <p><button class="btn" type="submit" disabled={rows.rows.length === 0}>保存（之后不能修改）</button></p>
+    </form>
+  )}
+</Base>

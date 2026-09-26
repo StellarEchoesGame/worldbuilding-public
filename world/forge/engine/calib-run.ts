@@ -1,6 +1,5 @@
 import { existsSync, readdirSync, readFileSync } from 'node:fs';
 import { join, relative, sep } from 'node:path';
-import { fileURLToPath } from 'node:url';
 import type { Backend } from './adapters/types.ts';
 import { anonymizeText } from './anonymize.ts';
 import type { Attempted } from './calls.ts';
@@ -13,7 +12,7 @@ import { isRecord, readBoolean, readRecord, readString, type JsonRecord } from '
 import { calibSet, OWNER_ANSWERS, OWNER_LOG, protocolGate, type CalibAnswer } from './owner-inputs.ts';
 import { err, ok, type Result } from './result.ts';
 import { runAll, type StepDef, type StepOutcome } from './runner.ts';
-import { loadSchema, validate, type Schema } from './schema.ts';
+import { loadSchema, type Schema, schemaFile, validate } from './schema.ts';
 import { canonicalJson } from './seal.ts';
 import { sha256, type RoundPaths } from './store.ts';
 import { IntegrityError, runTask, TASK_ID } from './task.ts';
@@ -170,7 +169,7 @@ const schemas = new Map<string, Schema>();
 function schemaOf(name: string): Schema {
   const cached = schemas.get(name);
   if (cached !== undefined) return cached;
-  const raw: unknown = JSON.parse(readFileSync(fileURLToPath(new URL(`../schema/${name}.schema.json`, import.meta.url)), 'utf8'));
+  const raw: unknown = JSON.parse(readFileSync(schemaFile(`${name}.schema.json`), 'utf8'));
   const schema = loadSchema(raw);
   if (!schema.ok) throw new Error(`schema/${name}.schema.json: ${schema.error}`);
   schemas.set(name, schema.value);

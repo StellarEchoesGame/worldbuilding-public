@@ -1,12 +1,11 @@
 import { createHash } from 'node:crypto';
 import { existsSync, readdirSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
-import { fileURLToPath } from 'node:url';
 import { isFamily, type Family } from './config.ts';
 import type { RoundFiles } from './context.ts';
 import { isRecord, readBoolean, readNumber, readRecord, readString, stringArray, type JsonRecord } from './json.ts';
 import { err, ok, type Result } from './result.ts';
-import { loadSchema, validate, type Schema } from './schema.ts';
+import { loadSchema, type Schema, schemaFile, validate } from './schema.ts';
 import { readRecords } from './store.ts';
 
 export type BenchOutcome = 'activate' | 'pending_owner' | 'no_change' | 'no_change_invalid' | 'rejected_validate' | 'rejected_by_replay';
@@ -106,7 +105,7 @@ let cachedSchema: Schema | null = null;
 /** The engine's copy of schema/bench-log.schema.json (module-relative, so temp forge roots need no schema dir). */
 function logSchema(): Schema {
   if (cachedSchema !== null) return cachedSchema;
-  const raw: unknown = JSON.parse(readFileSync(fileURLToPath(new URL('../schema/bench-log.schema.json', import.meta.url)), 'utf8'));
+  const raw: unknown = JSON.parse(readFileSync(schemaFile('bench-log.schema.json'), 'utf8'));
   const schema = loadSchema(raw);
   if (!schema.ok) throw new Error(`schema/bench-log.schema.json: ${schema.error}`);
   cachedSchema = schema.value;
