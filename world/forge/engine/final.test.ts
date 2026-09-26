@@ -221,3 +221,34 @@ test('approval diff bytes (real git) ignore core.abbrev, diff.algorithm, indent 
   assert.ok(prBody(FINAL, 7, []).includes(`\`${APPROVAL_DIFF_COMMAND}\``));
   rmSync(repo, { recursive: true, force: true });
 });
+
+/** A bench/outcome.json (= the cycle's benchmark/log.jsonl line) of a replay-rejected v3. */
+function outcomeLine(): Record<string, unknown> {
+  return {
+    at: '2026-10-01T03:00:00.000Z', cycle: 'R01', outcome: 'rejected_by_replay', version: 'v3', parent: 'v2', sha256: 'c'.repeat(64), path: 'rounds/R01/bench/candidate.json',
+    activation: 'replay', changed_keys: ['taste'], evidence_packet: 'benchmark/evidence/R01.json', evidence_packet_sha256: 'd'.repeat(64),
+    evidence_ids: ['E-R01-PEND-v2', 'E-R01-SAT-taste'], reasons: [{ text: '换问法', keys: ['taste'], evidence_ids: ['E-R01-SAT-taste'] }], errors: [],
+    replay: { labels: ['C00-P02'], families: ['Moonshot'], pooled: { old: 2, new: 0, n: 2 }, per_family: { Moonshot: { old: 2, new: 0, n: 2, void: 0 } }, passed: false, reason: 'family_drop' },
+    dropped_cliches: [], protocol_bundle_sha256: 'e'.repeat(64), calls: ['rounds/R01/calls/bench-propose-R01-a1.json'], source: 'engine',
+  };
+}
+
+test('12a fills final.maintainer from bench/outcome.json (listed as an input, one PR-body line); a malformed outcome or a marked 11j without it is an integrity error', async () => {
+  const h = await merged();
+  const bench = join(h.ctx.paths.dir, 'bench');
+  mkdirSync(bench, { recursive: true });
+  writeFileSync(join(bench, 'outcome.json'), `${JSON.stringify(outcomeLine(), null, 2)}\n`);
+  const out = await prepareFinalStep.run(h.ctx, null);
+  assert.ok(out.kind === 'done' && out.inputs.includes('rounds/R01/bench/outcome.json'), JSON.stringify(out));
+  assert.deepEqual(finalOf(h).maintainer, { outcome: 'rejected_by_replay', version: 'v3', evidence_ids: ['E-R01-PEND-v2', 'E-R01-SAT-taste'] });
+  const body = readFileSync(join(h.ctx.paths.dir, 'pr-body.md'), 'utf8');
+  assert.match(body, /Benchmark maintainer: rejected_by_replay \(v3\), cites `E-R01-PEND-v2`, `E-R01-SAT-taste`/u);
+  assert.match(body, /`rounds\/R01\/bench\/outcome\.json`/u);
+  writeFileSync(join(bench, 'outcome.json'), `${JSON.stringify({ ...outcomeLine(), outcome: 'adopted' })}\n`);
+  await assert.rejects(prepareFinalStep.run(h.ctx, null), (e: unknown) => e instanceof IntegrityError && e.message.includes('bench/outcome.json'));
+  rmSync(join(bench, 'outcome.json'));
+  mkdirSync(h.ctx.paths.markers, { recursive: true });
+  writeFileSync(join(h.ctx.paths.markers, '11j-bench-outcome.json'), readFileSync(join(h.ctx.paths.markers, '09b-decision.json')));
+  await assert.rejects(prepareFinalStep.run(h.ctx, null), /bench\/outcome\.json is missing although 11j-bench-outcome is marked/u);
+  rmSync(h.dir, { recursive: true, force: true });
+});

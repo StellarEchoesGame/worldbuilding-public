@@ -1,12 +1,13 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
-import { join } from 'node:path';
+import { dirname, join } from 'node:path';
 import { fakeBackend } from '../adapters/fake.ts';
 import type { Backend } from '../adapters/types.ts';
 import { loadConfig } from '../config.ts';
-import { buildContext, parseStartRecord, type RoundBackends, type StartOptions, type StepContext } from '../context.ts';
+import { roundCommand } from '../cli-round.ts';
+import { buildContext, parseStartRecord, type EngineDeps, type RoundBackends, type StartOptions, type StepContext } from '../context.ts';
 import { err, type Result } from '../result.ts';
 import { runSteps, verifyChain, type RunReport, type StepDef } from '../runner.ts';
 import { roundPaths, sha256 } from '../store.ts';
@@ -18,6 +19,8 @@ interface Harness {
   w: FixtureWorld;
   ports: FakePorts;
   ctx: StepContext;
+  deps: EngineDeps;
+  logs: string[];
 }
 
 function harness(opts: FixtureOptions = DEFAULT_FIXTURE, roundId = 'R01', startOptions: StartOptions = { cell: 'cells/E2E-R01.json', seed: null }, doctor: Result<string> | null = null, same: Pick<Harness, 'w' | 'ports'> | null = null): Harness {
@@ -34,13 +37,14 @@ function harness(opts: FixtureOptions = DEFAULT_FIXTURE, roundId = 'R01', startO
     baseline: gw('BASE'), decoy: gw('decoy'), defect: gw('defect'), judges,
     forecasters: judges.map((j) => j.backend), maintainer: gw('maintainer'), mergeEditor: gw('merge_editor'), calibGateway: new Map(),
   };
+  const logs: string[] = [];
+  const deps: EngineDeps = { ports, backends: () => backends, env: {}, pid: 4242, isAlive: (pid) => pid === 4242, log: (l) => logs.push(l) };
   const built = buildContext({
     root: w.root, repo: w.repo, roundId, pipeline: 'round', paths: roundPaths(w.root, roundId), config: loaded.value,
-    deps: { ports, backends: () => backends, env: {}, pid: 4242, isAlive: (pid) => pid === 4242, log: () => undefined },
-    startOptions, quotaBudgetMs: null,
+    deps, startOptions, quotaBudgetMs: null,
   });
   if (!built.ok) throw new Error(built.error);
-  return { w, ports, ctx: built.value };
+  return { w, ports, ctx: built.value, deps, logs };
 }
 
 function run(ctx: StepContext, steps: readonly StepDef[] = [startStep]): Promise<RunReport> {
@@ -179,4 +183,55 @@ test('one open round: an unmerged forge/calib-<set> blocks a round started from 
   git.mergeToMain('forge/calib-q01');
   assert.deepEqual(await openRoundBranches(git, h.w.root, 'R01', 'main', []), { ok: true, value: [] });
   assert.equal((await run(h.ctx)).exitCode, 0);
+});
+
+/** Commits `files` (forge-root-relative, content `{}`) on forge/r00, created from main if absent, then checks out main. */
+async function commitOnR00(h: Harness, files: readonly string[], message: string): Promise<void> {
+  const git = h.ports.git;
+  const exists = await git.branchExists(roundBranch('R00'));
+  assert.ok(exists.ok);
+  if (!exists.value) assert.ok((await git.createBranch(roundBranch('R00'), 'main')).ok);
+  assert.ok((await git.checkout('forge/r00')).ok);
+  for (const rel of files) {
+    mkdirSync(dirname(join(h.w.root, rel)), { recursive: true });
+    writeFileSync(join(h.w.root, rel), '{}\n');
+  }
+  assert.ok((await git.commit(files.map((rel) => `world/forge/${rel}`), message)).ok);
+  assert.ok((await git.checkout('main')).ok);
+}
+
+const C00_MARKER = 'calibration/C00/markers/c5-score.json';
+const R00_EVIDENCE = 'benchmark/evidence/R00.json';
+
+test('one open round: a squash-merged forge/r00 counts as merged by benchmark/evidence/R00.json (only the R00 bench cycle writes it; round 0 writes no start.json)', async () => {
+  const h = harness();
+  const git = h.ports.git;
+  await commitOnR00(h, [R00_EVIDENCE], 'chore: round 0');
+  assert.deepEqual(await openRoundBranches(git, h.w.root, 'R01', 'main', []), { ok: true, value: ['forge/r00'] });
+  git.squashToMain('forge/r00');
+  assert.deepEqual(await git.isAncestor('forge/r00', 'main'), { ok: true, value: false }, 'a squash merge never makes the branch an ancestor');
+  assert.deepEqual(await openRoundBranches(git, h.w.root, 'R01', 'main', []), { ok: true, value: [] });
+  const started = await run(h.ctx);
+  assert.equal(started.exitCode, 0, started.detail);
+});
+
+test('one open round: the squash-merged C00 PR alone leaves forge/r00 open (its R00 bench cycle is not on main), so round start R01 is refused', async () => {
+  const h = harness();
+  const git = h.ports.git;
+  await commitOnR00(h, [C00_MARKER], 'chore: calibration C00');
+  git.squashToMain('forge/r00');
+  await commitOnR00(h, ['rounds/R00/bench/proposal.json'], 'chore: R00 bench cycle, unmerged');
+  const marker = await git.show('main', join(h.w.root, C00_MARKER));
+  assert.ok(marker.ok && marker.value !== null, 'main holds the C00 c5-score marker');
+  assert.deepEqual(await openRoundBranches(git, h.w.root, 'R01', 'main', []), { ok: true, value: ['forge/r00'] });
+  const at = { root: h.w.root, repo: h.w.repo };
+  assert.equal(await roundCommand(['start', 'R01', '--cell', 'cells/E2E-R01.json'], h.deps, at), 1);
+  assert.match(h.logs.join('\n'), /forge\/r00 not merged into main yet/u);
+  assert.equal(existsSync(h.ctx.paths.start), false, 'a refused start writes no start.json');
+  await commitOnR00(h, [R00_EVIDENCE], 'chore: R00 bench cycle 11f');
+  git.squashToMain('forge/r00');
+  assert.deepEqual(await openRoundBranches(git, h.w.root, 'R01', 'main', []), { ok: true, value: [] });
+  h.logs.length = 0;
+  assert.notEqual(await roundCommand(['start', 'R01', '--cell', 'cells/E2E-R01.json'], h.deps, at), 1, h.logs.join('\n'));
+  assert.equal(existsSync(h.ctx.paths.start), true);
 });

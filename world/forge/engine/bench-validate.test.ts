@@ -4,6 +4,7 @@ import { readFileSync } from 'node:fs';
 import { isRecord, readRecord, type JsonRecord } from './json.ts';
 import { loadSchema, type Schema } from './schema.ts';
 import {
+  changedKeys,
   DEFAULT_ACTIVATION,
   DEFAULT_HOLD_ROUNDS,
   MAINTAINER_KEYS,
@@ -354,4 +355,19 @@ test('reasons are read defensively when the schema is looser than expected', () 
   const verdict = validateBenchmark(child, parent, loose);
   assert.equal(verdict.ok, false);
   assert.deepEqual(verdict.errors, ['changed key cliche_list has no reason with evidence']);
+});
+
+test('changedKeys compares maintainer keys plus activation keys canonically; a null parent counts every present key', () => {
+  const { parent, child } = family();
+  assert.deepEqual(changedKeys(child, parent, DEFAULT_ACTIVATION), []);
+  const reordered: JsonRecord = { ...child, bars: { beats_champion_four_families: 7 }, version: 'v9', reasons: [reason(['bars'])] };
+  assert.deepEqual(changedKeys(reordered, parent, DEFAULT_ACTIVATION), [], 'meta keys are never compared');
+  const edited: JsonRecord = { ...child, cliche_list: ['新的陈词'], decoy_recipe: { details: 3, instructions: 'x' } };
+  assert.deepEqual(changedKeys(edited, parent, DEFAULT_ACTIVATION), ['cliche_list', 'decoy_recipe']);
+  const extra: JsonRecord = { ...child, custom: 1 };
+  assert.deepEqual(changedKeys(extra, parent, { ...DEFAULT_ACTIVATION, custom: 'auto' }), ['custom']);
+  assert.deepEqual(changedKeys(extra, parent, DEFAULT_ACTIVATION), [], 'a key outside MAINTAINER_KEYS and activation is not compared');
+  assert.deepEqual(changedKeys(parent, null, DEFAULT_ACTIVATION), [...MAINTAINER_KEYS]);
+  const partial: JsonRecord = { taste: parent['taste'] ?? null };
+  assert.deepEqual(changedKeys(partial, null, DEFAULT_ACTIVATION), ['taste']);
 });

@@ -1,5 +1,6 @@
 import { existsSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
+import { evidencePath } from '../bench-log.ts';
 import { parseCell } from '../brief.ts';
 import { parseStartRecord, type StartRecord, type StepContext } from '../context.ts';
 import { isRecord, readRecord } from '../json.ts';
@@ -62,8 +63,11 @@ export interface EngineBranch {
 }
 
 /**
- * `forge/r00` … the previous round (evidence `rounds/RNN/start.json`, committed at 03c) and `forge/calib-<set>`
- * for the given sets (evidence `calibration/<set>/markers/c1-build.json`).
+ * `forge/r00` … the previous round (evidence `rounds/RNN/start.json`, committed at 03c) and `forge/calib-<set>` for
+ * the given sets (evidence `calibration/<set>/markers/c1-build.json`). Round 0 writes no start.json: `forge/r00`
+ * proves itself by `benchmark/evidence/R00.json`, which 11f of its bench cycle always writes (R00-init never does).
+ * C00's `c5-score` marker is no proof: `calib score` runs before that cycle and the C00 files may merge in their own
+ * PR, while forge/r00 still holds an unmerged R00 cycle whose 11f pinned calibration/{labels,status}.json.
  */
 export function earlierEngineBranches(root: string, roundId: string, calibSets: readonly string[]): Result<EngineBranch[]> {
   if (!ROUND_ID.test(roundId)) return err(`round id must look like R01, got ${roundId}`);
@@ -71,7 +75,8 @@ export function earlierEngineBranches(root: string, roundId: string, calibSets: 
   const out: EngineBranch[] = [];
   for (let i = 0; i < n; i += 1) {
     const id = `R${String(i).padStart(2, '0')}`;
-    out.push({ branch: roundBranch(id), evidence: join(root, 'rounds', id, 'start.json') });
+    const evidence = i === 0 ? join(root, evidencePath(id)) : join(root, 'rounds', id, 'start.json');
+    out.push({ branch: roundBranch(id), evidence });
   }
   for (const set of calibSets) out.push({ branch: `forge/calib-${set.toLowerCase()}`, evidence: join(root, 'calibration', set, 'markers', 'c1-build.json') });
   return ok(out);

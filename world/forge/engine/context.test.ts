@@ -458,7 +458,7 @@ test('owner is read afresh on every access, so a UI entry written after buildCon
   rmSync(h.dir, { recursive: true });
 });
 
-test('calibration and bench pipelines read the set seed and the C00 pin; bench-initial pins nothing', () => {
+test('calibration and bench-r00 read the set seed (C00) and the C00 pin; bench-initial pins nothing', () => {
   const h = harness(DEFAULT_FIXTURE, 'C00', 'calibration');
   const v1 = readFileSync(join(h.w.root, 'benchmark', 'v1.json'));
   const early = context(h.input);
@@ -473,6 +473,7 @@ test('calibration and bench pipelines read the set seed and the C00 pin; bench-i
   assert.throws(() => calib.freeze(), /before 02c-freeze/u);
   const r00 = context({ ...h.input, roundId: 'R00', pipeline: 'bench-r00', paths: roundPaths(h.w.root, 'R00') });
   assert.equal(r00.benchmark().version, 'v1');
+  assert.equal(r00.seed(), 'calib-seed', 'the R00 cycle (replay plan) is seeded by the C00 set seed: round 0 has no start.json');
   const initial = context({ ...h.input, roundId: 'R00', pipeline: 'bench-initial', paths: roundPaths(h.w.root, 'R00') });
   assert.throws(() => initial.benchmark(), /bench-initial/u);
   assert.equal(initial.rules.barFourFamilies, 7);

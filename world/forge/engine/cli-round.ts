@@ -4,6 +4,8 @@ import { gatewayBackend } from './adapters/gateway.ts';
 import { judgeBackend } from './adapters/judges.ts';
 import { runProcess } from './adapters/process.ts';
 import type { Backend } from './adapters/types.ts';
+import { pendingVersions } from './bench-evidence.ts';
+import { readBenchLog } from './bench-log.ts';
 import { BUILD_CONFIG, parseBuildConfig } from './calib-build.ts';
 import { familyOf, loadConfig, type Family, type ForgeConfig, type WriterSlot } from './config.ts';
 import { buildContext, readGithubConfig, type EngineDeps, type RoundBackends, type StartOptions, type StepContext } from './context.ts';
@@ -188,7 +190,21 @@ async function start(argv: readonly string[], deps: EngineDeps, at: ForgeRoots):
   const open = await openRoundProblem(ctx.value);
   if (open !== null) return usage(deps, open);
   const r = await runSteps(ctx.value, { pipeline: 'round', steps: ROUND_STEPS, until: '01-topic', from: null, redoFrom: null, pid: deps.pid, isAlive: (pid) => deps.isAlive(pid) });
+  logPendingVersions(ctx.value, deps);
   return report(deps, id.value, r);
+}
+
+/**
+ * A pending_owner version holds the version, not the round (plan §6 Holds): `round start` only says which versions wait
+ * for the owner's approval; the freeze resolves without them. An unreadable log is reported, never an exit code.
+ */
+function logPendingVersions(ctx: StepContext, deps: EngineDeps): void {
+  const log = readBenchLog(ctx.root);
+  if (!log.ok) {
+    deps.log(`benchmark/log.jsonl: ${log.error}`);
+    return;
+  }
+  for (const p of pendingVersions(log.value, ctx.owner)) deps.log(`基准 ${p.version} 待 owner 批准（${p.since} 记录；本轮冻结不含该版本）`);
 }
 
 /** `round run`: resumes at the first unmarked step (refused before `round start` marked 00-start); then drains mirrors. */

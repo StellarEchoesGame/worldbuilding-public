@@ -66,6 +66,13 @@ export interface VersionRef {
 
 /** Forge-root-relative path of the log. */
 export const BENCH_LOG = 'benchmark/log.jsonl';
+/** Evidence packets live beside the log (bench-evidence.ts); the path helper sits here so steps/start.ts needs no cycle. */
+export const EVIDENCE_DIR = 'benchmark/evidence';
+
+/** `benchmark/evidence/<round>.json` (forge-root-relative). */
+export function evidencePath(round: string): string {
+  return `${EVIDENCE_DIR}/${round}.json`;
+}
 
 /** Maintainer lineage versions (`v0.json` and `v0.1-prototype` are outside it). */
 export const VERSION_ID = /^v[1-9]\d*$/u;

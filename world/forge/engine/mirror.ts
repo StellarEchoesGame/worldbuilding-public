@@ -15,7 +15,7 @@ import { loadSchema, validate, type Schema } from './schema.ts';
 import { canonicalJson } from './seal.ts';
 import { roundPaths } from './store.ts';
 import { loadSubmission } from './submission.ts';
-import type { RoundTally } from './tally.ts';
+import { isRoundTally, type RoundTally } from './tally.ts';
 
 /**
  * Derived mirror queue and drain (plan §8 Mirror, s5 §3; PR-D group D2) over PR-A mirror-log.ts. No queue file: a
@@ -69,7 +69,6 @@ const HEX64 = /^[0-9a-f]{64}$/u;
 /** Error prefix of public-scan.ts scannedGitHub (the second guard behind the drain's own scan). */
 const SCAN_PREFIX = 'public-content scan:';
 const SCAN_ERROR = `${SCAN_PREFIX} the body hits a public-content rule`;
-const GATE_OUTCOMES: readonly string[] = ['pass', 'fail', 'split', 'unverified'];
 
 function message(e: unknown): string {
   return e instanceof Error ? e.message : String(e);
@@ -91,7 +90,7 @@ export function mirrorBackoffMs(failures: number): number {
   return n >= 9 ? MIRROR_BACKOFF_CAP_MS : Math.min(2 ** n * MIRROR_BACKOFF_MS, MIRROR_BACKOFF_CAP_MS);
 }
 
-// --- card.json / tally.json narrowing (engine-written by 08; schema/ plus the members the schema subset cannot express)
+// --- card.json narrowing (engine-written by 08; schema/ plus the members the schema subset cannot express; tally.json: tally.ts isRoundTally)
 
 const schemaCache = new Map<string, Schema>();
 
@@ -107,8 +106,6 @@ function schemaOf(file: string, path: readonly string[]): Schema {
   schemaCache.set(id, schema.value);
   return schema.value;
 }
-
-const MEASURES_PATH: readonly string[] = ['properties', 'entries', 'items', 'properties', 'measures'];
 
 function familyList(value: unknown): boolean {
   return Array.isArray(value) && value.every((v) => typeof v === 'string' && isFamily(v));
@@ -130,23 +127,6 @@ function isCardJson(value: unknown): value is CardJson {
     const notes = readArray(gate, 'path_instance_notes') ?? [];
     return familyList(gate?.['counted']) && notes.every((n) => familyList([readString(n, 'family')])) && valuesAre(readRecord(e, 'wins')?.['by_family'], isCount);
   });
-}
-
-/** tally.schema.json plus Family members and the keyed maps (ordering, gate outcomes, per-text measures). */
-function isRoundTally(value: unknown): value is RoundTally {
-  if (validate(schemaOf('tally.schema.json', []), value).length > 0 || !isRecord(value)) return false;
-  const measures = schemaOf('card.schema.json', MEASURES_PATH);
-  const pairsOk = (readArray(value, 'champion_pairs') ?? []).every(
-    (p) => familyList(readArray(p, 'e')) && familyList(readArray(p, 'shadow')) && familyList(readArray(p, 'dropped')) && valuesAre(readRecord(p, 'wins_by_family'), isCount),
-  );
-  const auxOk = (readArray(value, 'aux_pairs') ?? []).every((p) => familyList(readArray(p, 'families')));
-  return (
-    pairsOk &&
-    auxOk &&
-    valuesAre(value['ordering'], isCount) &&
-    valuesAre(value['gate'], (v) => typeof v === 'string' && GATE_OUTCOMES.includes(v)) &&
-    valuesAre(value['measures'], (v) => validate(measures, v).length === 0)
-  );
 }
 
 // --- bodies (pure)

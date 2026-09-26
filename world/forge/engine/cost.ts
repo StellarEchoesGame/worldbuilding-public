@@ -54,7 +54,8 @@ export interface RoundCost {
   by_backend: Record<string, BackendCost>;
 }
 
-const round10 = (x: number): number => Math.round(x * 1e10) / 1e10;
+/** Rounds to 10 decimals: sums of float USD costs stay byte-stable in JSON. */
+export const round10 = (x: number): number => Math.round(x * 1e10) / 1e10;
 
 /** Sums the round's call records (calls/*.json, one per attempt; quota retries skipped) per backend; records without a cost count as unpriced. */
 export function roundCost(paths: RoundPaths): RoundCost {

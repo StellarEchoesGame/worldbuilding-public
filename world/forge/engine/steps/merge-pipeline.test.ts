@@ -18,10 +18,11 @@ import { ROUND_STEPS } from './index.ts';
 
 /*
  * PR-D fixture pipeline: the scripted round of testing/round-script.ts (every writer registers one fact) through
- * `forge round start|run` to the owner's decision, then `forge merge R01` and `forge round run` on to 11e-agreement,
+ * `forge round start|run` to the owner's decision, then `forge merge R01` and `forge round run` on to 12b-diff-approval,
  * all through the CLI command functions. A decision with facts from two candidates meets a contradicting re-gate
  * judge (rewind to 09b, canon = main); the owner re-decides with the base's own fact only and the merge commits
- * reference 8.2; 11a–11e publish the seal, pool the forecasts, crown the pick, tag the scene and rebuild trust.
+ * reference 8.2; 11a–11e publish the seal, pool the forecasts, crown the pick, tag the scene and rebuild trust; 11f–11j
+ * log the idle maintainer's void proposal, 11l commits the bookkeeping and 12a / 12b wait for the owner's diff approval.
  */
 
 const PID = 5101;
@@ -71,7 +72,7 @@ async function toDecision(x: World): Promise<void> {
   assert.deepEqual(markers(x), [probeMarker(ROUND), mirrorMarker('card', ROUND, ROUND)], 'the card is mirrored once the audit exists');
 }
 
-test('forge merge on the scripted round: a contradicting re-gate rewinds to 09b; a re-decision merges 8.2; round run finishes 11a–11e; mirrors post once', async () => {
+test('forge merge on the scripted round: a contradicting re-gate rewinds to 09b; a re-decision merges 8.2; round run finishes 11a–12b; mirrors post once', async () => {
   const x = world({ claims: true });
   const dir = join(x.w.root, 'rounds', ROUND);
   await toDecision(x);
@@ -155,8 +156,19 @@ test('forge merge on the scripted round: a contradicting re-gate rewinds to 09b;
   assert.match(x.logs.at(-1) ?? '', new RegExp(`rounds/R01/merge/${d8b}/post-merge\\.json pinned`, 'u'));
   assert.deepEqual(markers(x), [probeMarker(ROUND), mirrorMarker('card', ROUND, ROUND), mirrorMarker('decision', ROUND, decision2)]);
 
-  // round run continues 11a–11e to done (the build's pipeline ends at 11e).
+  // round run continues 11a–12a and waits at 12b for the diff approval; the idle maintainer's void proposal is a result
+  // (no_change_invalid), 11l commits the bookkeeping; once the owner approves the diff the round is done.
   const labelsBefore = readFileSync(join(x.w.root, 'calibration', 'status.json'), 'utf8');
+  assert.equal(await round(x, ['run', ROUND]), 2, x.logs.join('\n'));
+  assert.deepEqual([status(x).state, status(x).step, status(x).waiting_for], ['waiting', '12b-diff-approval', 'diff_approval']);
+  const outcome = readObject(join(dir, 'bench', 'outcome.json'));
+  assert.deepEqual([outcome['cycle'], outcome['outcome'], outcome['version']], [ROUND, 'no_change_invalid', null]);
+  assert.deepEqual(readRecord(readObject(join(dir, 'final.json')), 'maintainer'), { outcome: 'no_change_invalid', version: null, evidence_ids: [] });
+  assert.equal(markerResult(x, '11h-bench-validate.json'), 'skip');
+  assert.equal(markerResult(x, '11i-bench-replay.json'), 'skip');
+  assert.equal(markerResult(x, '11k-wiki.json'), 'skip');
+  assert.equal(x.ports.git.commits('forge/r01').at(-1)?.message, `chore: bookkeeping for R01 (#${ISSUE_OF(x)})`);
+  x.sim.approveDiff(ROUND);
   assert.equal(await round(x, ['run', ROUND]), 0, x.logs.join('\n'));
   const ids = ROUND_STEPS.map((s) => s.id);
   assert.deepEqual([status(x).state, status(x).done], ['done', ids]);
@@ -177,13 +189,16 @@ test('forge merge on the scripted round: a contradicting re-gate rewinds to 09b;
   const paidDone = allCalls(x);
   assert.equal(new Set(paidDone).size, paidDone.length, 'no paid call repeated');
 
-  // Idempotent: another run changes nothing and calls nothing; mirrors: the card and decision-2 exactly once.
+  // Idempotent: another run changes nothing and calls nothing; mirrors: the card, decision-2, the R01 bench notice and the diff approval exactly once.
   assert.equal(await round(x, ['run', ROUND]), 0, x.logs.join('\n'));
   assert.deepEqual(allCalls(x), paidDone);
   assert.equal(await mirrorCommand(['--round', ROUND], deps(x, PID), x.at), 0);
   assert.equal(await mirrorCommand(['--dry-run'], deps(x, PID), x.at), 0);
   assert.match(x.logs.at(-1) ?? '', /no pending mirror/u);
-  assert.deepEqual(markers(x), [probeMarker(ROUND), mirrorMarker('card', ROUND, ROUND), mirrorMarker('decision', ROUND, decision2)]);
+  const diffSha = readString(readObject(join(dir, 'final.json')), 'approval_diff_sha256') ?? '';
+  assert.deepEqual(markers(x), [
+    probeMarker(ROUND), mirrorMarker('card', ROUND, ROUND), mirrorMarker('decision', ROUND, decision2), mirrorMarker('bench_notice', ROUND, ROUND), mirrorMarker('diff_approval', ROUND, diffSha),
+  ]);
 
   // Owner files are byte-identical to what owner-sim wrote; no gateway host in any file or comment.
   for (const [rel, sha] of x.sim.expected()) assert.equal(sha256Bytes(readFileSync(join(x.w.root, rel))), sha, rel);

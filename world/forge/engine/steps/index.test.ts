@@ -33,12 +33,13 @@ const KILL_AFTER = 'write-W2';
 /** The 06b kill fires in the afterCall of this many-th taste call. */
 const KILL_TASTE_AT = 5;
 
-test('ROUND_STEPS ids are a prefix of STEP_IDS in order, ending at 11e-agreement (PR-A … 05a, PR-B 05b … 09b, PR-D 10a … 11e)', () => {
+test('ROUND_STEPS ids equal STEP_IDS in order (PR-A … 05a, PR-B 05b … 09b, PR-D 10a … 11e, PR-E 11f … 12b)', () => {
   const ids = ROUND_STEPS.map((s) => s.id);
-  assert.deepEqual(ids, STEP_IDS.slice(0, ids.length));
+  assert.deepEqual(ids, STEP_IDS);
   assert.equal(ids[ids.indexOf('05a-gate-mech') + 1], '05b-defect');
   assert.equal(ids[ids.indexOf('09b-decision') + 1], '10a-regate');
-  assert.equal(ids[ids.length - 1], '11e-agreement');
+  assert.equal(ids[ids.indexOf('11e-agreement') + 1], '11f-bench-evidence');
+  assert.equal(ids[ids.length - 1], '12b-diff-approval');
 });
 
 test('a fixture round runs 00-start … 09b-decision through the CLI: kills inside 04-write and 06b resume with no repeated paid call; owner waits at 09a and 09b', async () => {

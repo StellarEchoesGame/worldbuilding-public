@@ -1,6 +1,10 @@
+import { readFileSync } from 'node:fs';
+import { fileURLToPath } from 'node:url';
 import type { ChampionKind } from './champions.ts';
-import type { Family } from './config.ts';
+import { isFamily, type Family } from './config.ts';
+import { isRecord, readArray, readRecord } from './json.ts';
 import type { FamilySessions, SessionCall } from './pairs.ts';
+import { loadSchema, validate, type Schema } from './schema.ts';
 import type { GateOutcome } from './tasks/gate-judge.ts';
 import type { SurpriseStatus } from './tasks/surprise.ts';
 import { IntegrityError } from './task.ts';
@@ -386,4 +390,56 @@ export function buildRoundTally(input: RoundTallyInput): RoundTally {
     measures: sortedRecord(input.measures),
     voids: { ...input.voids },
   };
+}
+
+// ---------------------------------------------------------------------------------------------------------------
+// tally.json v2 narrowing for its readers (mirror.ts, bench-evidence.ts): schema/ plus the members the schema subset
+// cannot express.
+
+const GATE_OUTCOMES: readonly string[] = ['pass', 'fail', 'split', 'unverified'];
+/** The per-text measures object in card.schema.json (tally.schema.json leaves the `measures` values open). */
+const MEASURES_PATH: readonly string[] = ['properties', 'entries', 'items', 'properties', 'measures'];
+
+const schemaCache = new Map<string, Schema>();
+
+/** schema/<file> (module-relative, like owner-inputs.ts), or the sub-schema at `path` inside it. */
+function schemaOf(file: string, path: readonly string[]): Schema {
+  const id = `${file}#${path.join('/')}`;
+  const cached = schemaCache.get(id);
+  if (cached !== undefined) return cached;
+  let raw: unknown = JSON.parse(readFileSync(fileURLToPath(new URL(`../schema/${file}`, import.meta.url)), 'utf8'));
+  for (const key of path) raw = isRecord(raw) ? raw[key] : null;
+  const schema = loadSchema(raw);
+  if (!schema.ok) throw new Error(`schema/${file} ${path.join('.')}: ${schema.error}`);
+  schemaCache.set(id, schema.value);
+  return schema.value;
+}
+
+function familyList(value: unknown): boolean {
+  return Array.isArray(value) && value.every((v) => typeof v === 'string' && isFamily(v));
+}
+
+function valuesAre(value: unknown, check: (v: unknown) => boolean): boolean {
+  return isRecord(value) && Object.values(value).every(check);
+}
+
+function isFiniteNumber(v: unknown): boolean {
+  return typeof v === 'number' && Number.isFinite(v);
+}
+
+/** tally.schema.json plus Family members and the keyed maps (ordering, gate outcomes, per-text measures). */
+export function isRoundTally(value: unknown): value is RoundTally {
+  if (validate(schemaOf('tally.schema.json', []), value).length > 0 || !isRecord(value)) return false;
+  const measures = schemaOf('card.schema.json', MEASURES_PATH);
+  const pairsOk = (readArray(value, 'champion_pairs') ?? []).every(
+    (p) => familyList(readArray(p, 'e')) && familyList(readArray(p, 'shadow')) && familyList(readArray(p, 'dropped')) && valuesAre(readRecord(p, 'wins_by_family'), isFiniteNumber),
+  );
+  const auxOk = (readArray(value, 'aux_pairs') ?? []).every((p) => familyList(readArray(p, 'families')));
+  return (
+    pairsOk &&
+    auxOk &&
+    valuesAre(value['ordering'], isFiniteNumber) &&
+    valuesAre(value['gate'], (v) => typeof v === 'string' && GATE_OUTCOMES.includes(v)) &&
+    valuesAre(value['measures'], (v) => validate(measures, v).length === 0)
+  );
 }

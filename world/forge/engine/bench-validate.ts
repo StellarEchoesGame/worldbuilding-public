@@ -88,12 +88,9 @@ function schemaErrors(candidate: unknown, ctx: BenchContext): string[] {
   return errors;
 }
 
-function comparedKeys(ctx: BenchContext): string[] {
-  return [...new Set([...MAINTAINER_KEYS, ...Object.keys(ctx.activation)])];
-}
-
-function changedKeysOf(candidate: JsonRecord, parent: JsonRecord | null, ctx: BenchContext): string[] {
-  return comparedKeys(ctx).filter((key) => {
+/** Maintainer keys (MAINTAINER_KEYS ∪ activation keys) whose canonical JSON differs from the parent (null: every present key). */
+export function changedKeys(candidate: JsonRecord, parent: JsonRecord | null, activation: Readonly<Record<string, Activation>>): string[] {
+  return [...new Set([...MAINTAINER_KEYS, ...Object.keys(activation)])].filter((key) => {
     const before = parent === null ? undefined : parent[key];
     return stableStringify(candidate[key]) !== stableStringify(before);
   });
@@ -133,12 +130,12 @@ export function validateBenchmark(candidate: unknown, parent: unknown | null, ct
   const claimedParent = candidate['parent'];
   if (parent === null && typeof claimedParent === 'string') errors.push(`candidate names parent ${claimedParent}; the parent benchmark is required`);
 
-  const changedKeys = changedKeysOf(candidate, parentRecord, ctx);
-  const noChange = changedKeys.length === 0;
+  const changed = changedKeys(candidate, parentRecord, ctx.activation);
+  const noChange = changed.length === 0;
   // Nothing maintainer-owned changes, so no version is adopted and linkage/evidence are moot.
-  if (noChange) return { ok: errors.length === 0, errors, changedKeys, activation: null, noChange };
+  if (noChange) return { ok: errors.length === 0, errors, changedKeys: changed, activation: null, noChange };
 
-  for (const key of changedKeys) if (!Object.hasOwn(ctx.activation, key)) errors.push(`no activation class for ${key}`);
+  for (const key of changed) if (!Object.hasOwn(ctx.activation, key)) errors.push(`no activation class for ${key}`);
 
   if (parentRecord !== null) {
     const parentVersion = readString(parentRecord, 'version');
@@ -147,7 +144,7 @@ export function validateBenchmark(candidate: unknown, parent: unknown | null, ct
     else if (claimed !== parentVersion) errors.push(`parent must be ${parentVersion}, got ${String(claimed)}`);
 
     const evidenced = evidencedKeys(candidate);
-    for (const key of changedKeys) if (!evidenced.has(key)) errors.push(`changed key ${key} has no reason with evidence`);
+    for (const key of changed) if (!evidenced.has(key)) errors.push(`changed key ${key} has no reason with evidence`);
 
     const barBefore = readNumber(readRecord(parentRecord, 'bars'), 'beats_champion_four_families');
     const barAfter = readNumber(readRecord(candidate, 'bars'), 'beats_champion_four_families');
@@ -157,5 +154,5 @@ export function validateBenchmark(candidate: unknown, parent: unknown | null, ct
   }
 
   const ok = errors.length === 0;
-  return { ok, errors, changedKeys, activation: ok ? strongestActivation(changedKeys, ctx) : null, noChange };
+  return { ok, errors, changedKeys: changed, activation: ok ? strongestActivation(changed, ctx) : null, noChange };
 }
